@@ -1,4 +1,4 @@
-import { useEffect } from "../deps/preact.ts";
+import { useEffect } from "../deps/preact.tsx";
 
 type EventMap<E extends EventTarget> = E extends Window ? WindowEventMap
   : E extends Document ? DocumentEventMap

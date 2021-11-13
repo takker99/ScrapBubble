@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "../deps/preact.ts";
+import { useCallback, useEffect, useState } from "../deps/preact.tsx";
 import { NotMemberProject, scrapbox } from "../deps/scrapbox.ts";
 
 const defaultTheme = "default-light";

@@ -3,24 +3,15 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import {
-  CSS as textCSS,
-  TextBubble,
-} from "https://scrapbox.io/api/code/programming-notes/ScrapBubble@0.2.0%2FTextBubble/script.js";
-import {
-  CardBubble,
-  CSS as listCSS,
-} from "https://scrapbox.io/api/code/programming-notes/ScrapBubble@0.2.0%2FCardBubble/script.js";
-import {
-  CSS as cardCSS,
-  RelatedPageCard,
-} from "https://scrapbox.io/api/code/programming-notes/card-bubble-component@0.1.0/script.js";
-import { Fragment, h, render, useCallback, useState } from "./deps/preact.ts";
+import { CSS as textCSS, TextBubble } from "./TextBubble.tsx";
+import { CardBubble, CSS as listCSS } from "./CardBubble.tsx";
+import { CSS as cardCSS, RelatedPageCard } from "./RelatedPageCard.tsx";
+import { Fragment, h, render, useCallback, useState } from "./deps/preact.tsx";
 import { useCards } from "./hooks/useCards.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
-import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { toLc } from "./utils.ts";
 import { scrapbox } from "./deps/scrapbox.ts";
+import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { getEditor } from "./dom.ts";
 
 const userscriptName = "scrap-bubble";
@@ -114,7 +105,7 @@ const App = (
           <TextBubble
             project={project}
             titleLc={titleLc}
-            theme={getTheme(project)}
+            theme={getTheme(project) ?? "default"}
             style={{
               top: `${top}px`,
               ...(
@@ -123,33 +114,34 @@ const App = (
             }}
             lines={lines}
             loading={loading}
-            onPointerEnterCapture={(e: { target: HTMLAnchorElement }) =>
-              showCard(index + 1, e.target)}
-            onPointerLeaveCapture="${cancel}"
-            onClick="${() => hide(index + 1)}"
-            hasChild="${cards.length > index + 1}"
+            onPointerEnterCapture={(e) => showCard(index + 1, e.currentTarget)}
+            onPointerLeaveCapture={cancel}
+            onClick={() => hide(index + 1)}
+            hasChildCards={cards.length > index + 1}
           />
           <CardBubble
             loading={loading}
-            style="bottom: ${bottom}px; ${
-          left ? `left: ${left}` : `right: ${right}`
-        }px;"
-            onClickCapture={(e: { target: HTMLElement }) =>
-              e.target.tagName !== "A" && hide(index + 1)}
-            hasChild={cards.length > index + 1}
+            style={{
+              bottom: `${top}px`,
+              ...(
+                left ? ({ left: `${left}px` }) : ({ right: `${right}px` })
+              ),
+            }}
+            onClickCapture={(e) =>
+              (e.target as Element).tagName !== "A" && hide(index + 1)}
+            hasChildCards={cards.length > index + 1}
           >
             {linked.map((page) => (
               <RelatedPageCard
                 key={`/${page.project}/${page.title}`}
-                project="${page.project}"
-                title="${page.title}"
-                theme="${getTheme(page.project)}"
-                descriptions="${page.descriptions}"
-                thumbnail="${page.image}"
-                onPointerEnterCapture={(
-                  e: { target: HTMLDivElement | HTMLAnchorElement },
-                ) => showCard(index + 1, e.target)}
-                onPointerLeaveCapture="${cancel}"
+                project={page.project}
+                title={page.title}
+                theme={getTheme(page.project) ?? "default"}
+                descriptions={page.descriptions}
+                thumbnail={page.image ?? ""}
+                onPointerEnterCapture={(e) =>
+                  showCard(index + 1, e.currentTarget)}
+                onPointerLeaveCapture={cancel}
               />
             ))}
           </CardBubble>
