@@ -482,19 +482,19 @@ const Link = ({ node: { pathType, href, content }, project }: LinkProps) => {
       );
     }
     case "absolute": {
-      // コードが適当なのは後で直す
-      // 動画と画像の識別を行う
-      const url = new URL(href);
-      switch (url.hostname) {
-        case "www.youtube.com":
-          return <Youtube url={url} />;
-        case "vimeo.com":
-          return <Vimeo url={url} />;
-        default:
-          break;
+      const youtube = parseYoutube(href);
+      if (youtube) {
+        return <Youtube {...youtube} />;
       }
-      if (isAudioURL(href) && content === "") {
-        return <Audio href={href} />;
+      const vimeo = parseVimeo(href);
+      if (vimeo) {
+        return <Vimeo {...vimeo} />;
+      }
+      if (isAudioURL(href)) {
+        return <Audio href={href} content={content} />;
+      }
+      if (isVideoURL(href)) {
+        return <Video href={href} />;
       }
       return (
         <a
@@ -515,25 +515,122 @@ const Link = ({ node: { pathType, href, content }, project }: LinkProps) => {
 };
 
 type YoutubeProps = {
-  url: URL;
+  params: URLSearchParams;
+  videoId: string;
 };
-const Youtube = ({ url }: YoutubeProps) => <></>;
+const youtubeRegExp =
+  /https?:\/\/(?:www\.|)youtube\.com\/watch\?((?:[^\s]+&|)v=([a-zA-Z\d_-]+)(?:&[^\s]+|))/;
+const youtubeShortRegExp =
+  /https?:\/\/youtu\.be\/([a-zA-Z\d_-]+)(?:\?([^\s]{0,100})|)/;
+const youtubeListRegExp =
+  /https?:\/\/(?:www\.|)youtube\.com\/playlist\?((?:[^\s]+&|)list=([a-zA-Z\d_-]+)(?:&[^\s]+|))/;
+function parseYoutube(url: string): YoutubeProps | undefined {
+  {
+    const matches = url.match(youtubeRegExp);
+    if (matches) {
+      const [, params, videoId] = matches;
+      const _params = new URLSearchParams(params);
+      _params.delete("v");
+      _params.append("autoplay", "0");
+      return {
+        videoId,
+        params: _params,
+      };
+    }
+  }
+  {
+    const matches = url.match(youtubeShortRegExp);
+    if (matches) {
+      const [, videoId] = matches;
+      return {
+        videoId,
+        params: new URLSearchParams("autoplay=0"),
+      };
+    }
+  }
+  {
+    const matches = url.match(youtubeListRegExp);
+    if (matches) {
+      const [, params, listId] = matches;
+
+      const _params = new URLSearchParams(params);
+      const videoId = _params.get("v");
+      if (!videoId) return;
+      _params.delete("v");
+      _params.append("autoplay", "0");
+      _params.append("list", listId);
+      return {
+        videoId,
+        params: _params,
+      };
+    }
+  }
+  return undefined;
+}
+const Youtube = ({ videoId, params }: YoutubeProps) => (
+  <div className="iframe-video-player">
+    <iframe
+      src={`https://www.youtube.com/embed/${videoId}?${params.toString()}`}
+      allowFullScreen
+      type="text/html"
+    />
+  </div>
+);
+const vimeoRegExp = /https?:\/\/vimeo\.com\/([0-9]+)/i;
+function parseVimeo(url: string) {
+  const matches = url.match(vimeoRegExp);
+  if (!matches) return undefined;
+  return { vimeoId: matches[1] };
+}
 type VimeoProps = {
-  url: URL;
+  vimeoId: string;
 };
-const Vimeo = ({ url }: VimeoProps) => <></>;
-type AudioURL = `${string}.${"mp3" | "ogg" | "wav"}`;
+const Vimeo = ({ vimeoId }: VimeoProps) => (
+  <div className="iframe-video-player">
+    <iframe
+      src={`https://player.vimeo.com/video/${vimeoId}`}
+      allowFullScreen
+      type="text/html"
+    />
+  </div>
+);
+type AudioURL = `${string}.${"mp3" | "ogg" | "wav" | "acc"}`;
 function isAudioURL(url: string): url is AudioURL {
-  return /\.(?:mp3|ogg|wav)$/.test(url);
+  return /\.(?:mp3|ogg|wav|aac)$/.test(url);
 }
 type AudioProps = {
   href: AudioURL;
+  content: string;
 };
-const Audio = ({ href }: AudioProps) => <></>;
+const Audio = ({ href, content }: AudioProps) =>
+  content === ""
+    ? <audio className="audio-player" preload="none" src={href} />
+    : (
+      <span className="audio-link">
+        <a href={href} rel="noopener noreferrer" target="_blank">
+          {content}
+        </a>
+        <span className="play">♬</span>
+      </span>
+    );
+type VideoURL = `${string}.${"mp4" | "webm"}`;
+function isVideoURL(url: string): url is VideoURL {
+  return /\.(?:mp4|webm)$/.test(url);
+}
 type VideoProps = {
-  href: string;
+  href: VideoURL;
 };
-const Video = ({ href }: VideoProps) => <></>;
+const Video = ({ href }: VideoProps) => (
+  <div className="video-player">
+    <video
+      class="video"
+      style={{ display: "inline-block" }}
+      controls
+      loop
+      src={href}
+    />
+  </div>
+);
 
 export const CSS = `
 a {
