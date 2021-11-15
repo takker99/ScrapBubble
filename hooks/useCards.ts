@@ -1,6 +1,8 @@
 import { useCallback, useMemo, useState } from "../deps/preact.tsx";
 import { toLc } from "../utils.ts";
-import { Page, scrapbox } from "../deps/scrapbox.ts";
+import { Page } from "../deps/scrapbox.ts";
+import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
+declare const scrapbox: Scrapbox;
 
 export interface Cache {
   project: string;

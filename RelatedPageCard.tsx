@@ -15,7 +15,8 @@ import {
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
 import { toLc } from "./utils.ts";
-import { scrapbox } from "./deps/scrapbox.ts";
+import type { Scrapbox } from "./deps/scrapbox.ts";
+declare const scrapbox: Scrapbox;
 
 export type RelatedPageCardProps = {
   project: string;

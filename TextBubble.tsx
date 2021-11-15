@@ -7,7 +7,6 @@ import { Content, CSS as contentCSS } from "./Content.tsx";
 import { CSS as StatusBarCSS } from "./StatusBar.tsx";
 import { Fragment, h } from "./deps/preact.tsx";
 import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
-
 declare const scrapbox: Scrapbox;
 
 export type TextBubbleProps = {

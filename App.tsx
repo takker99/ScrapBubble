@@ -10,9 +10,10 @@ import { Fragment, h, render, useCallback, useState } from "./deps/preact.tsx";
 import { useCards } from "./hooks/useCards.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
 import { toLc } from "./utils.ts";
-import { scrapbox } from "./deps/scrapbox.ts";
 import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { getEditor } from "./dom.ts";
+import type { Scrapbox } from "./deps/scrapbox.ts";
+declare const scrapbox: Scrapbox;
 
 const userscriptName = "scrap-bubble";
 const App = (

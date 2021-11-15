@@ -35,8 +35,9 @@ import {
   StrongNode,
   Table as TableType,
 } from "https://esm.sh/@progfay/scrapbox-parser@7.1.0";
-import { scrapbox } from "./deps/scrapbox.ts";
 import { toLc } from "./utils.ts";
+import type { Scrapbox } from "./deps/scrapbox.ts";
+declare const scrapbox: Scrapbox;
 
 declare global {
   interface Window {
