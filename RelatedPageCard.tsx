@@ -34,8 +34,7 @@ export const RelatedPageCard = ({
   descriptions,
   thumbnail,
   theme,
-  onPointerEnterCapture,
-  onPointerLeaveCapture,
+  ...props
 }: RelatedPageCardProps) => {
   const blocks = useMemo(
     () => thumbnail ? [] : parse(descriptions.join("\n"), { hasTitle: false }),
@@ -47,11 +46,10 @@ export const RelatedPageCard = ({
       className="related-page-card page-link"
       type="link"
       data-theme={theme}
-      onPointerEnterCapture={onPointerEnterCapture}
-      onPointerLeaveCapture={onPointerLeaveCapture}
       href={`/${project}/${toLc(title)}`}
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}
+      {...props}
     >
       <div class="hover" />
       <div class="content">
@@ -89,7 +87,7 @@ type NodeProps = {
   project: string;
 };
 const SummaryNode = ({ node, project }: NodeProps) => {
-  switch (node.type) {
+  switch (nodetype) {
     case "code":
       return <code>{node.text}</code>;
     case "formula":
