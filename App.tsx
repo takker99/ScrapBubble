@@ -20,7 +20,7 @@ const App = (
 ) => {
   const { cards, cache, show, hide } = useCards({ expired, whiteList });
   const [, setTimer] = useState<number | undefined>(undefined);
-  const { getTheme, loadTheme } = useProjectTheme();
+  const getTheme = useProjectTheme();
 
   const showCard = useCallback(
     (depth: number, link: HTMLDivElement | HTMLAnchorElement) => {
@@ -32,7 +32,6 @@ const App = (
         : ["", scrapbox.Project.name, scrapbox.Page.title];
       if (project === "") return;
       const titleLc = toLc(decodeURIComponent(encodedTitleLc ?? ""));
-      loadTheme(project);
       cache(project, titleLc);
 
       setTimer((before) => {
@@ -51,7 +50,7 @@ const App = (
         }, delay);
       });
     },
-    [cache, show, loadTheme],
+    [cache, show],
   );
   const cancel = useCallback((e: PointerEvent) => {
     const target = e.target as HTMLDivElement | null;
