@@ -6,7 +6,14 @@
 import { CSS as textCSS, TextBubble } from "./TextBubble.tsx";
 import { CardBubble, CSS as listCSS } from "./CardBubble.tsx";
 import { CSS as cardCSS, RelatedPageCard } from "./RelatedPageCard.tsx";
-import { Fragment, h, render, useCallback, useState } from "./deps/preact.tsx";
+import {
+  Fragment,
+  h,
+  render,
+  useCallback,
+  useEffect,
+  useState,
+} from "./deps/preact.tsx";
 import { useCards } from "./hooks/useCards.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
 import { toLc } from "./utils.ts";
@@ -77,7 +84,11 @@ const App = (
     hide(0);
   }, { capture: true });
 
-  scrapbox.addListener("page:changed", () => hide(0));
+  useEffect(() => {
+    const callback = () => hide(0);
+    scrapbox.addListener("page:changed", callback);
+    return () => scrapbox.removeListener("page:changed", callback);
+  }, []);
 
   return (
     <>
