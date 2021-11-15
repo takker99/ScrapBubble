@@ -58,7 +58,7 @@ export function useCards(
         linked,
         checked: now,
       });
-      return { ...oldCaches };
+      return new Map(oldCaches);
     });
     if (!_expired) return;
 
@@ -81,7 +81,7 @@ export function useCards(
           linked: cache?.linked ?? linked,
           checked,
         });
-        return oldCaches;
+        return new Map(oldCaches);
       });
     }
   }, [expired]);
