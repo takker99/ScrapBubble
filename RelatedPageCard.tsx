@@ -87,7 +87,7 @@ type NodeProps = {
   project: string;
 };
 const SummaryNode = ({ node, project }: NodeProps) => {
-  switch (nodetype) {
+  switch (node.type) {
     case "code":
       return <code>{node.text}</code>;
     case "formula":
