@@ -26,7 +26,7 @@ const userscriptName = "scrap-bubble";
 const App = (
   { delay = 500, expired = 60, whiteList = [] as string[] } = {},
 ) => {
-  const { cards, cache, show, hide } = useCards({ expired, whiteList });
+  const { getBubbles, show, hide } = useCards({ expired, whiteList });
   const [, setTimer] = useState<number | undefined>(undefined);
   const getTheme = useProjectTheme();
 
@@ -39,8 +39,7 @@ const App = (
           ["", "", ""]
         : ["", scrapbox.Project.name, scrapbox.Page.title];
       if (project === "") return;
-      const titleLc = toLc(decodeURIComponent(encodedTitleLc ?? ""));
-      cache(project, titleLc);
+      const title = decodeURIComponent(encodedTitleLc ?? "");
 
       setTimer((before) => {
         clearTimeout(before);
@@ -48,7 +47,7 @@ const App = (
           const { top, right, left, bottom } = link.getBoundingClientRect();
           const root = getEditor().getBoundingClientRect();
           const adjustRight = (left - root.left) / root.width > 0.5; // 右寄せにするかどうか
-          show(depth, project, titleLc, {
+          show(depth, project, title, {
             top: Math.round(bottom - root.top),
             bottom: Math.round(root.bottom - top),
             ...(adjustRight
@@ -58,7 +57,7 @@ const App = (
         }, delay);
       });
     },
-    [cache, show],
+    [show],
   );
   const cancel = useCallback((e: PointerEvent) => {
     const target = e.target as HTMLDivElement | null;
@@ -104,7 +103,7 @@ const App = (
           ${cardCSS}
       `}
       </style>
-      {cards.map(({
+      {getBubbles().map(({
         project,
         titleLc,
         lines,
