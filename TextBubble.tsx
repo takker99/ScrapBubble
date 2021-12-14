@@ -3,7 +3,7 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { Content, CSS as contentCSS } from "./Content.tsx";
+import { CSS as pageCSS, Page } from "./Page.tsx";
 import { CSS as StatusBarCSS } from "./StatusBar.tsx";
 import { Fragment, h } from "./deps/preact.tsx";
 import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
@@ -61,7 +61,7 @@ export const TextBubble = ({
           {project !== scrapbox.Project.name &&
             <ProjectBadge project={project} titleLc={titleLc} />}
           {lines.length > 0 &&
-            <Content lines={lines} project={project} titleLc={titleLc} />}
+            <Page lines={lines} project={project} titleLc={titleLc} />}
         </div>
       )}
   </>
@@ -127,7 +127,7 @@ export const CSS = `
   --text-bubble-border-color: hsl(176, 29%, 67%);
 }
 
-${contentCSS}
+${pageCSS}
 ${StatusBarCSS}
 
 .project-badge {

@@ -46,14 +46,14 @@ declare global {
   }
 }
 
-export type ContentProps = {
+export type PageProps = {
   project: string;
   lines: { text: string; id: string }[] | string[];
   titleLc: string;
   noIndent?: boolean;
 };
 
-export function Content({ lines, project, titleLc, noIndent }: ContentProps) {
+export function Page({ lines, project, titleLc, noIndent }: PageProps) {
   const blocks = useMemo(() => {
     const text = lines.map((line) =>
       typeof line === "string" ? line : line.text
