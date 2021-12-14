@@ -31,11 +31,11 @@ const App = (
   const getTheme = useProjectTheme();
 
   const showCard = useCallback(
-    (depth: number, link: HTMLDivElement | HTMLAnchorElement) => {
-      if (!link.matches("a.page-link, .line-title .text")) return;
+    (depth: number, link: HTMLElement) => {
+      if (!isLinkOrTitle(link)) return;
 
-      const [_, project, encodedTitleLc] = link.classList.contains("page-link")
-        ? (link as HTMLAnchorElement).href.match(/\/([\w\-]+)\/([^#]*)/) ??
+      const [, project, encodedTitleLc] = isPageLink(link)
+        ? link.href.match(/\/([\w\-]+)\/([^#]*)/) ??
           ["", "", ""]
         : ["", scrapbox.Project.name, scrapbox.Page.title];
       if (project === "") return;
@@ -125,7 +125,8 @@ const App = (
             }}
             lines={lines}
             loading={loading}
-            onPointerEnterCapture={(e) => showCard(index + 1, e.currentTarget)}
+            onPointerEnterCapture={(e) =>
+              showCard(index + 1, e.target as HTMLElement)}
             onPointerLeaveCapture={cancel}
             onClick={() => hide(index + 1)}
             hasChildCards={cards.length > index + 1}
@@ -151,7 +152,7 @@ const App = (
                 descriptions={page.descriptions}
                 thumbnail={page.image ?? ""}
                 onPointerEnterCapture={(e) =>
-                  showCard(index + 1, e.currentTarget)}
+                  showCard(index + 1, e.target as HTMLElement)}
                 onPointerLeaveCapture={cancel}
               />
             ))}
@@ -173,4 +174,15 @@ export function mount(
     <App delay={delay} expired={expired} whiteList={whiteList} />,
     shadowRoot,
   );
+}
+
+function isLinkOrTitle(
+  element: HTMLElement,
+): element is HTMLDivElement | HTMLAnchorElement {
+  return element.matches("a.page-link, .line-title .text");
+}
+function isPageLink(
+  element: HTMLElement,
+): element is HTMLAnchorElement {
+  return element.classList.contains("page-link");
 }
