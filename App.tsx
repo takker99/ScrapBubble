@@ -108,7 +108,7 @@ const App = (
         project,
         titleLc,
         lines,
-        position: { top, left, right },
+        position: { top, bottom, left, right },
         linked,
         loading,
       }, index) => (
@@ -133,7 +133,7 @@ const App = (
           <CardBubble
             loading={loading}
             style={{
-              bottom: `${top}px`,
+              bottom: `${bottom}px`,
               ...(
                 left ? ({ left: `${left}px` }) : ({ right: `${right}px` })
               ),
