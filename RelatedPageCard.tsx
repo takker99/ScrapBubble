@@ -115,7 +115,7 @@ const SummaryNode = ({ node, project }: NodeProps) => {
       return <Link node={node} />;
     case "plain":
     case "blank":
-      return <>node.text</>;
+      return <>{node.text}</>;
     default:
       return <></>;
   }
