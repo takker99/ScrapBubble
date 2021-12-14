@@ -18,7 +18,7 @@ import { toLc } from "./utils.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
-export type RelatedPageCardProps = {
+export type CardProps = {
   project: string;
   title: string;
   descriptions: string[];
@@ -28,14 +28,14 @@ export type RelatedPageCardProps = {
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLAnchorElement>;
   onPointerLeaveCapture: h.JSX.PointerEventHandler<HTMLAnchorElement>;
 };
-export const RelatedPageCard = ({
+export const Card = ({
   project,
   title,
   descriptions,
   thumbnail,
   theme,
   ...props
-}: RelatedPageCardProps) => {
+}: CardProps) => {
   const blocks = useMemo(
     () => thumbnail ? [] : parse(descriptions.join("\n"), { hasTitle: false }),
     [descriptions, thumbnail],

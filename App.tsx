@@ -5,7 +5,7 @@
 /// <reference lib="dom"/>
 import { CSS as textCSS, TextBubble } from "./TextBubble.tsx";
 import { CardBubble, CSS as listCSS } from "./CardBubble.tsx";
-import { CSS as cardCSS, RelatedPageCard } from "./RelatedPageCard.tsx";
+import { Card, CSS as cardCSS } from "./Card.tsx";
 import {
   Fragment,
   h,
@@ -144,7 +144,7 @@ const App = (
             hasChildCards={cards.length > index + 1}
           >
             {linked.map((page) => (
-              <RelatedPageCard
+              <Card
                 key={`/${page.project}/${page.title}`}
                 project={page.project}
                 title={page.title}
