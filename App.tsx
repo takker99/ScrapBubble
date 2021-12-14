@@ -14,7 +14,7 @@ import {
   useEffect,
   useState,
 } from "./deps/preact.tsx";
-import { useCards } from "./hooks/useCards.ts";
+import { useBubbles } from "./hooks/useBubbles.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
 import { toLc } from "./utils.ts";
 import { useProjectTheme } from "./hooks/useProjectTheme.ts";
@@ -26,7 +26,7 @@ const userscriptName = "scrap-bubble";
 const App = (
   { delay = 500, expired = 60, whiteList = [] as string[] } = {},
 ) => {
-  const { cards, cache, show, hide } = useCards({ expired, whiteList });
+  const { cards, cache, show, hide } = useBubbles({ expired, whiteList });
   const [, setTimer] = useState<number | undefined>(undefined);
   const getTheme = useProjectTheme();
 

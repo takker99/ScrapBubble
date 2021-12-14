@@ -23,12 +23,12 @@ export type Position = {
   right?: number;
 };
 
-export interface UseCardsInit {
+export interface UseBubblesInit {
   /** cacheの有効期限 (UNIX時刻) */ expired?: number;
   /** 透過的に扱いたいproject名のリスト */ whiteList?: string[];
 }
-export function useCards(
-  { expired = 60, whiteList: _whiteList = [] }: UseCardsInit,
+export function useBubbles(
+  { expired = 60, whiteList: _whiteList = [] }: UseBubblesInit,
 ) {
   const [caches, setCaches] = useState(new Map<string, Cache>());
   // 表示するデータのcache idのリストと表示位置とのペアのリスト
