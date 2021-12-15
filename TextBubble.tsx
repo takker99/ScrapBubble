@@ -6,7 +6,7 @@
 import { CSS as pageCSS, Page } from "./Page.tsx";
 import { CSS as StatusBarCSS } from "./StatusBar.tsx";
 import { Fragment, h } from "./deps/preact.tsx";
-import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
+import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 export type TextBubbleProps = {
@@ -18,7 +18,7 @@ export type TextBubbleProps = {
   }[];
   hasChildCards: boolean;
   style: string | h.JSX.CSSProperties;
-  theme: string;
+  theme: Theme;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
   onPointerLeaveCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
