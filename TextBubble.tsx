@@ -16,7 +16,6 @@ export type TextBubbleProps = {
     text: string;
     id: string;
   }[];
-  loading: boolean;
   hasChildCards: boolean;
   style: string | h.JSX.CSSProperties;
   theme: string;
@@ -28,7 +27,6 @@ export const TextBubble = ({
   project,
   titleLc,
   lines,
-  loading,
   hasChildCards,
   style,
   theme,
@@ -37,7 +35,7 @@ export const TextBubble = ({
   onClick,
 }: TextBubbleProps) => (
   <>
-    {(lines.length > 0 || loading) &&
+    {lines.length > 0 &&
       (
         <div
           className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
@@ -47,17 +45,6 @@ export const TextBubble = ({
           onClick={onClick}
           style={style}
         >
-          <div
-            className={`status-bar ${
-              lines.length > 0 ? "top-right" : "top-left"
-            }`}
-          >
-            {loading && (
-              <span>
-                {lines.length > 0 ? "Updating..." : "Loading..."}
-              </span>
-            )}
-          </div>
           {project !== scrapbox.Project.name &&
             <ProjectBadge project={project} titleLc={titleLc} />}
           {lines.length > 0 &&

@@ -11,46 +11,27 @@ import {
 } from "./deps/preact.tsx";
 
 export type CardBubbleProps = {
-  loading: boolean;
   hasChildCards: boolean;
   children: ComponentChildren;
   style: h.JSX.CSSProperties;
   onClickCapture: h.JSX.MouseEventHandler<HTMLDivElement>;
 };
 export const CardBubble = ({
-  loading,
   hasChildCards,
   children,
   ...rest
-}: CardBubbleProps) => {
-  return (
-    <>
-      {(toChildArray(children).length > 0 || loading) &&
-        (
-          <div className="card-bubble" {...rest}>
-            <ul>
-              {toChildArray(children).map((child) => <li>{child}</li>)}
-            </ul>
-            {loading &&
-              (
-                <div
-                  className={`status-bar ${
-                    toChildArray(children).length > 0
-                      ? "top-left"
-                      : "bottom-left"
-                  }`}
-                >
-                  <span>
-                    {toChildArray(children).length > 0 ? "Updating..."
-                    : "Loading..."}
-                  </span>
-                </div>
-              )}
-          </div>
-        )}
-    </>
-  );
-};
+}: CardBubbleProps) => (
+  <>
+    {toChildArray(children).length > 0 &&
+      (
+        <div className="card-bubble" {...rest}>
+          <ul>
+            {toChildArray(children).map((child) => <li>{child}</li>)}
+          </ul>
+        </div>
+      )}
+  </>
+);
 
 export const CSS = `
 .card-bubble {

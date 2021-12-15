@@ -110,7 +110,6 @@ const App = (
         lines,
         position: { top, bottom, left, right },
         linked,
-        loading,
       }, index) => (
         <Fragment key={`/${project}/${titleLc}/`}>
           <TextBubble
@@ -124,7 +123,6 @@ const App = (
               ),
             }}
             lines={lines}
-            loading={loading}
             onPointerEnterCapture={(e) =>
               showCard(index + 1, e.target as HTMLElement)}
             onPointerLeaveCapture={cancel}
@@ -132,7 +130,6 @@ const App = (
             hasChildCards={cards.length > index + 1}
           />
           <CardBubble
-            loading={loading}
             style={{
               bottom: `${bottom}px`,
               ...(
