@@ -136,24 +136,19 @@ const App = (
                 left ? ({ left: `${left}px` }) : ({ right: `${right}px` })
               ),
             }}
+            cards={linked.map(
+              ({ project, ...rest }) => ({
+                project,
+                theme: getTheme(project) ?? "default",
+                ...rest,
+              }),
+            )}
+            onPointerEnterCapture={(e) =>
+              showCard(index + 1, e.target as HTMLElement)}
+            onPointerLeaveCapture={cancel}
             onClickCapture={(e) =>
               (e.target as Element).tagName !== "A" && hide(index + 1)}
-            hasChildCards={cards.length > index + 1}
-          >
-            {linked.map((page) => (
-              <Card
-                key={`/${page.project}/${page.title}`}
-                project={page.project}
-                title={page.title}
-                theme={getTheme(page.project) ?? "default"}
-                descriptions={page.descriptions}
-                thumbnail={page.image ?? ""}
-                onPointerEnterCapture={(e) =>
-                  showCard(index + 1, e.target as HTMLElement)}
-                onPointerLeaveCapture={cancel}
-              />
-            ))}
-          </CardBubble>
+          />
         </Fragment>
       ))}
     </>

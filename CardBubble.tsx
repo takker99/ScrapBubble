@@ -9,28 +9,40 @@ import {
   h,
   toChildArray,
 } from "./deps/preact.tsx";
+import type { Theme } from "./deps/scrapbox.ts";
+import { Card } from "./Card.tsx";
 
 export type CardBubbleProps = {
-  hasChildCards: boolean;
-  children: ComponentChildren;
+  cards: {
+    descriptions: string[];
+    image: string | null;
+    project: string;
+    title: string;
+    theme: Theme;
+  }[];
   style: h.JSX.CSSProperties;
   onClickCapture: h.JSX.MouseEventHandler<HTMLDivElement>;
+  onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
+  onPointerLeaveCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
 };
 export const CardBubble = ({
-  hasChildCards,
-  children,
+  cards,
   ...rest
 }: CardBubbleProps) => (
-  <>
-    {toChildArray(children).length > 0 &&
-      (
-        <div className="card-bubble" {...rest}>
-          <ul>
-            {toChildArray(children).map((child) => <li>{child}</li>)}
-          </ul>
-        </div>
-      )}
-  </>
+  <div className="card-bubble" {...rest}>
+    <ul>
+      {cards.map(({ project, title, theme, descriptions, image }) => (
+        <Card
+          key={`/${project}/${title}`}
+          project={project}
+          title={title}
+          theme={theme}
+          descriptions={descriptions}
+          thumbnail={image ?? ""}
+        />
+      ))}
+    </ul>
+  </div>
 );
 
 export const CSS = `

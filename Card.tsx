@@ -15,7 +15,7 @@ import {
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
 import { toLc } from "./utils.ts";
-import type { Scrapbox } from "./deps/scrapbox.ts";
+import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 export type CardProps = {
@@ -23,10 +23,7 @@ export type CardProps = {
   title: string;
   descriptions: string[];
   thumbnail: string;
-  theme: string;
-
-  onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLAnchorElement>;
-  onPointerLeaveCapture: h.JSX.PointerEventHandler<HTMLAnchorElement>;
+  theme: Theme;
 };
 export const Card = ({
   project,
