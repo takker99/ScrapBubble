@@ -147,7 +147,7 @@ const App = (
               showCard(index + 1, e.target as HTMLElement)}
             onPointerLeaveCapture={cancel}
             onClickCapture={(e) =>
-              (e.target as Element).tagName !== "A" && hide(index + 1)}
+              e.target instanceof HTMLAnchorElement && hide(index + 1)}
           />
         </Fragment>
       ))}
