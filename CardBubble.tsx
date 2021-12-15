@@ -8,8 +8,6 @@ import {
   Fragment,
   h,
   toChildArray,
-  useCallback,
-  useRef,
 } from "./deps/preact.tsx";
 
 export type CardBubbleProps = {
@@ -25,25 +23,12 @@ export const CardBubble = ({
   children,
   ...rest
 }: CardBubbleProps) => {
-  const ref = useRef<HTMLUListElement>(null);
-  const handleWheel: h.JSX.WheelEventHandler<HTMLUListElement> = useCallback(
-    (e) => {
-      if (hasChildCards) return; // scrollできないときはスルー
-      e.preventDefault();
-      e.stopPropagation();
-      if (ref.current) {
-        ref.current.scrollLeft += e.deltaY < 0 ? -120 : 120;
-      }
-    },
-    [],
-  );
-
   return (
     <>
       {(toChildArray(children).length > 0 || loading) &&
         (
           <div className="card-bubble" {...rest}>
-            <ul ref={ref} onWheel={handleWheel}>
+            <ul>
               {toChildArray(children).map((child) => <li>{child}</li>)}
             </ul>
             {loading &&
