@@ -32,14 +32,16 @@ export const CardBubble = ({
   <div className="card-bubble" {...rest}>
     <ul>
       {cards.map(({ project, title, theme, descriptions, image }) => (
-        <Card
-          key={`/${project}/${title}`}
-          project={project}
-          title={title}
-          theme={theme}
-          descriptions={descriptions}
-          thumbnail={image ?? ""}
-        />
+        <li>
+          <Card
+            key={`/${project}/${title}`}
+            project={project}
+            title={title}
+            theme={theme}
+            descriptions={descriptions}
+            thumbnail={image ?? ""}
+          />
+        </li>
       ))}
     </ul>
   </div>
