@@ -35,7 +35,8 @@ import {
   StrongNode,
   Table as TableType,
 } from "https://esm.sh/@progfay/scrapbox-parser@7.1.0";
-import { toLc } from "./utils.ts";
+import { encodeTitle } from "./utils.ts";
+import { parseLink } from "./parseLink.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -46,14 +47,14 @@ declare global {
   }
 }
 
-export type ContentProps = {
+export type PageProps = {
   project: string;
   lines: { text: string; id: string }[] | string[];
   titleLc: string;
   noIndent?: boolean;
 };
 
-export function Content({ lines, project, titleLc, noIndent }: ContentProps) {
+export function Page({ lines, project, titleLc, noIndent }: PageProps) {
   const blocks = useMemo(() => {
     const text = lines.map((line) =>
       typeof line === "string" ? line : line.text
@@ -383,7 +384,7 @@ const Icon = (
       path,
     ]
     : path.match(/\/([\w\-]+)\/(.+)$/)?.slice?.(1) ?? [_project, path];
-  const titleLc = toLc(title);
+  const titleLc = encodeTitle(title);
   return (
     <a
       href={`/${project}/${titleLc}`}
@@ -434,7 +435,7 @@ type HashTagProps = {
 };
 const HashTag = ({ node: { href }, project }: HashTagProps) => (
   <a
-    href={`/${project}/${toLc(href)}`}
+    href={`/${project}/${encodeTitle(href)}`}
     className="page-link"
     type="hashTag"
     rel={project === scrapbox.Project.name ? "route" : "noopener noreferrer"}
@@ -449,34 +450,25 @@ type LinkProps = {
 };
 const Link = ({ node: { pathType, href, content }, project }: LinkProps) => {
   switch (pathType) {
+    case "relative":
     case "root": {
-      const [, _project, title, hash] =
-        href.match(/\/([\w\-]+)\/([^#]*)(.*)/) ?? ["", "", "", ""];
+      const { project: _project = project, title, hash = "" } = parseLink({
+        pathType,
+        href,
+      });
       return (
         <a
           className="page-link"
           type="link"
-          href={`/${_project}/${toLc(title)}${hash}`}
+          href={`/${_project}${
+            title === undefined
+              ? ""
+              : `/${encodeTitle(title)}${hash === "" ? "" : `#${hash}`}`
+          }`}
           rel={_project === scrapbox.Project.name
             ? "route"
             : "noopener noreferrer"}
           target={_project === scrapbox.Project.name ? "" : "_blank"}
-        >
-          {href}
-        </a>
-      );
-    }
-    case "relative": {
-      const [, title, hash] = href.match(/^([^#]*)(.*)/) ?? ["", "", ""];
-      return (
-        <a
-          className="page-link"
-          type="link"
-          href={`/${project}/${toLc(title)}${hash}`}
-          rel={project === scrapbox.Project.name
-            ? "route"
-            : "noopener noreferrer"}
-          target={project === scrapbox.Project.name ? "" : "_blank"}
         >
           {href}
         </a>

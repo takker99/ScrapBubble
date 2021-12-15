@@ -8,64 +8,44 @@ import {
   Fragment,
   h,
   toChildArray,
-  useCallback,
-  useRef,
 } from "./deps/preact.tsx";
+import type { Theme } from "./deps/scrapbox.ts";
+import { Card } from "./Card.tsx";
 
 export type CardBubbleProps = {
-  loading: boolean;
-  hasChildCards: boolean;
-  children: ComponentChildren;
+  cards: {
+    descriptions: string[];
+    image: string | null;
+    project: string;
+    title: string;
+    theme: Theme;
+  }[];
   style: h.JSX.CSSProperties;
   onClickCapture: h.JSX.MouseEventHandler<HTMLDivElement>;
+  onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
+  onPointerLeaveCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
 };
 export const CardBubble = ({
-  loading,
-  hasChildCards,
-  children,
+  cards,
   ...rest
-}: CardBubbleProps) => {
-  const ref = useRef<HTMLUListElement>(null);
-  const handleWheel: h.JSX.WheelEventHandler<HTMLUListElement> = useCallback(
-    (e) => {
-      if (hasChildCards) return; // scrollできないときはスルー
-      e.preventDefault();
-      e.stopPropagation();
-      if (ref.current) {
-        ref.current.scrollLeft += e.deltaY < 0 ? -120 : 120;
-      }
-    },
-    [],
-  );
-
-  return (
-    <>
-      {(toChildArray(children).length > 0 || loading) &&
-        (
-          <div className="card-bubble" {...rest}>
-            <ul ref={ref} onWheel={handleWheel}>
-              {toChildArray(children).map((child) => <li>{child}</li>)}
-            </ul>
-            {loading &&
-              (
-                <div
-                  className={`status-bar ${
-                    toChildArray(children).length > 0
-                      ? "top-left"
-                      : "bottom-left"
-                  }`}
-                >
-                  <span>
-                    {toChildArray(children).length > 0 ? "Updating..."
-                    : "Loading..."}
-                  </span>
-                </div>
-              )}
-          </div>
-        )}
-    </>
-  );
-};
+}: CardBubbleProps) => (
+  <div className="card-bubble" {...rest}>
+    <ul>
+      {cards.map(({ project, title, theme, descriptions, image }) => (
+        <li>
+          <Card
+            key={`/${project}/${title}`}
+            project={project}
+            title={title}
+            theme={theme}
+            descriptions={descriptions}
+            thumbnail={image ?? ""}
+          />
+        </li>
+      ))}
+    </ul>
+  </div>
+);
 
 export const CSS = `
 .card-bubble {

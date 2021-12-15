@@ -15,27 +15,24 @@ import {
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
 import { toLc } from "./utils.ts";
-import type { Scrapbox } from "./deps/scrapbox.ts";
+import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
-export type RelatedPageCardProps = {
+export type CardProps = {
   project: string;
   title: string;
   descriptions: string[];
   thumbnail: string;
-  theme: string;
-
-  onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLAnchorElement>;
-  onPointerLeaveCapture: h.JSX.PointerEventHandler<HTMLAnchorElement>;
+  theme: Theme;
 };
-export const RelatedPageCard = ({
+export const Card = ({
   project,
   title,
   descriptions,
   thumbnail,
   theme,
   ...props
-}: RelatedPageCardProps) => {
+}: CardProps) => {
   const blocks = useMemo(
     () => thumbnail ? [] : parse(descriptions.join("\n"), { hasTitle: false }),
     [descriptions, thumbnail],
@@ -115,7 +112,7 @@ const SummaryNode = ({ node, project }: NodeProps) => {
       return <Link node={node} />;
     case "plain":
     case "blank":
-      return <>node.text</>;
+      return <>{node.text}</>;
     default:
       return <></>;
   }

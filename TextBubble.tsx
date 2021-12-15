@@ -3,10 +3,10 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { Content, CSS as contentCSS } from "./Content.tsx";
+import { CSS as pageCSS, Page } from "./Page.tsx";
 import { CSS as StatusBarCSS } from "./StatusBar.tsx";
 import { Fragment, h } from "./deps/preact.tsx";
-import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
+import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 export type TextBubbleProps = {
@@ -16,10 +16,9 @@ export type TextBubbleProps = {
     text: string;
     id: string;
   }[];
-  loading: boolean;
   hasChildCards: boolean;
   style: string | h.JSX.CSSProperties;
-  theme: string;
+  theme: Theme;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
   onPointerLeaveCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
@@ -28,7 +27,6 @@ export const TextBubble = ({
   project,
   titleLc,
   lines,
-  loading,
   hasChildCards,
   style,
   theme,
@@ -37,7 +35,7 @@ export const TextBubble = ({
   onClick,
 }: TextBubbleProps) => (
   <>
-    {(lines.length > 0 || loading) &&
+    {lines.length > 0 &&
       (
         <div
           className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
@@ -47,21 +45,10 @@ export const TextBubble = ({
           onClick={onClick}
           style={style}
         >
-          <div
-            className={`status-bar ${
-              lines.length > 0 ? "top-right" : "top-left"
-            }`}
-          >
-            {loading && (
-              <span>
-                {lines.length > 0 ? "Updating..." : "Loading..."}
-              </span>
-            )}
-          </div>
           {project !== scrapbox.Project.name &&
             <ProjectBadge project={project} titleLc={titleLc} />}
           {lines.length > 0 &&
-            <Content lines={lines} project={project} titleLc={titleLc} />}
+            <Page lines={lines} project={project} titleLc={titleLc} />}
         </div>
       )}
   </>
@@ -127,7 +114,7 @@ export const CSS = `
   --text-bubble-border-color: hsl(176, 29%, 67%);
 }
 
-${contentCSS}
+${pageCSS}
 ${StatusBarCSS}
 
 .project-badge {

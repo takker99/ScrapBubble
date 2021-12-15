@@ -5,7 +5,7 @@
 /// <reference lib="dom"/>
 import { CSS as textCSS, TextBubble } from "./TextBubble.tsx";
 import { CardBubble, CSS as listCSS } from "./CardBubble.tsx";
-import { CSS as cardCSS, RelatedPageCard } from "./RelatedPageCard.tsx";
+import { Card, CSS as cardCSS } from "./Card.tsx";
 import {
   Fragment,
   h,
@@ -14,9 +14,9 @@ import {
   useEffect,
   useState,
 } from "./deps/preact.tsx";
-import { useCards } from "./hooks/useCards.ts";
+import { useBubbles } from "./hooks/useBubbles.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
-import { toLc } from "./utils.ts";
+import { encodeTitle } from "./utils.ts";
 import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { getEditor } from "./dom.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
@@ -26,16 +26,17 @@ const userscriptName = "scrap-bubble";
 const App = (
   { delay = 500, expired = 60, whiteList = [] as string[] } = {},
 ) => {
-  const { getBubbles, show, hide } = useCards({ expired, whiteList });
+  const { getBubbles, show, hide } = useBubbles({ expired, whiteList });
+  const bubbles = getBubbles();
   const [, setTimer] = useState<number | undefined>(undefined);
   const getTheme = useProjectTheme();
 
   const showCard = useCallback(
-    (depth: number, link: HTMLDivElement | HTMLAnchorElement) => {
-      if (!link.matches("a.page-link, .line-title .text")) return;
+    (depth: number, link: HTMLElement) => {
+      if (!isLinkOrTitle(link)) return;
 
-      const [_, project, encodedTitleLc] = link.classList.contains("page-link")
-        ? (link as HTMLAnchorElement).href.match(/\/([\w\-]+)\/([^#]*)/) ??
+      const [, project, encodedTitleLc] = isPageLink(link)
+        ? link.href.match(/\/([\w\-]+)\/([^#]*)/) ??
           ["", "", ""]
         : ["", scrapbox.Project.name, scrapbox.Page.title];
       if (project === "") return;
@@ -103,60 +104,60 @@ const App = (
           ${cardCSS}
       `}
       </style>
-      {getBubbles().map(({
-        project,
-        titleLc,
-        lines,
-        position: { top, left, right },
-        linked,
-        loading,
-      }, index) => (
-        <Fragment key={`/${project}/${titleLc}/`}>
-          <TextBubble
-            project={project}
-            titleLc={titleLc}
-            theme={getTheme(project) ?? "default"}
-            style={{
-              top: `${top}px`,
-              ...(
-                left ? ({ left: `${left}px` }) : ({ right: `${right}px` })
-              ),
-            }}
-            lines={lines}
-            loading={loading}
-            onPointerEnterCapture={(e) => showCard(index + 1, e.currentTarget)}
-            onPointerLeaveCapture={cancel}
-            onClick={() => hide(index + 1)}
-            hasChildCards={cards.length > index + 1}
-          />
-          <CardBubble
-            loading={loading}
-            style={{
-              bottom: `${top}px`,
-              ...(
-                left ? ({ left: `${left}px` }) : ({ right: `${right}px` })
-              ),
-            }}
-            onClickCapture={(e) =>
-              (e.target as Element).tagName !== "A" && hide(index + 1)}
-            hasChildCards={cards.length > index + 1}
-          >
-            {linked.map((page) => (
-              <RelatedPageCard
-                key={`/${page.project}/${page.title}`}
-                project={page.project}
-                title={page.title}
-                theme={getTheme(page.project) ?? "default"}
-                descriptions={page.descriptions}
-                thumbnail={page.image ?? ""}
-                onPointerEnterCapture={(e) =>
-                  showCard(index + 1, e.currentTarget)}
-                onPointerLeaveCapture={cancel}
-              />
-            ))}
-          </CardBubble>
-        </Fragment>
-      ))}
+      {bubbles.map((bubble, index) => {
+        if (bubble.loading) return <></>;
+        const {
+          pages: [{ project, title, lines }],
+          cards,
+          position: {
+            top,
+            left,
+            right,
+            bottom,
+          },
+        } = bubble;
+        return (
+          <Fragment key={`/${project}/${title}/`}>
+            <TextBubble
+              project={project}
+              titleLc={encodeTitle(title)}
+              theme={getTheme(project) ?? "default"}
+              style={{
+                top: `${top}px`,
+                ...(
+                  left ? ({ left: `${left}px` }) : ({ right: `${right}px` })
+                ),
+              }}
+              lines={lines}
+              onPointerEnterCapture={(e) =>
+                showCard(index + 1, e.target as HTMLElement)}
+              onPointerLeaveCapture={cancel}
+              onClick={() => hide(index + 1)}
+              hasChildCards={cards.length > index + 1}
+            />
+            <CardBubble
+              style={{
+                bottom: `${bottom}px`,
+                ...(
+                  left ? ({ left: `${left}px` }) : ({ right: `${right}px` })
+                ),
+              }}
+              cards={cards.map(
+                ({ project, ...rest }) => ({
+                  project,
+                  theme: getTheme(project) ?? "default",
+                  ...rest,
+                }),
+              )}
+              onPointerEnterCapture={(e) =>
+                showCard(index + 1, e.target as HTMLElement)}
+              onPointerLeaveCapture={cancel}
+              onClickCapture={(e) =>
+                e.target instanceof HTMLAnchorElement && hide(index + 1)}
+            />
+          </Fragment>
+        );
+      })}
     </>
   );
 };
@@ -172,4 +173,15 @@ export function mount(
     <App delay={delay} expired={expired} whiteList={whiteList} />,
     shadowRoot,
   );
+}
+
+function isLinkOrTitle(
+  element: HTMLElement,
+): element is HTMLDivElement | HTMLAnchorElement {
+  return element.matches("a.page-link, .line-title .text");
+}
+function isPageLink(
+  element: HTMLElement,
+): element is HTMLAnchorElement {
+  return element.classList.contains("page-link");
 }
