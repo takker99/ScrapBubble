@@ -608,7 +608,7 @@ type AudioProps = {
 };
 const Audio = ({ href, content }: AudioProps) =>
   content === ""
-    ? <audio className="audio-player" preload="none" src={href} />
+    ? <audio className="audio-player" preload="none" controls src={href} />
     : (
       <span className="audio-link">
         <a href={href} rel="noopener noreferrer" target="_blank">
