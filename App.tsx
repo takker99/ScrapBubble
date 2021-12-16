@@ -14,6 +14,8 @@ import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./hooks/usePromiseSettledAnytimes.ts";
 import { getEditor } from "./dom.ts";
+import { parseLink } from "./parseLink.ts";
+import type { ScrollTo } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -42,13 +44,13 @@ const App = (
         // 処理を<a>か.line-titleのときに限定する
         if (!isLinkOrTitle(link)) continue;
 
-        const [, project, encodedTitleLc] = isPageLink(link)
-          ? link.href.match(/\/([\w\-]+)\/([^#]*)/) ??
-            ["", "", ""]
-          : ["", scrapbox.Project.name, scrapbox.Page.title];
+        const { project = scrapbox.Project.name, title, hash = "" } =
+          isPageLink(link)
+            ? parseLink({ pathType: "root", href: new URL(link.href).pathname })
+            : { project: scrapbox.Project.name, title: scrapbox.Page.title };
         // [/project]の形のリンクは何もしない
         if (project === "") return;
-        const titleLc = toLc(decodeURI(encodedTitleLc ?? ""));
+        const titleLc = toLc(decodeURI(title ?? ""));
         cache(project, titleLc);
 
         // delay以内にカーソルが離れるかクリックしたら何もしない
@@ -64,6 +66,13 @@ const App = (
           throw e;
         }
 
+        // スクロール先を設定する
+        const scrollTo = hash !== ""
+          ? { type: "id", value: hash } as const
+          : link.dataset.linkedTo
+          ? { type: "link", value: link.dataset.linkedTo } as const
+          : undefined;
+
         // 表示位置を計算する
         const { top, right, left, bottom } = link.getBoundingClientRect();
         const root = getEditor().getBoundingClientRect();
@@ -77,7 +86,7 @@ const App = (
           maxWidth: adjustRight
             ? right - 10
             : document.documentElement.clientWidth - left - 10,
-        });
+        }, scrollTo);
       }
     })();
     return () => finished = true;
@@ -117,6 +126,7 @@ const App = (
         titleLc,
         lines,
         position,
+        scrollTo,
         linked,
       }, index) => (
         <Fragment key={`/${project}/${titleLc}/`}>
@@ -126,6 +136,7 @@ const App = (
             theme={getTheme(project) ?? "default"}
             index={index + 1}
             position={position}
+            scrollTo={scrollTo}
             lines={lines}
             onPointerEnterCapture={handlePointerEnter}
             onClick={() => hide(index + 1)}
@@ -136,6 +147,7 @@ const App = (
             cards={linked.map(
               ({ project, ...rest }) => ({
                 project,
+                linkedTo: titleLc,
                 theme: getTheme(project) ?? "default",
                 ...rest,
               }),

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "../deps/preact.tsx";
 import { toLc } from "../utils.ts";
 import { Page } from "../deps/scrapbox.ts";
+import type { ScrollTo } from "../types.ts";
 import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
 declare const scrapbox: Scrapbox;
 
@@ -38,7 +39,7 @@ export function useBubbles(
   const [caches, setCaches] = useState(new Map<string, Cache>());
   // 表示するデータのcache idのリストと表示位置とのペアのリスト
   const [selectedList, setSelectedList] = useState<
-    { ids: string[]; position: Position }[]
+    { ids: string[]; position: Position; scrollTo?: ScrollTo }[]
   >([]);
 
   // このリストにあるproject以外は表示しない
@@ -102,13 +103,19 @@ export function useBubbles(
   }, [_cache, whiteList]);
   // depth階層目にカードを表示する
   const show = useCallback(
-    (depth: number, project: string, titleLc: string, position: Position) => {
+    (
+      depth: number,
+      project: string,
+      titleLc: string,
+      position: Position,
+      scrollTo?: ScrollTo,
+    ) => {
       // whiteListにないprojectの場合は何もしない
       if (!whiteList.includes(project)) return;
 
       setSelectedList((list) => {
         const ids = whiteList.map((_project) => toId(_project, titleLc));
-        return [...list.slice(0, depth), { ids, position }];
+        return [...list.slice(0, depth), { ids, position, scrollTo }];
       });
     },
     [whiteList],
@@ -126,7 +133,7 @@ export function useBubbles(
         project: scrapbox.Project.name,
         titleLc: toLc(scrapbox.Page.title ?? ""),
       }];
-      return selectedList.flatMap(({ ids, position }) => {
+      return selectedList.flatMap(({ ids, ...rest }) => {
         const cacheList = ids.flatMap((id) =>
           caches.has(id) ? [caches.get(id)!] : []
         );
@@ -139,7 +146,6 @@ export function useBubbles(
         const card = {
           project,
           titleLc,
-          position,
           lines: titleLc === showedPages[0].titleLc ? [] : lines, // editorで開いているページは表示しない
           linked: linked.flatMap(({ project: _project, title, ...page }) =>
             !showedPages.some((page) =>
@@ -149,6 +155,7 @@ export function useBubbles(
               : []
           ),
           loading: cacheList.every(({ loading }) => loading),
+          ...rest,
         };
         showedPages.push({ project, titleLc });
         // linesもlinkedも空のときは消す

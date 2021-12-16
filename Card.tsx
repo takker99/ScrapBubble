@@ -24,12 +24,14 @@ export type CardProps = {
   descriptions: string[];
   thumbnail: string;
   theme: Theme;
+  linkedTo: string;
 };
 export const Card = ({
   project,
   title,
   descriptions,
   thumbnail,
+  linkedTo,
   theme,
   ...props
 }: CardProps) => {
@@ -43,6 +45,7 @@ export const Card = ({
       className="related-page-card page-link"
       type="link"
       data-theme={theme}
+      data-linked-to={linkedTo}
       href={`/${project}/${encodeTitle(title)}`}
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}
