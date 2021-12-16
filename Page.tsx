@@ -37,6 +37,7 @@ import {
 } from "https://esm.sh/@progfay/scrapbox-parser@7.1.0";
 import { encodeTitle } from "./utils.ts";
 import { parseLink } from "./parseLink.ts";
+import { sleep } from "./sleep.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -154,12 +155,17 @@ const CodeBlock = (
 ) => {
   const [buttonLabel, setButtonLabel] = useState("\uf0c5");
   const handleClick = useCallback(
-    (e: h.JSX.TargetedMouseEvent<HTMLSpanElement>) => {
+    async (e: h.JSX.TargetedMouseEvent<HTMLSpanElement>) => {
       e.preventDefault();
       e.stopPropagation();
-      navigator.clipboard.writeText(content);
-      setButtonLabel("Copied");
-      setTimeout(() => setButtonLabel("\uf0c5"), 1000);
+      try {
+        await navigator.clipboard.writeText(content);
+        setButtonLabel("Copied");
+        await sleep(1000);
+        setButtonLabel("\uf0c5");
+      } catch (e) {
+        alert(`Failed to copy the code block\nError:${e.message}`);
+      }
     },
     [content],
   );
