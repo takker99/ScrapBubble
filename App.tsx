@@ -149,8 +149,7 @@ const App = (
             )}
             index={index + 1}
             onPointerEnterCapture={handlePointerEnter}
-            onClickCapture={(e) =>
-              e.target instanceof HTMLAnchorElement && hide(index + 1)}
+            onClick={() => hide(index + 1)}
           />
         </Fragment>
       ))}

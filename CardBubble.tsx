@@ -22,7 +22,7 @@ export type CardBubbleProps = {
   }[];
   style: h.JSX.CSSProperties;
   index: number;
-  onClickCapture: h.JSX.MouseEventHandler<HTMLDivElement>;
+  onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
 };
 export const CardBubble = ({
