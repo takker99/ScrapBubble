@@ -3,7 +3,7 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { Fragment, h, useMemo } from "./deps/preact.tsx";
+import { Fragment, h } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
 import {
   FormulaNode,
@@ -11,10 +11,11 @@ import {
   IconNode,
   LinkNode,
   Node as NodeType,
-  parse,
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
 import { encodeTitle } from "./utils.ts";
+import { useParser } from "./hooks/useParser.ts";
+import type { LinkType } from "./types.ts";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -24,25 +25,31 @@ export type CardProps = {
   descriptions: string[];
   thumbnail: string;
   theme: Theme;
+  linkedTo: string;
+  linkedType: LinkType;
 };
 export const Card = ({
   project,
   title,
   descriptions,
   thumbnail,
+  linkedTo,
+  linkedType,
   theme,
   ...props
 }: CardProps) => {
-  const blocks = useMemo(
-    () => thumbnail ? [] : parse(descriptions.join("\n"), { hasTitle: false }),
-    [descriptions, thumbnail],
-  );
+  const blocks = useParser(thumbnail ? [] : descriptions, { hasTitle: false }, [
+    thumbnail,
+    descriptions,
+  ]);
 
   return (
     <a
       className="related-page-card page-link"
       type="link"
       data-theme={theme}
+      data-linked-to={linkedTo}
+      data-linked-type={linkedType}
       href={`/${project}/${encodeTitle(title)}`}
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}

@@ -9,6 +9,7 @@ import {
   Fragment,
   h,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -26,19 +27,21 @@ import {
   HelpfeelNode,
   IconNode,
   ImageNode,
+  Line as LineType,
   LinkNode,
   Node as NodeType,
-  parse,
   PlainNode,
   QuoteNode,
   StrongIconNode,
   StrongImageNode,
   StrongNode,
   Table as TableType,
-} from "https://esm.sh/@progfay/scrapbox-parser@7.1.0";
-import { encodeTitle } from "./utils.ts";
+} from "./deps/scrapbox-parser.ts";
+import { encodeTitle, toLc } from "./utils.ts";
 import { parseLink } from "./parseLink.ts";
 import { sleep } from "./sleep.ts";
+import { useParser } from "./hooks/useParser.ts";
+import type { ScrollTo } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -54,63 +57,127 @@ export type PageProps = {
   lines: { text: string; id: string }[] | string[];
   titleLc: string;
   noIndent?: boolean;
+  scrollTo?: ScrollTo;
 };
 
-export function Page({ lines, project, titleLc, noIndent }: PageProps) {
-  const blocks = useMemo(() => {
-    const text = lines.map((line) =>
-      typeof line === "string" ? line : line.text
-    ).join("\n");
-    return parse(text, { hasTitle: false });
-  }, [lines]);
+function hasLink(link: string, nodes: NodeType[]): boolean {
+  return nodes.some((node) => {
+    switch (node.type) {
+      case "hashTag":
+        return toLc(node.href) === toLc(link);
+      case "link":
+        return node.pathType === "relative" && toLc(node.href) === toLc(link);
+      case "quote":
+      case "strong":
+      case "decoration":
+        return hasLink(link, node.nodes);
+    }
+  });
+}
+
+export function Page(
+  { lines, project, titleLc, noIndent, scrollTo }: PageProps,
+) {
+  const _blocks = useParser(lines, { hasTitle: false });
   const lineIds = useMemo(
     () => lines.flatMap((line) => typeof line === "string" ? [] : [line.id]),
     [lines],
   );
+  const blocks = useMemo(() => {
+    let counter = 0;
+    return _blocks.map((block) => {
+      switch (block.type) {
+        case "title":
+        case "line":
+          return {
+            ...block,
+            id: lineIds[counter++],
+          };
+        case "codeBlock": {
+          const start = counter;
+          counter += block.content.split("\n").length + 1;
+          return {
+            ...block,
+            ids: lineIds.slice(start, counter),
+          };
+        }
+        case "table": {
+          const start = counter;
+          counter += block.cells.length + 1;
+          return {
+            ...block,
+            ids: lineIds.slice(start, counter),
+          };
+        }
+      }
+    });
+  }, [_blocks, lineIds]);
 
-  let counter = 0;
+  const scrollId = useMemo(() => {
+    if (!scrollTo) return;
+
+    const id = scrollTo.type === "id"
+      ? scrollTo.value
+      : (blocks.find((block) => {
+        if (block.type !== "line") return false;
+
+        return hasLink(scrollTo.value, block.nodes);
+      }) as LineType & { id: string } | undefined)?.id ?? "";
+    if (!lineIds.includes(id)) return;
+    return id;
+  }, [scrollTo, blocks, lineIds]);
+
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!scrollId) return;
+
+    // Pageだけスクロールする
+    const targetLine = ref.current?.querySelector(`[data-id="${scrollId}"]`);
+    const scrollY = window.scrollY;
+    targetLine?.scrollIntoView?.({ block: "center" });
+    window.scroll(0, scrollY);
+  }, [scrollId]);
+
   return (
-    <>
+    <div className="lines" ref={ref}>
       {blocks.map((block) => {
         switch (block.type) {
           case "title":
             return <div />; // dummy
           case "codeBlock": {
-            const start = counter;
-            counter += block.content.split("\n").length + 1;
             return (
               <CodeBlock
-                key={lineIds[start]}
+                key={block.ids[0]}
                 block={block}
                 project={project}
                 titleLc={titleLc}
                 noIndent={noIndent}
-                ids={lineIds.slice(start, counter)}
+                ids={block.ids}
+                scrollId={scrollId}
               />
             );
           }
           case "table": {
-            const start = counter;
-            counter += block.cells.length + 1;
             return (
               <Table
-                key={lineIds[start]}
+                key={block.ids[0]}
                 block={block}
                 project={project}
                 titleLc={titleLc}
                 noIndent={noIndent}
-                ids={lineIds.slice(start, counter)}
+                ids={block.ids}
+                scrollId={scrollId}
               />
             );
           }
           case "line":
-            counter++;
             return (
               <Line
-                key={lineIds[counter - 1]}
-                index={lineIds[counter - 1]}
+                key={block.id}
+                index={block.id}
                 indent={block.indent}
                 noIndent={noIndent}
+                permalink={block.id === scrollId}
               >
                 {block.nodes.length > 0
                   ? block.nodes.map((node) => (
@@ -121,20 +188,21 @@ export function Page({ lines, project, titleLc, noIndent }: PageProps) {
             );
         }
       })}
-    </>
+    </div>
   );
 }
 
 type LineProps = {
   index: string;
   indent: number;
+  permalink?: boolean;
   noIndent?: boolean;
   children: ComponentChildren;
 };
 
-const Line = ({ index, indent, noIndent, children }: LineProps) => (
+const Line = ({ index, indent, noIndent, children, permalink }: LineProps) => (
   <div
-    className="line"
+    className={`line${permalink ? " permalink" : ""}`}
     data-id={index}
     data-indent={indent}
     style={{ "margin-left": noIndent ? "" : `${1.0 * indent}em` }}
@@ -149,9 +217,10 @@ type CodeBlockProps = {
   noIndent?: boolean;
   titleLc: string;
   ids: string[];
+  scrollId?: string;
 };
 const CodeBlock = (
-  { block: { fileName, content, indent }, project, titleLc, ids }:
+  { block: { fileName, content, indent }, project, titleLc, ids, scrollId }:
     CodeBlockProps,
 ) => {
   const [buttonLabel, setButtonLabel] = useState("\uf0c5");
@@ -173,7 +242,7 @@ const CodeBlock = (
 
   return (
     <>
-      <Line index={ids[0]} indent={indent}>
+      <Line index={ids[0]} indent={indent} permalink={ids[0] === scrollId}>
         <span className="code-block">
           <span className="code-block-start">
             {fileName.includes(".")
@@ -194,7 +263,11 @@ const CodeBlock = (
       </Line>
       <>
         {content.split("\n").map((line, index) => (
-          <Line index={ids[index + 1]} indent={indent}>
+          <Line
+            index={ids[index + 1]}
+            indent={indent}
+            permalink={ids[index + 1] === scrollId}
+          >
             <code className="code-block">
               {line}
             </code>
@@ -210,13 +283,15 @@ type TableProps = {
   project: string;
   titleLc: string;
   noIndent?: boolean;
+  scrollId?: string;
   ids: string[];
 };
 const Table = (
-  { block: { fileName, cells, indent }, project, titleLc, ids }: TableProps,
+  { block: { fileName, cells, indent }, project, titleLc, ids, scrollId }:
+    TableProps,
 ) => (
   <>
-    <Line index={ids[0]} indent={indent}>
+    <Line index={ids[0]} indent={indent} permalink={ids[0] === scrollId}>
       <span className="table-block">
         <span className="table-block-start">
           <a
@@ -230,7 +305,11 @@ const Table = (
     </Line>
     <>
       {cells.map((cell, i) => (
-        <Line index={ids[i + 1]} indent={indent}>
+        <Line
+          index={ids[i + 1]}
+          indent={indent}
+          permalink={ids[i + 1] === scrollId}
+        >
           <span className="table-block table-block-row">
             {cell.map((row, index) => (
               <span className={`cell col-${index}`}>

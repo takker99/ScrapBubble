@@ -14,12 +14,27 @@ import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./hooks/usePromiseSettledAnytimes.ts";
 import { getEditor } from "./dom.ts";
+import { parseLink } from "./parseLink.ts";
+import type { LinkType } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 const userscriptName = "scrap-bubble";
+
+export interface AppProps {
+  /** hoverしてからbubbleを表示するまでのタイムラグ */ delay: number;
+  /** cacheの有効期間 */ expired: number;
+  /** 透過的に扱うprojectのリスト */ whiteList: string[];
+  /** リンク先へスクロールする機能を有効にする対象
+   *
+   * `link`: []で囲まれたリンク
+   * `hashtag`: ハッシュタグ
+   * `lineId`: 行リンク
+   */
+  scrollTargets: ("title" | "link" | "hashtag" | "lineId")[];
+}
 const App = (
-  { delay = 500, expired = 60, whiteList = [] as string[] } = {},
+  { delay, expired, whiteList, scrollTargets }: AppProps,
 ) => {
   const { cards, cache, show, hide } = useBubbles({ expired, whiteList });
   const getTheme = useProjectTheme();
@@ -42,13 +57,16 @@ const App = (
         // 処理を<a>か.line-titleのときに限定する
         if (!isLinkOrTitle(link)) continue;
 
-        const [, project, encodedTitleLc] = isPageLink(link)
-          ? link.href.match(/\/([\w\-]+)\/([^#]*)/) ??
-            ["", "", ""]
-          : ["", scrapbox.Project.name, scrapbox.Page.title];
+        const { project = scrapbox.Project.name, title, hash = "" } =
+          isPageLink(link)
+            ? parseLink({
+              pathType: "root",
+              href: `${new URL(link.href).pathname}${new URL(link.href).hash}`,
+            })
+            : { project: scrapbox.Project.name, title: scrapbox.Page.title };
         // [/project]の形のリンクは何もしない
         if (project === "") return;
-        const titleLc = toLc(decodeURI(encodedTitleLc ?? ""));
+        const titleLc = toLc(decodeURI(title ?? ""));
         cache(project, titleLc);
 
         // delay以内にカーソルが離れるかクリックしたら何もしない
@@ -64,19 +82,35 @@ const App = (
           throw e;
         }
 
+        // スクロール先を設定する
+        const scrollTo = hash !== "" && scrollTargets.includes("lineId")
+          ? { type: "id", value: hash } as const
+          : link.dataset.linkedTo
+          ? link.dataset.linkedTo &&
+              (["link", "hashtag", "title"] as const).some((type) =>
+                link.dataset.linkedType === type && scrollTargets.includes(type)
+              )
+            ? { type: "link", value: link.dataset.linkedTo } as const
+            : undefined
+          : undefined;
+
         // 表示位置を計算する
         const { top, right, left, bottom } = link.getBoundingClientRect();
         const root = getEditor().getBoundingClientRect();
         const adjustRight = (left - root.left) / root.width > 0.5; // 右寄せにするかどうか
         show(depth, project, titleLc, {
-          top: Math.round(bottom - root.top),
-          bottom: Math.round(root.bottom - top),
-          ...(adjustRight
-            ? { right: Math.round(root.right - right) }
-            : { left: Math.round(left - root.left) }),
-          maxWidth: adjustRight
-            ? right - 10
-            : document.documentElement.clientWidth - left - 10,
+          scrollTo,
+          position: {
+            top: Math.round(bottom - root.top),
+            bottom: Math.round(root.bottom - top),
+            ...(adjustRight
+              ? { right: Math.round(root.right - right) }
+              : { left: Math.round(left - root.left) }),
+            maxWidth: adjustRight
+              ? right - 10
+              : document.documentElement.clientWidth - left - 10,
+          },
+          type: getLinkType(link),
         });
       }
     })();
@@ -117,6 +151,8 @@ const App = (
         titleLc,
         lines,
         position,
+        scrollTo,
+        type,
         linked,
       }, index) => (
         <Fragment key={`/${project}/${titleLc}/`}>
@@ -126,6 +162,7 @@ const App = (
             theme={getTheme(project) ?? "default"}
             index={index + 1}
             position={position}
+            scrollTo={scrollTo}
             lines={lines}
             onPointerEnterCapture={handlePointerEnter}
             onClick={() => hide(index + 1)}
@@ -136,6 +173,8 @@ const App = (
             cards={linked.map(
               ({ project, ...rest }) => ({
                 project,
+                linkedTo: titleLc,
+                linkedType: type,
                 theme: getTheme(project) ?? "default",
                 ...rest,
               }),
@@ -151,14 +190,24 @@ const App = (
 };
 
 export function mount(
-  { delay = 500, expired = 60, whiteList = [] as string[] } = {},
+  {
+    delay = 500,
+    expired = 60,
+    whiteList = [],
+    scrollTargets = ["link", "hashtag", "lineId", "title"],
+  }: Partial<AppProps> = {},
 ) {
   const app = document.createElement("div");
   app.dataset.userscriptName = userscriptName;
   getEditor().append(app);
   const shadowRoot = app.attachShadow({ mode: "open" });
   render(
-    <App delay={delay} expired={expired} whiteList={whiteList} />,
+    <App
+      delay={delay}
+      expired={expired}
+      whiteList={whiteList}
+      scrollTargets={scrollTargets}
+    />,
     shadowRoot,
   );
 }
@@ -172,4 +221,9 @@ function isPageLink(
   element: HTMLElement,
 ): element is HTMLAnchorElement {
   return element.classList.contains("page-link");
+}
+function getLinkType(element: HTMLDivElement | HTMLAnchorElement): LinkType {
+  return isPageLink(element)
+    ? (element.type === "link" ? "link" : "hashtag")
+    : "title";
 }
