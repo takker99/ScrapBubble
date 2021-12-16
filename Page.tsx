@@ -37,7 +37,7 @@ import {
   StrongNode,
   Table as TableType,
 } from "./deps/scrapbox-parser.ts";
-import { encodeTitle } from "./utils.ts";
+import { encodeTitle, toLc } from "./utils.ts";
 import { parseLink } from "./parseLink.ts";
 import { sleep } from "./sleep.ts";
 import { useParser } from "./hooks/useParser.ts";
@@ -64,9 +64,9 @@ function hasLink(link: string, nodes: NodeType[]): boolean {
   return nodes.some((node) => {
     switch (node.type) {
       case "hashTag":
-        return node.href === link;
+        return toLc(node.href) === toLc(link);
       case "link":
-        return node.pathType === "relative" && node.href === link;
+        return node.pathType === "relative" && toLc(node.href) === toLc(link);
       case "quote":
       case "strong":
       case "decoration":
