@@ -48,7 +48,7 @@ const App = (
           : ["", scrapbox.Project.name, scrapbox.Page.title];
         // [/project]の形のリンクは何もしない
         if (project === "") return;
-        const titleLc = toLc(decodeURIComponent(encodedTitleLc ?? ""));
+        const titleLc = toLc(decodeURI(encodedTitleLc ?? ""));
         cache(project, titleLc);
 
         // delay以内にカーソルが離れるかクリックしたら何もしない

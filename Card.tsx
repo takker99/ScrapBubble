@@ -14,7 +14,7 @@ import {
   parse,
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
-import { toLc } from "./utils.ts";
+import { encodeTitle } from "./utils.ts";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -43,7 +43,7 @@ export const Card = ({
       className="related-page-card page-link"
       type="link"
       data-theme={theme}
-      href={`/${project}/${toLc(title)}`}
+      href={`/${project}/${encodeTitle(title)}`}
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}
       {...props}
@@ -145,7 +145,12 @@ const Icon = ({ node: { pathType, path }, project: _project }: IconProps) => {
     ]
     : path.match(/\/([\w\-]+)\/(.+)$/)?.slice?.(1) ?? [_project, path];
 
-  return <img class="icon" src={`/api/pages/${project}/${toLc(title)}/icon`} />;
+  return (
+    <img
+      class="icon"
+      src={`/api/pages/${project}/${encodeTitle(title)}/icon`}
+    />
+  );
 };
 type HashTagProps = {
   node: HashTagNode;
