@@ -17,10 +17,10 @@ export type TextBubbleProps = {
     id: string;
   }[];
   hasChildCards: boolean;
+  index: number;
   style: string | h.JSX.CSSProperties;
   theme: Theme;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
-  onPointerLeaveCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
 };
 export const TextBubble = ({
@@ -30,8 +30,8 @@ export const TextBubble = ({
   hasChildCards,
   style,
   theme,
+  index,
   onPointerEnterCapture,
-  onPointerLeaveCapture,
   onClick,
 }: TextBubbleProps) => (
   <>
@@ -40,8 +40,8 @@ export const TextBubble = ({
         <div
           className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
           data-theme={theme}
+          data-index={index}
           onPointerEnterCapture={onPointerEnterCapture}
-          onPointerLeaveCapture={onPointerLeaveCapture}
           onClick={onClick}
           style={style}
         >
