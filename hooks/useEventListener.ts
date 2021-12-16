@@ -22,5 +22,5 @@ export function useEventListener<
   useEffect(() => {
     element.addEventListener(type, listener, options);
     return () => element.removeEventListener(type, listener, options);
-  }, [element, element, type, options]);
+  }, [element, type, options]);
 }
