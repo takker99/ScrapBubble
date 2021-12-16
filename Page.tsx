@@ -65,8 +65,14 @@ function hasLink(link: string, nodes: NodeType[]): boolean {
     switch (node.type) {
       case "hashTag":
         return toLc(node.href) === toLc(link);
-      case "link":
-        return node.pathType === "relative" && toLc(node.href) === toLc(link);
+      case "link": {
+        if (node.pathType !== "relative") return false;
+        const { title = "" } = parseLink({
+          pathType: "relative",
+          href: node.href,
+        });
+        return toLc(title) === toLc(link);
+      }
       case "quote":
       case "strong":
       case "decoration":
