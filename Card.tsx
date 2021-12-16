@@ -15,6 +15,7 @@ import {
 } from "./deps/scrapbox-parser.ts";
 import { encodeTitle } from "./utils.ts";
 import { useParser } from "./hooks/useParser.ts";
+import type { LinkType } from "./types.ts";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -25,6 +26,7 @@ export type CardProps = {
   thumbnail: string;
   theme: Theme;
   linkedTo: string;
+  linkedType: LinkType;
 };
 export const Card = ({
   project,
@@ -32,6 +34,7 @@ export const Card = ({
   descriptions,
   thumbnail,
   linkedTo,
+  linkedType,
   theme,
   ...props
 }: CardProps) => {
@@ -46,6 +49,7 @@ export const Card = ({
       type="link"
       data-theme={theme}
       data-linked-to={linkedTo}
+      data-linked-type={linkedType}
       href={`/${project}/${encodeTitle(title)}`}
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}

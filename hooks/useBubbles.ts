@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "../deps/preact.tsx";
 import { toLc } from "../utils.ts";
 import { Page } from "../deps/scrapbox.ts";
-import type { ScrollTo } from "../types.ts";
+import type { LinkType, ScrollTo } from "../types.ts";
 import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
 declare const scrapbox: Scrapbox;
 
@@ -39,7 +39,7 @@ export function useBubbles(
   const [caches, setCaches] = useState(new Map<string, Cache>());
   // 表示するデータのcache idのリストと表示位置とのペアのリスト
   const [selectedList, setSelectedList] = useState<
-    { ids: string[]; position: Position; scrollTo?: ScrollTo }[]
+    { ids: string[]; position: Position; scrollTo?: ScrollTo; type: LinkType }[]
   >([]);
 
   // このリストにあるproject以外は表示しない
@@ -107,15 +107,18 @@ export function useBubbles(
       depth: number,
       project: string,
       titleLc: string,
-      position: Position,
-      scrollTo?: ScrollTo,
+      options: {
+        position: Position;
+        scrollTo?: ScrollTo;
+        type: "hashtag" | "link" | "title";
+      },
     ) => {
       // whiteListにないprojectの場合は何もしない
       if (!whiteList.includes(project)) return;
 
       setSelectedList((list) => {
         const ids = whiteList.map((_project) => toId(_project, titleLc));
-        return [...list.slice(0, depth), { ids, position, scrollTo }];
+        return [...list.slice(0, depth), { ids, ...options }];
       });
     },
     [whiteList],

@@ -15,7 +15,7 @@ import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./hooks/usePromiseSettledAnytimes.ts";
 import { getEditor } from "./dom.ts";
 import { parseLink } from "./parseLink.ts";
-import type { ScrollTo } from "./types.ts";
+import type { LinkType } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -25,9 +25,16 @@ export interface AppProps {
   /** hoverしてからbubbleを表示するまでのタイムラグ */ delay: number;
   /** cacheの有効期間 */ expired: number;
   /** 透過的に扱うprojectのリスト */ whiteList: string[];
+  /** リンク先へスクロールする機能を有効にする対象
+   *
+   * `link`: []で囲まれたリンク
+   * `hashtag`: ハッシュタグ
+   * `lineId`: 行リンク
+   */
+  scrollTargets: ("title" | "link" | "hashtag" | "lineId")[];
 }
 const App = (
-  { delay = 500, expired = 60, whiteList = [] }: AppProps,
+  { delay, expired, whiteList, scrollTargets }: AppProps,
 ) => {
   const { cards, cache, show, hide } = useBubbles({ expired, whiteList });
   const getTheme = useProjectTheme();
@@ -76,10 +83,15 @@ const App = (
         }
 
         // スクロール先を設定する
-        const scrollTo = hash !== ""
+        const scrollTo = hash !== "" && scrollTargets.includes("lineId")
           ? { type: "id", value: hash } as const
           : link.dataset.linkedTo
-          ? { type: "link", value: link.dataset.linkedTo } as const
+          ? link.dataset.linkedTo &&
+              (["link", "hashtag", "title"] as const).some((type) =>
+                link.dataset.linkedType === type && scrollTargets.includes(type)
+              )
+            ? { type: "link", value: link.dataset.linkedTo } as const
+            : undefined
           : undefined;
 
         // 表示位置を計算する
@@ -87,15 +99,19 @@ const App = (
         const root = getEditor().getBoundingClientRect();
         const adjustRight = (left - root.left) / root.width > 0.5; // 右寄せにするかどうか
         show(depth, project, titleLc, {
-          top: Math.round(bottom - root.top),
-          bottom: Math.round(root.bottom - top),
-          ...(adjustRight
-            ? { right: Math.round(root.right - right) }
-            : { left: Math.round(left - root.left) }),
-          maxWidth: adjustRight
-            ? right - 10
-            : document.documentElement.clientWidth - left - 10,
-        }, scrollTo);
+          scrollTo,
+          position: {
+            top: Math.round(bottom - root.top),
+            bottom: Math.round(root.bottom - top),
+            ...(adjustRight
+              ? { right: Math.round(root.right - right) }
+              : { left: Math.round(left - root.left) }),
+            maxWidth: adjustRight
+              ? right - 10
+              : document.documentElement.clientWidth - left - 10,
+          },
+          type: getLinkType(link),
+        });
       }
     })();
     return () => finished = true;
@@ -136,6 +152,7 @@ const App = (
         lines,
         position,
         scrollTo,
+        type,
         linked,
       }, index) => (
         <Fragment key={`/${project}/${titleLc}/`}>
@@ -157,6 +174,7 @@ const App = (
               ({ project, ...rest }) => ({
                 project,
                 linkedTo: titleLc,
+                linkedType: type,
                 theme: getTheme(project) ?? "default",
                 ...rest,
               }),
@@ -172,14 +190,24 @@ const App = (
 };
 
 export function mount(
-  { delay = 500, expired = 60, whiteList = [] }: Partial<AppProps> = {},
+  {
+    delay = 500,
+    expired = 60,
+    whiteList = [],
+    scrollTargets = ["link", "hashtag", "lineId", "title"],
+  }: Partial<AppProps> = {},
 ) {
   const app = document.createElement("div");
   app.dataset.userscriptName = userscriptName;
   getEditor().append(app);
   const shadowRoot = app.attachShadow({ mode: "open" });
   render(
-    <App delay={delay} expired={expired} whiteList={whiteList} />,
+    <App
+      delay={delay}
+      expired={expired}
+      whiteList={whiteList}
+      scrollTargets={scrollTargets}
+    />,
     shadowRoot,
   );
 }
@@ -193,4 +221,9 @@ function isPageLink(
   element: HTMLElement,
 ): element is HTMLAnchorElement {
   return element.classList.contains("page-link");
+}
+function getLinkType(element: HTMLDivElement | HTMLAnchorElement): LinkType {
+  return isPageLink(element)
+    ? (element.type === "link" ? "link" : "hashtag")
+    : "title";
 }

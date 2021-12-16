@@ -4,6 +4,7 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 import { h } from "./deps/preact.tsx";
+import type { LinkType } from "./types.ts";
 import type { Theme } from "./deps/scrapbox.ts";
 import { Card } from "./Card.tsx";
 
@@ -15,6 +16,7 @@ export type CardBubbleProps = {
     title: string;
     theme: Theme;
     linkedTo: string;
+    linkedType: LinkType;
   }[];
   index: number;
   position: {
@@ -47,7 +49,9 @@ export const CardBubble = ({
     {...rest}
   >
     <ul>
-      {cards.map(({ project, title, theme, descriptions, image, linkedTo }) => (
+      {cards.map((
+        { project, title, theme, descriptions, image, linkedTo, linkedType },
+      ) => (
         <li>
           <Card
             key={`/${project}/${title}`}
@@ -55,6 +59,7 @@ export const CardBubble = ({
             title={title}
             theme={theme}
             linkedTo={linkedTo}
+            linkedType={linkedType}
             descriptions={descriptions}
             thumbnail={image ?? ""}
           />
