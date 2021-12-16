@@ -20,8 +20,14 @@ import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 const userscriptName = "scrap-bubble";
+
+export interface AppProps {
+  /** hoverしてからbubbleを表示するまでのタイムラグ */ delay: number;
+  /** cacheの有効期間 */ expired: number;
+  /** 透過的に扱うprojectのリスト */ whiteList: string[];
+}
 const App = (
-  { delay = 500, expired = 60, whiteList = [] as string[] } = {},
+  { delay = 500, expired = 60, whiteList = [] }: AppProps,
 ) => {
   const { cards, cache, show, hide } = useBubbles({ expired, whiteList });
   const getTheme = useProjectTheme();
@@ -46,7 +52,10 @@ const App = (
 
         const { project = scrapbox.Project.name, title, hash = "" } =
           isPageLink(link)
-            ? parseLink({ pathType: "root", href: new URL(link.href).pathname })
+            ? parseLink({
+              pathType: "root",
+              href: `${new URL(link.href).pathname}${new URL(link.href).hash}`,
+            })
             : { project: scrapbox.Project.name, title: scrapbox.Page.title };
         // [/project]の形のリンクは何もしない
         if (project === "") return;
@@ -163,7 +172,7 @@ const App = (
 };
 
 export function mount(
-  { delay = 500, expired = 60, whiteList = [] as string[] } = {},
+  { delay = 500, expired = 60, whiteList = [] }: Partial<AppProps> = {},
 ) {
   const app = document.createElement("div");
   app.dataset.userscriptName = userscriptName;
