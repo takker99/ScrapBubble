@@ -178,7 +178,7 @@ async function fetchPage(
   project: string,
   titleLc: string,
 ): Promise<Cache | undefined> {
-  const res = await fetch(`/api/pages/${project}/${titleLc}`);
+  const res = await fetch(`/api/pages/${project}/${titleLc}?followRename=true`);
   const checked = new Date().getTime() / 1000;
   // 存在しないページの時
   if (!res.ok) return;
