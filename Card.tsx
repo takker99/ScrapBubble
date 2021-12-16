@@ -3,7 +3,7 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { Fragment, h, useMemo } from "./deps/preact.tsx";
+import { Fragment, h } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
 import {
   FormulaNode,
@@ -11,10 +11,10 @@ import {
   IconNode,
   LinkNode,
   Node as NodeType,
-  parse,
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
 import { encodeTitle } from "./utils.ts";
+import { useParser } from "./hooks/useParser.ts";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -33,10 +33,10 @@ export const Card = ({
   theme,
   ...props
 }: CardProps) => {
-  const blocks = useMemo(
-    () => thumbnail ? [] : parse(descriptions.join("\n"), { hasTitle: false }),
-    [descriptions, thumbnail],
-  );
+  const blocks = useParser(thumbnail ? [] : descriptions, { hasTitle: false }, [
+    thumbnail,
+    descriptions,
+  ]);
 
   return (
     <a

@@ -28,7 +28,6 @@ import {
   ImageNode,
   LinkNode,
   Node as NodeType,
-  parse,
   PlainNode,
   QuoteNode,
   StrongIconNode,
@@ -39,6 +38,7 @@ import {
 import { encodeTitle } from "./utils.ts";
 import { parseLink } from "./parseLink.ts";
 import { sleep } from "./sleep.ts";
+import { useParser } from "./hooks/useParser.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -57,12 +57,7 @@ export type PageProps = {
 };
 
 export function Page({ lines, project, titleLc, noIndent }: PageProps) {
-  const blocks = useMemo(() => {
-    const text = lines.map((line) =>
-      typeof line === "string" ? line : line.text
-    ).join("\n");
-    return parse(text, { hasTitle: false });
-  }, [lines]);
+  const blocks = useParser(lines, { hasTitle: false });
   const lineIds = useMemo(
     () => lines.flatMap((line) => typeof line === "string" ? [] : [line.id]),
     [lines],

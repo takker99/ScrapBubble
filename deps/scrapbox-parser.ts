@@ -13,6 +13,7 @@ export type {
   ImageNode,
   LinkNode,
   Node,
+  ParserOption,
   PlainNode,
   QuoteNode,
   StrongIconNode,
