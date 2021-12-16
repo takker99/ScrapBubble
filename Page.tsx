@@ -10,6 +10,7 @@ import {
   h,
   useCallback,
   useMemo,
+  useRef,
   useState,
 } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
@@ -609,14 +610,29 @@ type AudioProps = {
 const Audio = ({ href, content }: AudioProps) =>
   content === ""
     ? <audio className="audio-player" preload="none" controls src={href} />
-    : (
-      <span className="audio-link">
-        <a href={href} rel="noopener noreferrer" target="_blank">
-          {content}
-        </a>
-        <span className="play">♬</span>
-      </span>
-    );
+    : <AudioLink href={href} content={content} />;
+const AudioLink = ({ href, content }: AudioProps) => {
+  const ref = useRef<HTMLAudioElement>(null);
+  const togglePlay = useCallback(() => {
+    if (ref.current?.paused) {
+      ref.current.currentTime = 0;
+      ref.current.play();
+    } else {
+      ref.current?.pause?.();
+    }
+  }, []);
+
+  return (
+    <span className="audio-link">
+      <a href={href} rel="noopener noreferrer" target="_blank">
+        {content}
+      </a>
+      <span className="play" onClick={togglePlay}>♬</span>
+      <audio preload="none" src={href} ref={ref} />
+    </span>
+  );
+};
+
 type VideoURL = `${string}.${"mp4" | "webm"}`;
 function isVideoURL(url: string): url is VideoURL {
   return /\.(?:mp4|webm)$/.test(url);
