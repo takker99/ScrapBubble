@@ -18,7 +18,10 @@ export type TextBubbleProps = {
   }[];
   hasChildCards: boolean;
   index: number;
-  style: string | h.JSX.CSSProperties;
+  position: {
+    top: number;
+    maxWidth: number;
+  } & ({ left: number } | { right: number });
   theme: Theme;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
@@ -28,7 +31,7 @@ export const TextBubble = ({
   titleLc,
   lines,
   hasChildCards,
-  style,
+  position,
   theme,
   index,
   onPointerEnterCapture,
@@ -43,7 +46,17 @@ export const TextBubble = ({
           data-index={index}
           onPointerEnterCapture={onPointerEnterCapture}
           onClick={onClick}
-          style={style}
+          style={{
+            top: `${position.top}px`,
+            maxWidth: `${position.maxWidth}px`,
+            ...("left" in position
+              ? {
+                left: `${position.left}px`,
+              }
+              : {
+                right: `${position.right}px`,
+              }),
+          }}
         >
           {project !== scrapbox.Project.name &&
             <ProjectBadge project={project} titleLc={titleLc} />}
