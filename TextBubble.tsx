@@ -23,6 +23,10 @@ export type TextBubbleProps = {
     maxWidth: number;
   } & ({ left: number } | { right: number });
   theme: Theme;
+  scrollTo?: {
+    type: "id" | "link";
+    value: string;
+  };
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
 };
@@ -35,37 +39,44 @@ export const TextBubble = ({
   theme,
   index,
   onPointerEnterCapture,
+  scrollTo,
   onClick,
-}: TextBubbleProps) => (
-  <>
-    {lines.length > 0 &&
-      (
-        <div
-          className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
-          data-theme={theme}
-          data-index={index}
-          onPointerEnterCapture={onPointerEnterCapture}
-          onClick={onClick}
-          style={{
-            top: `${position.top}px`,
-            maxWidth: `${position.maxWidth}px`,
-            ...("left" in position
-              ? {
-                left: `${position.left}px`,
-              }
-              : {
-                right: `${position.right}px`,
-              }),
-          }}
-        >
-          {project !== scrapbox.Project.name &&
-            <ProjectBadge project={project} titleLc={titleLc} />}
-          {lines.length > 0 &&
-            <Page lines={lines} project={project} titleLc={titleLc} />}
-        </div>
-      )}
-  </>
-);
+}: TextBubbleProps) => {
+  return (
+    (
+      <div
+        className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
+        data-theme={theme}
+        data-index={index}
+        onPointerEnterCapture={onPointerEnterCapture}
+        onClick={onClick}
+        style={{
+          top: `${position.top}px`,
+          maxWidth: `${position.maxWidth}px`,
+          ...("left" in position
+            ? {
+              left: `${position.left}px`,
+            }
+            : {
+              right: `${position.right}px`,
+            }),
+        }}
+      >
+        {project !== scrapbox.Project.name &&
+          <ProjectBadge project={project} titleLc={titleLc} />}
+        {lines.length > 0 &&
+          (
+            <Page
+              lines={lines}
+              project={project}
+              titleLc={titleLc}
+              scrollTo={scrollTo}
+            />
+          )}
+      </div>
+    )
+  );
+};
 
 export const CSS = `
 .text-bubble {

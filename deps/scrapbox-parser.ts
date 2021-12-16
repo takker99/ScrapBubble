@@ -11,6 +11,7 @@ export type {
   HelpfeelNode,
   IconNode,
   ImageNode,
+  Line,
   LinkNode,
   Node,
   ParserOption,
