@@ -16,12 +16,17 @@ export interface Cache {
     image: string | null;
   }[];
 }
-export type Position = {
-  top: number;
-  bottom: number;
-  left?: number;
-  right?: number;
-};
+export type Position =
+  & {
+    top: number;
+    bottom: number;
+    maxWidth: number;
+  }
+  & ({
+    left: number;
+  } | {
+    right: number;
+  });
 
 export interface UseBubblesInit {
   /** cacheの有効期限 (UNIX時刻) */ expired?: number;

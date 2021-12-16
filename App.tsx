@@ -6,7 +6,7 @@
 import { CSS as textCSS, TextBubble } from "./TextBubble.tsx";
 import { CardBubble, CSS as listCSS } from "./CardBubble.tsx";
 import { CSS as cardCSS } from "./Card.tsx";
-import { Fragment, h, render, useEffect, useState } from "./deps/preact.tsx";
+import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./hooks/useBubbles.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
 import { toLc } from "./utils.ts";
@@ -74,6 +74,9 @@ const App = (
           ...(adjustRight
             ? { right: Math.round(root.right - right) }
             : { left: Math.round(left - root.left) }),
+          maxWidth: adjustRight
+            ? right - 10
+            : document.documentElement.clientWidth - left - 10,
         });
       }
     })();
@@ -113,7 +116,7 @@ const App = (
         project,
         titleLc,
         lines,
-        position: { top, bottom, left, right },
+        position,
         linked,
       }, index) => (
         <Fragment key={`/${project}/${titleLc}/`}>
@@ -122,24 +125,14 @@ const App = (
             titleLc={titleLc}
             theme={getTheme(project) ?? "default"}
             index={index + 1}
-            style={{
-              top: `${top}px`,
-              ...(
-                left ? ({ left: `${left}px` }) : ({ right: `${right}px` })
-              ),
-            }}
+            position={position}
             lines={lines}
             onPointerEnterCapture={handlePointerEnter}
             onClick={() => hide(index + 1)}
             hasChildCards={cards.length > index + 1}
           />
           <CardBubble
-            style={{
-              bottom: `${bottom}px`,
-              ...(
-                left ? ({ left: `${left}px` }) : ({ right: `${right}px` })
-              ),
-            }}
+            position={position}
             cards={linked.map(
               ({ project, ...rest }) => ({
                 project,

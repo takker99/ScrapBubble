@@ -20,17 +20,36 @@ export type CardBubbleProps = {
     title: string;
     theme: Theme;
   }[];
-  style: h.JSX.CSSProperties;
   index: number;
+  position: {
+    bottom: number;
+    maxWidth: number;
+  } & ({ left: number } | { right: number });
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
 };
 export const CardBubble = ({
   cards,
   index,
+  position,
   ...rest
 }: CardBubbleProps) => (
-  <div className="card-bubble" data-index={index} {...rest}>
+  <div
+    className="card-bubble"
+    data-index={index}
+    style={{
+      bottom: `${position.bottom}px`,
+      maxWidth: `${position.maxWidth}px`,
+      ...("left" in position
+        ? {
+          left: `${position.left}px`,
+        }
+        : {
+          right: `${position.right}px`,
+        }),
+    }}
+    {...rest}
+  >
     <ul>
       {cards.map(({ project, title, theme, descriptions, image }) => (
         <li>
