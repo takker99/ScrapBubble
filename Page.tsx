@@ -153,11 +153,16 @@ const CodeBlock = (
     CodeBlockProps,
 ) => {
   const [buttonLabel, setButtonLabel] = useState("\uf0c5");
-  const handleClick = useCallback(() => {
-    navigator.clipboard.writeText(content);
-    setButtonLabel("Copied");
-    setTimeout(() => setButtonLabel("\uf0c5"), 1000);
-  }, [content]);
+  const handleClick = useCallback(
+    (e: h.JSX.TargetedMouseEvent<HTMLSpanElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      navigator.clipboard.writeText(content);
+      setButtonLabel("Copied");
+      setTimeout(() => setButtonLabel("\uf0c5"), 1000);
+    },
+    [content],
+  );
 
   return (
     <>

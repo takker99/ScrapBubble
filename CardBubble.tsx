@@ -21,15 +21,16 @@ export type CardBubbleProps = {
     theme: Theme;
   }[];
   style: h.JSX.CSSProperties;
-  onClickCapture: h.JSX.MouseEventHandler<HTMLDivElement>;
+  index: number;
+  onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
-  onPointerLeaveCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
 };
 export const CardBubble = ({
   cards,
+  index,
   ...rest
 }: CardBubbleProps) => (
-  <div className="card-bubble" {...rest}>
+  <div className="card-bubble" data-index={index} {...rest}>
     <ul>
       {cards.map(({ project, title, theme, descriptions, image }) => (
         <li>
