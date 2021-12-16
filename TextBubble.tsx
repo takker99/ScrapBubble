@@ -43,38 +43,37 @@ export const TextBubble = ({
   onClick,
 }: TextBubbleProps) => {
   return (
-    (
-      <div
-        className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
-        data-theme={theme}
-        data-index={index}
-        onPointerEnterCapture={onPointerEnterCapture}
-        onClick={onClick}
-        style={{
-          top: `${position.top}px`,
-          maxWidth: `${position.maxWidth}px`,
-          ...("left" in position
-            ? {
-              left: `${position.left}px`,
-            }
-            : {
-              right: `${position.right}px`,
-            }),
-        }}
-      >
-        {project !== scrapbox.Project.name &&
-          <ProjectBadge project={project} titleLc={titleLc} />}
-        {lines.length > 0 &&
-          (
-            <Page
-              lines={lines}
-              project={project}
-              titleLc={titleLc}
-              scrollTo={scrollTo}
-            />
-          )}
-      </div>
-    )
+    <>
+      {lines.length > 0 && (
+        <div
+          className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
+          data-theme={theme}
+          data-index={index}
+          onPointerEnterCapture={onPointerEnterCapture}
+          onClick={onClick}
+          style={{
+            top: `${position.top}px`,
+            maxWidth: `${position.maxWidth}px`,
+            ...("left" in position
+              ? {
+                left: `${position.left}px`,
+              }
+              : {
+                right: `${position.right}px`,
+              }),
+          }}
+        >
+          {project !== scrapbox.Project.name &&
+            <ProjectBadge project={project} titleLc={titleLc} />}
+          <Page
+            lines={lines}
+            project={project}
+            titleLc={titleLc}
+            scrollTo={scrollTo}
+          />
+        </div>
+      )}
+    </>
   );
 };
 
