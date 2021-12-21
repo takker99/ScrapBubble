@@ -319,7 +319,7 @@ const Table = (
           <span className="table-block table-block-row">
             {cell.map((row, index) => (
               <span className={`cell col-${index}`}>
-                {row[0]?.raw ?? ""}
+                {row.map((node) => <Node node={node} project={project} />)}
               </span>
             ))}
           </span>
