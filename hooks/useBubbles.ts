@@ -1,12 +1,24 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { useCallback, useMemo, useState } from "../deps/preact.tsx";
+import { useCallback, useEffect, useMemo, useState } from "../deps/preact.tsx";
 import { exposeState, toLc } from "../utils.ts";
 import { getPage } from "../fetch.ts";
 import type { LinkType, ScrollTo } from "../types.ts";
 import type { Line, Page, RelatedPage, Scrapbox } from "../deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
+
+export interface Bubble {
+  position: Position;
+  scrollTo?: ScrollTo;
+  type: LinkType;
+  pages: {
+    project: string;
+    title: string;
+    lines: Line[];
+  }[];
+  cards: (RelatedPage & { project: string })[];
+}
 
 /** bubbleの表示位置 */
 export type Position =
@@ -56,18 +68,7 @@ export interface UseBubbleResult {
    *
    * 取得中の場合は`loading`が`true`になる
    */
-  getBubbles(): ({ loading: true } | {
-    loading: false;
-    position: Position;
-    scrollTo?: ScrollTo;
-    type: LinkType;
-    pages: {
-      project: string;
-      title: string;
-      lines: Line[];
-    }[];
-    cards: (RelatedPage & { project: string })[];
-  })[];
+  getBubbles(): ({ loading: true } | { loading: false } & Bubble)[];
 }
 export function useBubbles(
   { expired = 60, whiteList: _whiteList = [] }: UseBubblesInit,
@@ -86,6 +87,8 @@ export function useBubbles(
       };
     }[]
   >([]);
+  // 取得したbubbles data
+  const [bubbles, setBubbles] = useState<Bubble[]>([]);
 
   // このリストにあるproject以外は表示しない
   const whiteList = useMemo(
@@ -119,6 +122,54 @@ export function useBubbles(
     (depth: number) => setSelectedList((list) => list.slice(0, depth)),
     [],
   );
+
+  // bubblesを作る
+  useEffect(() => {
+    // 以前の階層のtext bubbleで使ったページはcard bubbleに使わない
+    // 現在表示しているページも同様
+    const showedPages = [toLc(scrapbox.Page.title ?? "")];
+    type T = {
+      page?: { project: string; title: string; lines: Line[] };
+      cards: (RelatedPage & { project: string })[];
+      options: BubbleOptions;
+    };
+
+    for (const { projects, title, options } of selectedList) {
+      const titleLc = toLc(title);
+      for (const project of projects) {
+        const task = exposeState<T>((async () => {
+          const page = await getPage(project, title, { expired });
+
+          // エラーが出たら無視
+          if ("message" in page) {
+            return {
+              cards: [],
+              options,
+            } as T;
+          }
+
+          return {
+            page: page.persistent && !showedPages.includes(toLc(page.title))
+              ? {
+                project,
+                titile: page.title,
+                lines: page.lines,
+              }
+              : undefined,
+            cards: getBackLinks(page).flatMap(({ title, ...rest }) =>
+              showedPages.includes(toLc(title)) ? [] : [{
+                title,
+                project,
+                ...rest,
+              }]
+            ),
+            options,
+          } as T;
+        })());
+      }
+      showedPages.push(titleLc);
+    }
+  }, [selectedList, expired]);
 
   /** 表示するbubblesの情報を取得する函数
    *
