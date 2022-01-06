@@ -9,7 +9,9 @@ import {
   Fragment,
   h,
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useState,
 } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
@@ -25,18 +27,21 @@ import {
   HelpfeelNode,
   IconNode,
   ImageNode,
+  Line as LineType,
   LinkNode,
   Node as NodeType,
-  parse,
   PlainNode,
   QuoteNode,
   StrongIconNode,
   StrongImageNode,
   StrongNode,
   Table as TableType,
-} from "https://esm.sh/@progfay/scrapbox-parser@7.1.0";
-import { encodeTitle } from "./utils.ts";
+} from "./deps/scrapbox-parser.ts";
+import { encodeTitle, toLc } from "./utils.ts";
 import { parseLink } from "./parseLink.ts";
+import { sleep } from "./sleep.ts";
+import { useParser } from "./hooks/useParser.ts";
+import type { ScrollTo } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -52,63 +57,133 @@ export type PageProps = {
   lines: { text: string; id: string }[] | string[];
   titleLc: string;
   noIndent?: boolean;
+  scrollTo?: ScrollTo;
 };
 
-export function Page({ lines, project, titleLc, noIndent }: PageProps) {
-  const blocks = useMemo(() => {
-    const text = lines.map((line) =>
-      typeof line === "string" ? line : line.text
-    ).join("\n");
-    return parse(text, { hasTitle: false });
-  }, [lines]);
+function hasLink(link: string, nodes: NodeType[]): boolean {
+  return nodes.some((node) => {
+    switch (node.type) {
+      case "hashTag":
+        return toLc(node.href) === toLc(link);
+      case "link": {
+        if (node.pathType !== "relative") return false;
+        const { title = "" } = parseLink({
+          pathType: "relative",
+          href: node.href,
+        });
+        return toLc(title) === toLc(link);
+      }
+      case "quote":
+      case "strong":
+      case "decoration":
+        return hasLink(link, node.nodes);
+    }
+  });
+}
+
+export function Page(
+  { lines, project, titleLc, noIndent, scrollTo }: PageProps,
+) {
+  const _blocks = useParser(lines, { hasTitle: false });
   const lineIds = useMemo(
     () => lines.flatMap((line) => typeof line === "string" ? [] : [line.id]),
     [lines],
   );
+  const blocks = useMemo(() => {
+    let counter = 0;
+    return _blocks.map((block) => {
+      switch (block.type) {
+        case "title":
+        case "line":
+          return {
+            ...block,
+            id: lineIds[counter++],
+          };
+        case "codeBlock": {
+          const start = counter;
+          counter += block.content.split("\n").length + 1;
+          return {
+            ...block,
+            ids: lineIds.slice(start, counter),
+          };
+        }
+        case "table": {
+          const start = counter;
+          counter += block.cells.length + 1;
+          return {
+            ...block,
+            ids: lineIds.slice(start, counter),
+          };
+        }
+      }
+    });
+  }, [_blocks, lineIds]);
 
-  let counter = 0;
+  const scrollId = useMemo(() => {
+    if (!scrollTo) return;
+
+    const id = scrollTo.type === "id"
+      ? scrollTo.value
+      : (blocks.find((block) => {
+        if (block.type !== "line") return false;
+
+        return hasLink(scrollTo.value, block.nodes);
+      }) as LineType & { id: string } | undefined)?.id ?? "";
+    if (!lineIds.includes(id)) return;
+    return id;
+  }, [scrollTo, blocks, lineIds]);
+
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!scrollId) return;
+
+    // Pageだけスクロールする
+    const targetLine = ref.current?.querySelector(`[data-id="${scrollId}"]`);
+    const scrollY = window.scrollY;
+    targetLine?.scrollIntoView?.({ block: "center" });
+    window.scroll(0, scrollY);
+  }, [scrollId]);
+
   return (
-    <>
+    <div className="lines" ref={ref}>
       {blocks.map((block) => {
         switch (block.type) {
           case "title":
             return <div />; // dummy
           case "codeBlock": {
-            const start = counter;
-            counter += block.content.split("\n").length + 1;
             return (
               <CodeBlock
-                key={lineIds[start]}
+                key={block.ids[0]}
                 block={block}
                 project={project}
                 titleLc={titleLc}
                 noIndent={noIndent}
-                ids={lineIds.slice(start, counter)}
+                ids={block.ids}
+                scrollId={scrollId}
               />
             );
           }
           case "table": {
-            const start = counter;
-            counter += block.cells.length + 1;
             return (
               <Table
-                key={lineIds[start]}
+                key={block.ids[0]}
                 block={block}
                 project={project}
                 titleLc={titleLc}
                 noIndent={noIndent}
-                ids={lineIds.slice(start, counter)}
+                ids={block.ids}
+                scrollId={scrollId}
               />
             );
           }
           case "line":
-            counter++;
             return (
               <Line
-                key={lineIds[counter - 1]}
-                index={lineIds[counter - 1]}
+                key={block.id}
+                index={block.id}
                 indent={block.indent}
                 noIndent={noIndent}
+                permalink={block.id === scrollId}
               >
                 {block.nodes.length > 0
                   ? block.nodes.map((node) => (
@@ -119,20 +194,21 @@ export function Page({ lines, project, titleLc, noIndent }: PageProps) {
             );
         }
       })}
-    </>
+    </div>
   );
 }
 
 type LineProps = {
   index: string;
   indent: number;
+  permalink?: boolean;
   noIndent?: boolean;
   children: ComponentChildren;
 };
 
-const Line = ({ index, indent, noIndent, children }: LineProps) => (
+const Line = ({ index, indent, noIndent, children, permalink }: LineProps) => (
   <div
-    className="line"
+    className={`line${permalink ? " permalink" : ""}`}
     data-id={index}
     data-indent={indent}
     style={{ "margin-left": noIndent ? "" : `${1.0 * indent}em` }}
@@ -147,21 +223,32 @@ type CodeBlockProps = {
   noIndent?: boolean;
   titleLc: string;
   ids: string[];
+  scrollId?: string;
 };
 const CodeBlock = (
-  { block: { fileName, content, indent }, project, titleLc, ids }:
+  { block: { fileName, content, indent }, project, titleLc, ids, scrollId }:
     CodeBlockProps,
 ) => {
   const [buttonLabel, setButtonLabel] = useState("\uf0c5");
-  const handleClick = useCallback(() => {
-    navigator.clipboard.writeText(content);
-    setButtonLabel("Copied");
-    setTimeout(() => setButtonLabel("\uf0c5"), 1000);
-  }, [content]);
+  const handleClick = useCallback(
+    async (e: h.JSX.TargetedMouseEvent<HTMLSpanElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        await navigator.clipboard.writeText(content);
+        setButtonLabel("Copied");
+        await sleep(1000);
+        setButtonLabel("\uf0c5");
+      } catch (e) {
+        alert(`Failed to copy the code block\nError:${e.message}`);
+      }
+    },
+    [content],
+  );
 
   return (
     <>
-      <Line index={ids[0]} indent={indent}>
+      <Line index={ids[0]} indent={indent} permalink={ids[0] === scrollId}>
         <span className="code-block">
           <span className="code-block-start">
             {fileName.includes(".")
@@ -182,7 +269,11 @@ const CodeBlock = (
       </Line>
       <>
         {content.split("\n").map((line, index) => (
-          <Line index={ids[index + 1]} indent={indent}>
+          <Line
+            index={ids[index + 1]}
+            indent={indent}
+            permalink={ids[index + 1] === scrollId}
+          >
             <code className="code-block">
               {line}
             </code>
@@ -198,13 +289,15 @@ type TableProps = {
   project: string;
   titleLc: string;
   noIndent?: boolean;
+  scrollId?: string;
   ids: string[];
 };
 const Table = (
-  { block: { fileName, cells, indent }, project, titleLc, ids }: TableProps,
+  { block: { fileName, cells, indent }, project, titleLc, ids, scrollId }:
+    TableProps,
 ) => (
   <>
-    <Line index={ids[0]} indent={indent}>
+    <Line index={ids[0]} indent={indent} permalink={ids[0] === scrollId}>
       <span className="table-block">
         <span className="table-block-start">
           <a
@@ -218,11 +311,15 @@ const Table = (
     </Line>
     <>
       {cells.map((cell, i) => (
-        <Line index={ids[i + 1]} indent={indent}>
+        <Line
+          index={ids[i + 1]}
+          indent={indent}
+          permalink={ids[i + 1] === scrollId}
+        >
           <span className="table-block table-block-row">
             {cell.map((row, index) => (
               <span className={`cell col-${index}`}>
-                {row[0]?.raw ?? ""}
+                {row.map((node) => <Node node={node} project={project} />)}
               </span>
             ))}
           </span>
@@ -597,15 +694,30 @@ type AudioProps = {
 };
 const Audio = ({ href, content }: AudioProps) =>
   content === ""
-    ? <audio className="audio-player" preload="none" src={href} />
-    : (
-      <span className="audio-link">
-        <a href={href} rel="noopener noreferrer" target="_blank">
-          {content}
-        </a>
-        <span className="play">♬</span>
-      </span>
-    );
+    ? <audio className="audio-player" preload="none" controls src={href} />
+    : <AudioLink href={href} content={content} />;
+const AudioLink = ({ href, content }: AudioProps) => {
+  const ref = useRef<HTMLAudioElement>(null);
+  const togglePlay = useCallback(() => {
+    if (ref.current?.paused) {
+      ref.current.currentTime = 0;
+      ref.current.play();
+    } else {
+      ref.current?.pause?.();
+    }
+  }, []);
+
+  return (
+    <span className="audio-link">
+      <a href={href} rel="noopener noreferrer" target="_blank">
+        {content}
+      </a>
+      <span className="play" onClick={togglePlay}>♬</span>
+      <audio preload="none" src={href} ref={ref} />
+    </span>
+  );
+};
+
 type VideoURL = `${string}.${"mp4" | "webm"}`;
 function isVideoURL(url: string): url is VideoURL {
   return /\.(?:mp4|webm)$/.test(url);
@@ -624,175 +736,3 @@ const Video = ({ href }: VideoProps) => (
     />
   </div>
 );
-
-export const CSS = `
-a {
-  background-color: transparent;
-  text-decoration: none;
-  cursor: pointer;
-}
-img {
-  display: inline-block;
-  max-width: 100%;
-  max-height: 100px;
-}
-code {
-  font-family: var(--code-text-font, Menlo, Monaco, Consolas, "Courier New", monospace);
-  font-size: 90%;
-  color: var(--code-color, #342d9c);
-  background-color: var(--code-bg, rgba(0,0,0,0.04));
-  padding: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-blockquote {
-  background-color: var(--quote-bg-color, rgba(0,0,0,0.05));
-  display: block;
-  border-left: solid 4px #a0a0a0;
-  padding-left: 4px;
-  margin: 0px;
-}
-strong {
-  font-weight: bold;
-}
-iframe {
-  display: inline-block;
-  margin: 3px 0;
-  vertical-align: middle;
-  max-width: 100%;
-  width: 640px;
-  height: 360px;
-  border: 0;
-}
-audio {
-  display: inline-block;
-  vertical-align: middle;
-  white-space: initial;
-  max-width: 100%;
-}
-
-.formula {
-  margin: auto 6px;
-}
-.formula.error code {color:#fd7373; }
-.katex-display {
-  display: inline-block !important;
-  margin: 0 !important;
-  text-align: inherit !important;
-}
-.error .katex-display {
-  display: none;
-}
-.cli {
-  border-radius: 4px;
-}
-.cli .prefix {
-  color: #9c6248;
-}
-.helpfeel {
-  background-color: #fbebdd;
-  border-radius: 4px;
-  padding: 3px !important;
-}
-.helpfeel .prefix {
-  color: #f17c00;
-}
-.helpfeel .entry {
-  color: #cc5020;
-}
-
-.code-block {
-  display: block;
-  line-height: 1.7em;
-  background-color: var(--code-bg, rgba(0,0,0,0.04));
-}
-.code-block-start {
-  font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
-  color: #342d9c;
-  background-color: #ffcfc6;
-  font-size: .9em;
-  padding: 1px 2px;
-}
-.code-block-start a {
-  color: #342d9c;
-  text-decoration: underline;
-}
-code.code-block,
-.table-block.table-block-row {
-  padding-left: 1.0em;
-}
-.copy {
-  font-family: "Font Awesome 5 Free";
-  cursor: pointer;
-}
-
-.table-block {
-  white-space: nowrap;
-}
-.table-block-start {
-  padding: 1px 2px;
-  font-size: .9em;
-  background-color: #ffcfc6;
-}
-.table-block-start a {
-  color: #342d9c;
-  text-decoration: underline;
-}
-.cell {
-  margin: 0;
-  padding: 0 2px 0 8px;
-  box-sizing: content-box;
-  display: inline-block;
-  white-space: pre;
-}
-.cell:nth-child(2n+1) {
-  background-color: rgba(0,0,0,0.04);
-}
-.cell:nth-child(2n) {
-  background-color: rgba(0,0,0,0.06);
-}
-
-.strong-image {
-  max-height: 100%;
-}
-.icon {
-  height: 11px;
-  vertical-align: middle;
-}
-.strong-icon {
-  height: calc(11px * 1.2);
-}
-
-.deco-\\/ {font-style: italic;}
-.deco-\\*-1 {font-weight: bold;}
-.deco-\\*-2 {font-weight: bold; font-size: 1.20em;}
-.deco-\\*-3 {font-weight: bold; font-size: 1.44em;}
-.deco-\\*-4 {font-weight: bold; font-size: 1.73em;}
-.deco-\\*-5 {font-weight: bold; font-size: 2.07em;}
-.deco-\\*-6 {font-weight: bold; font-size: 2.49em;}
-.deco-\\*-7 {font-weight: bold; font-size: 3.00em;}
-.deco-\\*-8 {font-weight: bold; font-size: 3.58em;}
-.deco-\\*-9 {font-weight: bold; font-size: 4.30em;}
-.deco-\\*-10 {font-weight: bold; font-size: 5.16em;}
-.deco-\\- {text-decoration: line-through;}
-.deco-_ {text-decoration: underline;}
-.page-link {color: var(--page-link-color, #5e8af7);}
-.page-link:hover {color: var(--page-link-hover-color, #2d67f5);}
-.empty-page-link {color: :var(--empty-page-link-color, #fd7373);}
-.empty-page-link:hover {color: :var(--empty-page-link-hover-color, #fd7373);}
-.link {
-  color: var(--page-link-color, #5e8af7);
-  text-decoration: underline;
-}
-.link:hover {color: var(--page-link-color-hover-color, #2d67f5);}
-.link img {
-  padding-bottom: 3px;
-  border-style: none none solid;
-  border-width: 1.5px;
-  border-color: #8fadf9;
-}
-
-.permalink {
-  background-color: var(--line-permalink-color, rgba(234,218,74,0.75));
-}
-`;
