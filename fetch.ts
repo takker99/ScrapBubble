@@ -2,16 +2,22 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 import { encodeTitle, toLc } from "./utils.ts";
-import type { Page } from "./deps/scrapbox.ts";
+import { isScrapboxError } from "./deps/scrapbox.ts";
+import type {
+  NotFoundError,
+  NotLoggedInError,
+  NotMemberError,
+  Page,
+} from "./deps/scrapbox.ts";
 
 let cache: Cache | undefined;
 const cacheName = "ScrapBubble-0.1.0";
 
 /** Options for `getPage()` */
-export type GetPageOption = {
+export interface GetPageOption {
   /** cacheの有効期限 */ expired?: number;
   /** use `followRename` */ followRename?: boolean;
-};
+}
 /** get /api/pages/:projectname/:pagetitle
  *
  * @param project 取得したいページのproject名
@@ -23,12 +29,23 @@ export async function getPage(
   title: string,
   options?: GetPageOption,
 ) {
-  const { expired = 60, /* defaultは1分 */ followRename = true } = options ?? {};
   const path = `https://scrapbox.io/api/pages/${project}/${
     encodeTitle(toLc(title))
-  }?followRename=${followRename}`;
+  }?followRename=${options?.followRename ?? true}`;
 
-  const res = await fetch(path, { expired });
+  const res = await fetch(path, options ?? {});
+  if (!res.ok) {
+    const error = await res.text();
+    if (!isScrapboxError(error)) {
+      const unexpected = new Error();
+      unexpected.name = "UnexpectedError";
+      unexpected.message =
+        `Unexpected error has occuerd when fetching "${path}"`;
+    }
+    return JSON.parse(
+      error,
+    ) as (NotFoundError | NotLoggedInError | NotMemberError);
+  }
   return (await res.json()) as Page;
 }
 
