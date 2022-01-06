@@ -16,8 +16,7 @@ export type PromiseState<T, E> = {
   result: E;
 };
 
-// deno-lint-ignore no-explicit-any
-export function exposeState<T, E = any>(promise: Promise<T>) {
+export function exposeState<T, E = unknown>(promise: Promise<T>) {
   let state: PromiseState<T, E> = { state: "pending", result: undefined };
   promise
     .then((result) => state = { state: "fulfilled", result })
