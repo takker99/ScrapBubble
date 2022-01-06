@@ -4,9 +4,11 @@
 import { encodeTitle, toLc } from "./utils.ts";
 import { isScrapboxError } from "./deps/scrapbox.ts";
 import type {
+  MemberProject,
   NotFoundError,
   NotLoggedInError,
   NotMemberError,
+  NotMemberProject,
   Page,
 } from "./deps/scrapbox.ts";
 
@@ -47,6 +49,33 @@ export async function getPage(
     ) as (NotFoundError | NotLoggedInError | NotMemberError);
   }
   return (await res.json()) as Page;
+}
+
+/** get /api/projects/:projectname
+ *
+ * @param project 取得したいprojectの名前
+ * @param options オプション
+ */
+export async function getProject(
+  project: string,
+  options?: Omit<GetPageOption, "followRename">,
+) {
+  const path = `https://scrapbox.io/api/project/${project}`;
+
+  const res = await fetch(path, options ?? {});
+  if (!res.ok) {
+    const error = await res.text();
+    if (!isScrapboxError(error)) {
+      const unexpected = new Error();
+      unexpected.name = "UnexpectedError";
+      unexpected.message =
+        `Unexpected error has occuerd when fetching "${path}"`;
+    }
+    return JSON.parse(
+      error,
+    ) as (NotFoundError | NotLoggedInError | NotMemberError);
+  }
+  return (await res.json()) as (NotMemberProject | MemberProject);
 }
 
 type FetchOption = {
