@@ -3,9 +3,9 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { CSS as textCSS, TextBubble } from "./TextBubble.tsx";
-import { CardBubble, CSS as listCSS } from "./CardBubble.tsx";
-import { CSS as cardCSS } from "./Card.tsx";
+import { TextBubble } from "./TextBubble.tsx";
+import { CardBubble } from "./CardBubble.tsx";
+import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./hooks/useBubbles.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
@@ -138,14 +138,7 @@ const App = (
         rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css"
       />
-      <style>
-        {`
-          * {box-sizing: border-box;}
-          ${textCSS}
-          ${listCSS}
-          ${cardCSS}
-      `}
-      </style>
+      <style>{CSS}</style>
       {cards.map(({
         project,
         titleLc,
