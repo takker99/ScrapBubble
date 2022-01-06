@@ -5,9 +5,10 @@ import { useCallback, useMemo, useState } from "../deps/preact.tsx";
 import { exposeState, toLc } from "../utils.ts";
 import { getPage } from "../fetch.ts";
 import type { LinkType, ScrollTo } from "../types.ts";
-import type { Page, Scrapbox } from "../deps/scrapbox.ts";
+import type { Line, Page, RelatedPage, Scrapbox } from "../deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
+/** bubbleの表示位置 */
 export type Position =
   & {
     top: number;
@@ -19,14 +20,58 @@ export type Position =
   } | {
     right: number;
   });
+/** bubbleの表示制御設定 */
+export interface BubbleOptions {
+  /** bubbleの表示位置 */ position: Position;
+  /** text bubbleのスクロール先 */ scrollTo?: ScrollTo;
+  /** bubbleの発生源の種類 */ type: LinkType;
+}
 
 export interface UseBubblesInit {
   /** cacheの有効期限 (UNIX時刻) */ expired?: number;
   /** 透過的に扱いたいproject名のリスト */ whiteList?: string[];
 }
+export interface UseBubbleResult {
+  /** depth階層目にbubbleを表示する
+   *
+   * @param depth 表示する階層
+   * @param project 表示したいbubbleのprimary project name
+   * @param title 表示したいbubbleのtitle
+   * @param options bubbleの表示制御設定
+   */
+  show(
+    depth: number,
+    project: string,
+    title: string,
+    options: BubbleOptions,
+  ): void;
+
+  /** depth階層以降のbubblesを消す
+   *
+   * @param depth この階層以降のbubblesをすべて消す
+   */
+  hide(depth: number): void;
+
+  /** 表示するbubblesの情報を取得する函数
+   *
+   * 取得中の場合は`loading`が`true`になる
+   */
+  getBubbles(): ({ loading: true } | {
+    loading: false;
+    position: Position;
+    scrollTo?: ScrollTo;
+    type: LinkType;
+    pages: {
+      project: string;
+      title: string;
+      lines: Line[];
+    }[];
+    cards: (RelatedPage & { project: string })[];
+  })[];
+}
 export function useBubbles(
   { expired = 60, whiteList: _whiteList = [] }: UseBubblesInit,
-) {
+): UseBubbleResult {
   const [
     /** 表示するデータのcache id のリストと表示位置とのペアのリスト */ selectedList,
     setSelectedList,
@@ -34,9 +79,11 @@ export function useBubbles(
     {
       projects: string[];
       title: string;
-      position: Position;
-      scrollTo?: ScrollTo;
-      type: LinkType;
+      options: {
+        position: Position;
+        scrollTo?: ScrollTo;
+        type: LinkType;
+      };
     }[]
   >([]);
 
@@ -46,7 +93,6 @@ export function useBubbles(
     [_whiteList],
   );
 
-  /** depth階層目にカードを表示する */
   const show = useCallback(
     (depth: number, project: string, title: string, options: {
       position: Position;
@@ -62,7 +108,7 @@ export function useBubbles(
         // 指定されたprojectを最優先する
         projects: [project, ...whiteList.filter((proj) => proj !== project)],
         title,
-        ...options,
+        options,
       }]);
     },
     [whiteList],
@@ -85,7 +131,7 @@ export function useBubbles(
       const showedPages = [toLc(scrapbox.Page.title ?? "")];
 
       // ページデータを取得してbubblesを作る
-      const tasks = selectedList.map(({ projects, title, ...options }) =>
+      const tasks = selectedList.map(({ projects, title, options }) =>
         exposeState((async () => {
           const pages = await Promise.all(projects.map((
             project,

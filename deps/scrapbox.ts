@@ -1,8 +1,13 @@
 export type {
   NotMemberProject,
   Page,
+  RelatedPage,
   Scrapbox,
 } from "https://raw.githubusercontent.com/scrapbox-jp/types/0.0.5/mod.ts";
+import type {
+  Page,
+} from "https://raw.githubusercontent.com/scrapbox-jp/types/0.0.5/mod.ts";
+export type Line = Page["lines"][0];
 
 import { MakeTuple } from "../type-traits.ts";
 const defaults = [
