@@ -1,6 +1,7 @@
 import { useCallback, useState } from "../deps/preact.tsx";
-import { isTheme, NotMemberProject, Theme } from "../deps/scrapbox.ts";
-import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
+import { getProject } from "../fetch.ts";
+import { isTheme } from "../deps/scrapbox.ts";
+import type { Scrapbox, Theme } from "../deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 const defaultTheme = "default-light";
@@ -14,19 +15,26 @@ export function useProjectTheme() {
       return isTheme(theme) ? theme : defaultTheme;
     }
     if (!map.has(project)) {
+      // 先にdefault themeを設定し、projectの情報を取得でき次第変更する
+      setMap((oldMap) => {
+        oldMap.set(project, defaultTheme);
+        return oldMap;
+      });
+
       // projectのtheme情報を取得する
       (async () => {
         try {
-          const res = await fetch(
-            `https://scrapbox.io/api/projects/${project}`,
-          );
-          const { theme }: NotMemberProject = await res.json();
+          const res = await getProject(project);
+          // project情報を取得できなかったときはdefaultのままにする
+          if (!("theme" in res)) return;
+
           setMap((oldMap) => {
-            oldMap.set(project, isTheme(theme) ? theme : defaultTheme);
+            oldMap.set(project, isTheme(res.theme) ? res.theme : defaultTheme);
             return oldMap;
           });
-        } catch (_e) {
-          // errorを握りつぶす。ちょっとまずいかも
+        } catch (e: unknown) {
+          // 想定外のエラーはログに出す
+          console.error(e);
         }
       })();
     }
