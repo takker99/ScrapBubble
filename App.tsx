@@ -9,7 +9,7 @@ import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./hooks/useBubbles.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
-import { toLc } from "./utils.ts";
+import { encodeTitle, toLc } from "./utils.ts";
 import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./hooks/usePromiseSettledAnytimes.ts";
@@ -36,7 +36,8 @@ export interface AppProps {
 const App = (
   { delay, expired, whiteList, scrollTargets }: AppProps,
 ) => {
-  const { cards, cache, show, hide } = useBubbles({ expired, whiteList });
+  const { getBubbles, show, hide } = useBubbles({ expired, whiteList });
+  const bubbles = getBubbles();
   const getTheme = useProjectTheme();
   const [waitPointerEnter, handlePointerEnter] = usePromiseSettledAnytimes<
     PointerEvent
@@ -67,7 +68,6 @@ const App = (
         // [/project]の形のリンクは何もしない
         if (project === "") return;
         const titleLc = toLc(decodeURI(title ?? ""));
-        cache(project, titleLc);
 
         // delay以内にカーソルが離れるかクリックしたら何もしない
         try {
@@ -115,7 +115,7 @@ const App = (
       }
     })();
     return () => finished = true;
-  }, [delay, cache, show]);
+  }, [delay, show]);
   const editor = getEditor();
   useEventListener(editor, "pointerenter", handlePointerEnter, {
     capture: true,
@@ -139,45 +139,51 @@ const App = (
         href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css"
       />
       <style>{CSS}</style>
-      {cards.map(({
-        project,
-        titleLc,
-        lines,
-        position,
-        scrollTo,
-        type,
-        linked,
-      }, index) => (
-        <Fragment key={`/${project}/${titleLc}/`}>
-          <TextBubble
-            project={project}
-            titleLc={titleLc}
-            theme={getTheme(project)}
-            index={index + 1}
-            position={position}
-            scrollTo={scrollTo}
-            lines={lines}
-            onPointerEnterCapture={handlePointerEnter}
-            onClick={() => hide(index + 1)}
-            hasChildCards={cards.length > index + 1}
-          />
-          <CardBubble
-            position={position}
-            cards={linked.map(
-              ({ project, ...rest }) => ({
-                project,
-                linkedTo: titleLc,
-                linkedType: type,
-                theme: getTheme(project),
-                ...rest,
-              }),
-            )}
-            index={index + 1}
-            onPointerEnterCapture={handlePointerEnter}
-            onClick={() => hide(index + 1)}
-          />
-        </Fragment>
-      ))}
+      {bubbles.map((bubble, index) => {
+        if (bubble.loading) return <></>;
+        const {
+          pages: [{
+            project,
+            title,
+            lines,
+          }],
+          cards,
+          position,
+          scrollTo,
+          type,
+        } = bubble;
+        return (
+          <Fragment key={`/${project}/${title}/`}>
+            <TextBubble
+              project={project}
+              titleLc={encodeTitle(title)}
+              theme={getTheme(project) ?? "default"}
+              position={position}
+              lines={lines}
+              onPointerEnterCapture={handlePointerEnter}
+              onClick={() => hide(index + 1)}
+              hasChildCards={cards.length > index + 1}
+              index={index + 1}
+              scrollTo={scrollTo}
+            />
+            <CardBubble
+              position={position}
+              cards={cards.map(
+                ({ project, ...rest }) => ({
+                  project,
+                  linkedTo: title,
+                  linkedType: type,
+                  theme: getTheme(project) ?? "default",
+                  ...rest,
+                }),
+              )}
+              onPointerEnterCapture={handlePointerEnter}
+              index={index + 1}
+              onClick={() => hide(index + 1)}
+            />
+          </Fragment>
+        );
+      })}
     </>
   );
 };

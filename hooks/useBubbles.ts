@@ -1,22 +1,26 @@
-import { useCallback, useMemo, useState } from "../deps/preact.tsx";
-import { toLc } from "../utils.ts";
-import { Page } from "../deps/scrapbox.ts";
+/// <reference no-default-lib="true"/>
+/// <reference lib="esnext"/>
+/// <reference lib="dom"/>
+import { useCallback, useEffect, useMemo, useState } from "../deps/preact.tsx";
+import { exposeState, toLc } from "../utils.ts";
+import { getPage } from "../fetch.ts";
 import type { LinkType, ScrollTo } from "../types.ts";
-import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
+import type { Line, Page, RelatedPage, Scrapbox } from "../deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
-export interface Cache {
-  project: string;
-  titleLc: string;
-  checked: number; // 最後にデータを取得したUNIX時刻
-  lines: { text: string; id: string }[];
-  loading: boolean;
-  linked: {
+export interface Bubble {
+  position: Position;
+  scrollTo?: ScrollTo;
+  type: LinkType;
+  pages: {
+    project: string;
     title: string;
-    descriptions: string[];
-    image: string | null;
+    lines: Line[];
   }[];
+  cards: (RelatedPage & { project: string })[];
 }
+
+/** bubbleの表示位置 */
 export type Position =
   & {
     top: number;
@@ -28,19 +32,63 @@ export type Position =
   } | {
     right: number;
   });
+/** bubbleの表示制御設定 */
+export interface BubbleOptions {
+  /** bubbleの表示位置 */ position: Position;
+  /** text bubbleのスクロール先 */ scrollTo?: ScrollTo;
+  /** bubbleの発生源の種類 */ type: LinkType;
+}
 
 export interface UseBubblesInit {
   /** cacheの有効期限 (UNIX時刻) */ expired?: number;
   /** 透過的に扱いたいproject名のリスト */ whiteList?: string[];
 }
+export interface UseBubbleResult {
+  /** depth階層目にbubbleを表示する
+   *
+   * @param depth 表示する階層
+   * @param project 表示したいbubbleのprimary project name
+   * @param title 表示したいbubbleのtitle
+   * @param options bubbleの表示制御設定
+   */
+  show(
+    depth: number,
+    project: string,
+    title: string,
+    options: BubbleOptions,
+  ): void;
+
+  /** depth階層以降のbubblesを消す
+   *
+   * @param depth この階層以降のbubblesをすべて消す
+   */
+  hide(depth: number): void;
+
+  /** 表示するbubblesの情報を取得する函数
+   *
+   * 取得中の場合は`loading`が`true`になる
+   */
+  getBubbles(): ({ loading: true } | { loading: false } & Bubble)[];
+}
 export function useBubbles(
   { expired = 60, whiteList: _whiteList = [] }: UseBubblesInit,
-) {
-  const [caches, setCaches] = useState(new Map<string, Cache>());
-  // 表示するデータのcache idのリストと表示位置とのペアのリスト
-  const [selectedList, setSelectedList] = useState<
-    { ids: string[]; position: Position; scrollTo?: ScrollTo; type: LinkType }[]
+): UseBubbleResult {
+  const [
+    /** 表示するデータのcache id のリストと表示位置とのペアのリスト */ selectedList,
+    setSelectedList,
+  ] = useState<
+    {
+      projects: string[];
+      title: string;
+      options: {
+        position: Position;
+        scrollTo?: ScrollTo;
+        type: LinkType;
+      };
+    }[]
   >([]);
+  // 取得したbubbles data
+  const [bubbles, setBubbles] = useState<Bubble[]>([]);
 
   // このリストにあるproject以外は表示しない
   const whiteList = useMemo(
@@ -48,155 +96,152 @@ export function useBubbles(
     [_whiteList],
   );
 
-  /** 特定のprojectのpageの情報をcacheする */
-  const _cache = useCallback(async (project: string, titleLc: string) => {
-    const id = toId(project, titleLc);
-    const now = new Date().getTime() / 1000; // cacheの検証開始時刻
-    let _expired = true;
-    setCaches((oldCaches) => {
-      const { checked = 0, lines = [], linked = [] } = oldCaches.get(id) ?? {};
-      _expired = checked + expired < now;
-      oldCaches.set(id, {
-        project,
-        titleLc,
-        loading: _expired,
-        lines,
-        linked,
-        checked: now,
-      });
-      return new Map(oldCaches);
-    });
-    if (!_expired) return;
-
-    // cacheが寿命切れのときは再生成する
-    let cache: Cache | undefined = undefined;
-    try {
-      cache = await fetchPage(project, titleLc);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setCaches((oldCaches) => {
-        const { lines = [], linked = [], checked = now } = oldCaches.get(id) ??
-          {};
-        oldCaches.set(id, {
-          project,
-          titleLc,
-          loading: false,
-          // cacheの取得に失敗していたら更新しない
-          lines: cache?.lines ?? lines,
-          linked: cache?.linked ?? linked,
-          checked,
-        });
-        return new Map(oldCaches);
-      });
-    }
-  }, [expired]);
-
-  // whiteList中のprojectに存在する同名のページを全てcacheする
-  const cache = useCallback(async (project: string, titleLc: string) => {
-    // whiteListにないprojectの場合は何もしない
-    if (!whiteList.includes(project)) return;
-    // whiteListにあるprojectについてもcacheしておく
-    for (const _project of whiteList) {
-      await _cache(_project, titleLc);
-    }
-  }, [_cache, whiteList]);
-  // depth階層目にカードを表示する
   const show = useCallback(
-    (
-      depth: number,
-      project: string,
-      titleLc: string,
-      options: {
-        position: Position;
-        scrollTo?: ScrollTo;
-        type: "hashtag" | "link" | "title";
-      },
-    ) => {
+    (depth: number, project: string, title: string, options: {
+      position: Position;
+      scrollTo?: ScrollTo;
+      type: LinkType;
+    }) => {
       // whiteListにないprojectの場合は何もしない
       if (!whiteList.includes(project)) return;
 
-      setSelectedList((list) => {
-        const ids = whiteList.map((_project) => toId(_project, titleLc));
-        return [...list.slice(0, depth), { ids, ...options }];
-      });
+      setSelectedList((
+        list,
+      ) => [...list.slice(0, depth), {
+        // 指定されたprojectを最優先する
+        projects: [project, ...whiteList.filter((proj) => proj !== project)],
+        title,
+        options,
+      }]);
     },
     [whiteList],
   );
-  // depth階層以降のカードを消す
+
+  /** depth階層以降のカードを消す */
   const hide = useCallback(
-    (depth: number) => setSelectedList((list) => [...list.slice(0, depth)]),
+    (depth: number) => setSelectedList((list) => list.slice(0, depth)),
     [],
   );
 
-  const cards = useMemo(
+  // bubblesを作る
+  useEffect(() => {
+    // 以前の階層のtext bubbleで使ったページはcard bubbleに使わない
+    // 現在表示しているページも同様
+    const showedPages = [toLc(scrapbox.Page.title ?? "")];
+    type T = {
+      page?: { project: string; title: string; lines: Line[] };
+      cards: (RelatedPage & { project: string })[];
+      options: BubbleOptions;
+    };
+
+    for (const { projects, title, options } of selectedList) {
+      const titleLc = toLc(title);
+      for (const project of projects) {
+        const task = exposeState<T>((async () => {
+          const page = await getPage(project, title, { expired });
+
+          // エラーが出たら無視
+          if ("message" in page) {
+            return {
+              cards: [],
+              options,
+            } as T;
+          }
+
+          return {
+            page: page.persistent && !showedPages.includes(toLc(page.title))
+              ? {
+                project,
+                titile: page.title,
+                lines: page.lines,
+              }
+              : undefined,
+            cards: getBackLinks(page).flatMap(({ title, ...rest }) =>
+              showedPages.includes(toLc(title)) ? [] : [{
+                title,
+                project,
+                ...rest,
+              }]
+            ),
+            options,
+          } as T;
+        })());
+      }
+      showedPages.push(titleLc);
+    }
+  }, [selectedList, expired]);
+
+  /** 表示するbubblesの情報を取得する函数
+   *
+   * 取得中の場合は`loading`が`true`になる
+   */
+  const getBubbles = useMemo(
     () => {
       // 以前の階層のtext bubbleで使ったページはcard bubbleに使わない
-      const showedPages = [{
-        project: scrapbox.Project.name,
-        titleLc: toLc(scrapbox.Page.title ?? ""),
-      }];
-      return selectedList.flatMap(({ ids, ...rest }) => {
-        const cacheList = ids.flatMap((id) =>
-          caches.has(id) ? [caches.get(id)!] : []
-        );
-        // text bubbleで表示するページを決める
-        const { project, titleLc, lines } = cacheList
-          .find((cache) => cache.lines.length > 0) ?? cacheList[0];
-        const linked = cacheList.flatMap(
-          ({ project, linked }) => linked.map((page) => ({ ...page, project })),
-        );
-        const card = {
-          project,
-          titleLc,
-          lines: titleLc === showedPages[0].titleLc ? [] : lines, // editorで開いているページは表示しない
-          linked: linked.flatMap(({ project: _project, title, ...page }) =>
-            !showedPages.some((page) =>
-                page.project === _project && page.titleLc === toLc(title)
+      // 現在表示しているページも同様
+      const showedPages = [toLc(scrapbox.Page.title ?? "")];
+
+      // ページデータを取得してbubblesを作る
+      const tasks = selectedList.map(({ projects, title, options }) =>
+        exposeState((async () => {
+          const pages = await Promise.all(projects.map((
+            project,
+          ) => getPage(project, title, { expired })));
+
+          // text bubbleで表示するページを決める
+          const titleLc = toLc(title);
+          const previewdPages = showedPages.includes(titleLc)
+            ? []
+            : pages.flatMap(({ persistent, title, lines }, i) =>
+              persistent
+                ? [{
+                  project: projects[i],
+                  title,
+                  lines,
+                }]
+                : []
+            );
+          showedPages.push(titleLc);
+
+          return {
+            pages: previewdPages,
+            cards: pages.flatMap((page, i) =>
+              getBackLinks(page).flatMap(({ title, ...rest }) =>
+                showedPages.includes(toLc(title)) ? [] : [{
+                  title,
+                  project: projects[i],
+                  ...rest,
+                }]
               )
-              ? [{ project: _project, title, ...page }]
-              : []
-          ),
-          loading: cacheList.every(({ loading }) => loading),
-          ...rest,
-        };
-        showedPages.push({ project, titleLc });
-        // linesもlinkedも空のときは消す
-        return card.lines.length > 0 || card.linked.length > 0 ? [card] : [];
-      });
+            ),
+            ...options,
+          };
+        })())
+      );
+
+      return () =>
+        tasks.map((task) => {
+          const promiseState = task();
+          switch (promiseState.state) {
+            case "pending":
+              return { loading: true } as const;
+            case "fulfilled":
+              return { loading: false, ...promiseState.result } as const;
+            case "rejected":
+              throw promiseState.result;
+          }
+        });
     },
-    [caches, selectedList],
+    [selectedList, expired],
   );
 
-  return { cards, cache, show, hide };
+  return { getBubbles, show, hide };
 }
 
-function toId(project: string, titleLc: string) {
-  return `/${project}/${titleLc}`;
-}
-async function fetchPage(
-  project: string,
-  titleLc: string,
-): Promise<Cache | undefined> {
-  const res = await fetch(`/api/pages/${project}/${titleLc}?followRename=true`);
-  const checked = new Date().getTime() / 1000;
-  // 存在しないページの時
-  if (!res.ok) return;
-  const { lines, links, relatedPages: { links1hop } }: Page = await res.json();
-
-  // 逆リンクを取得する
+/** 逆リンクを取得する */
+function getBackLinks({ links, relatedPages: { links1hop } }: Page) {
   const linksLc = links.map((link) => toLc(link));
-  const pages = links1hop.flatMap(({
-    title,
-    descriptions,
-    image,
-  }) => !linksLc.includes(toLc(title)) ? [{ title, descriptions, image }] : []);
-  return {
-    project,
-    titleLc,
-    checked,
-    loading: false,
-    lines: lines.slice(1), // titleを除く
-    linked: pages,
-  };
+  return links1hop.flatMap((card) =>
+    linksLc.includes(toLc(card.title)) ? [] : [card]
+  );
 }
