@@ -44,6 +44,7 @@ export async function getPage(
       unexpected.name = "UnexpectedError";
       unexpected.message =
         `Unexpected error has occuerd when fetching "${path}"`;
+      throw unexpected;
     }
     return JSON.parse(
       error,
@@ -61,7 +62,7 @@ export async function getProject(
   project: string,
   options?: Omit<GetPageOption, "followRename">,
 ) {
-  const path = `https://scrapbox.io/api/project/${project}`;
+  const path = `https://scrapbox.io/api/projects/${project}`;
 
   const res = await fetch(path, options ?? {});
   if (!res.ok) {
@@ -71,6 +72,7 @@ export async function getProject(
       unexpected.name = "UnexpectedError";
       unexpected.message =
         `Unexpected error has occuerd when fetching "${path}"`;
+      throw unexpected;
     }
     return JSON.parse(
       error,
@@ -92,16 +94,10 @@ export async function fetch(path: string, options: FetchOption) {
   if (!cachedRes || cached + expired < new Date().getTime() / 1000) {
     // 有効期限切れかcacheがなければ、fetchし直す
     const res = await globalThis.fetch(path);
-    if (!res.ok) {
-      throw {
-        status: res.status,
-        statusText: res.statusText,
-        body: await res.json(),
-      };
-    }
 
     cache ??= await globalThis.caches.open(cacheName);
-    await cache.put(path, res);
+    // 有効でない応答もcacheする
+    await cache.put(path, res.clone());
     return res;
   } else {
     // cacheを返す
