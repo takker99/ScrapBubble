@@ -152,7 +152,7 @@ const App = (
           <TextBubble
             project={project}
             titleLc={titleLc}
-            theme={getTheme(project) ?? "default"}
+            theme={getTheme(project)}
             index={index + 1}
             position={position}
             scrollTo={scrollTo}
@@ -168,7 +168,7 @@ const App = (
                 project,
                 linkedTo: titleLc,
                 linkedType: type,
-                theme: getTheme(project) ?? "default",
+                theme: getTheme(project),
                 ...rest,
               }),
             )}
