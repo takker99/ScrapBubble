@@ -61,7 +61,7 @@ export async function getProject(
   project: string,
   options?: Omit<GetPageOption, "followRename">,
 ) {
-  const path = `https://scrapbox.io/api/project/${project}`;
+  const path = `https://scrapbox.io/api/projects/${project}`;
 
   const res = await fetch(path, options ?? {});
   if (!res.ok) {
