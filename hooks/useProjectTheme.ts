@@ -1,7 +1,7 @@
 import { useCallback, useState } from "../deps/preact.tsx";
 import { getProject } from "../fetch.ts";
 import { isTheme } from "../deps/scrapbox.ts";
-import type { NotMemberProject, Scrapbox, Theme } from "../deps/scrapbox.ts";
+import type { Scrapbox, Theme } from "../deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 const defaultTheme = "default-light";
