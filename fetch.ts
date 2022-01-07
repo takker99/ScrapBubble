@@ -44,6 +44,7 @@ export async function getPage(
       unexpected.name = "UnexpectedError";
       unexpected.message =
         `Unexpected error has occuerd when fetching "${path}"`;
+      throw unexpected;
     }
     return JSON.parse(
       error,
@@ -71,6 +72,7 @@ export async function getProject(
       unexpected.name = "UnexpectedError";
       unexpected.message =
         `Unexpected error has occuerd when fetching "${path}"`;
+      throw unexpected;
     }
     return JSON.parse(
       error,
