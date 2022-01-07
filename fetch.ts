@@ -103,7 +103,7 @@ export async function fetch(path: string, options: FetchOption) {
     }
 
     cache ??= await globalThis.caches.open(cacheName);
-    await cache.put(path, res);
+    await cache.put(path, res.clone());
     return res;
   } else {
     // cacheを返す
