@@ -207,7 +207,7 @@ export function mount(
 
 function isLinkOrTitle(
   element: HTMLElement,
-): element is HTMLDivElement | HTMLAnchorElement {
+): element is HTMLSpanElement | HTMLAnchorElement {
   return element.matches("a.page-link, .line-title .text");
 }
 function isPageLink(
@@ -215,7 +215,7 @@ function isPageLink(
 ): element is HTMLAnchorElement {
   return element.classList.contains("page-link");
 }
-function getLinkType(element: HTMLDivElement | HTMLAnchorElement): LinkType {
+function getLinkType(element: HTMLSpanElement | HTMLAnchorElement): LinkType {
   return isPageLink(element)
     ? (element.type === "link" ? "link" : "hashtag")
     : "title";
