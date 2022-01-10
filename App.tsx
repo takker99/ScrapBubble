@@ -55,7 +55,7 @@ const App = (
         const link = event.target as HTMLElement;
 
         // 処理を<a>か.line-titleのときに限定する
-        if (!isLinkOrTitle(link)) continue;
+        if (!isPageLink(link) && !isTitle(link)) continue;
 
         const { project = scrapbox.Project.name, title, hash = "" } =
           isPageLink(link)
@@ -205,10 +205,10 @@ export function mount(
   );
 }
 
-function isLinkOrTitle(
+function isTitle(
   element: HTMLElement,
-): element is HTMLSpanElement | HTMLAnchorElement {
-  return element.matches("a.page-link, .line-title .text");
+): element is HTMLSpanElement {
+  return element.matches(".line-title .text");
 }
 function isPageLink(
   element: HTMLElement,
