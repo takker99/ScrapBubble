@@ -5,7 +5,7 @@ export const sleep = (milliseconds: number) => {
       const id = setTimeout(() => resolve(), milliseconds);
       cancel = () => {
         clearTimeout(id);
-        reject("timeout");
+        reject("cancelled");
       };
     },
   ) as Promise<void> & { cancel: () => void };

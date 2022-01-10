@@ -78,7 +78,7 @@ const App = (
           link.addEventListener("click", () => waited.cancel(), { once: true });
           await waited;
         } catch (e) {
-          if (e === "timeout") continue;
+          if (e === "cancelled") continue;
           throw e;
         }
 
