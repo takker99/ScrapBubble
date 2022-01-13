@@ -1,8 +1,7 @@
 import { useCallback, useMemo, useState } from "../deps/preact.tsx";
 import { toLc } from "../utils.ts";
-import { Page } from "../deps/scrapbox.ts";
 import type { LinkType, ScrollTo } from "../types.ts";
-import type { Scrapbox } from "https://pax.deno.dev/scrapbox-jp/types@0.0.5";
+import { Page, Scrapbox } from "../deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 export interface Cache {
