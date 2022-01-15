@@ -36,7 +36,7 @@ export interface AppProps {
 const App = (
   { delay, expired, whiteList, scrollTargets }: AppProps,
 ) => {
-  const { cards, cache, show, hide } = useBubbles({ expired, whiteList });
+  const { bubbles, cache, show, hide } = useBubbles({ expired, whiteList });
   const getTheme = useProjectTheme();
   const [waitPointerEnter, handlePointerEnter] = usePromiseSettledAnytimes<
     PointerEvent
@@ -145,7 +145,7 @@ const App = (
         href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css"
       />
       <style>{CSS}</style>
-      {cards.map(({
+      {bubbles.map(({
         project,
         title,
         lines,
@@ -165,7 +165,7 @@ const App = (
             lines={lines}
             onPointerEnterCapture={handlePointerEnter}
             onClick={() => hide(index + 1)}
-            hasChildCards={cards.length > index + 1}
+            hasChildCards={bubbles.length > index + 1}
           />
           <CardBubble
             position={position}

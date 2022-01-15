@@ -152,7 +152,7 @@ export function useBubbles(
     [],
   );
 
-  const cards = useMemo(
+  const bubbles = useMemo(
     () => {
       // 以前の階層のtext bubbleで使ったページはcard bubbleに使わない
       const showedPageIds = [
@@ -190,5 +190,5 @@ export function useBubbles(
     [caches, selectedList],
   );
 
-  return { cards, cache, show, hide };
+  return { bubbles, cache, show, hide };
 }
