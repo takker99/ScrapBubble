@@ -133,7 +133,13 @@ export function useBubbles(
       if (!whiteList.includes(project)) return;
 
       setSelectedList((list) => {
-        const ids = whiteList.map((_project) => toId(_project, title));
+        // 指定されたprojectのtext bubbleが最優先で表示されるようにする
+        const ids = [
+          toId(project, title),
+          ...whiteList.flatMap((_project) =>
+            _project === project ? [] : [toId(_project, title)]
+          ),
+        ];
         return [...list.slice(0, depth), { ids, ...options }];
       });
     },
