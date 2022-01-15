@@ -170,6 +170,7 @@ export function useBubbles(
   return { cards, cache, show, hide };
 }
 
+/** 同一ページか判定するためのIDを作る */
 function toId(project: string, titleLc: string) {
   return `/${project}/${titleLc}`;
 }
