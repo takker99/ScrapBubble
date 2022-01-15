@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from "../deps/preact.tsx";
-import { encodeTitle, toId, toLc } from "../utils.ts";
+import { toId, toLc } from "../utils.ts";
 import type { LinkType, ScrollTo } from "../types.ts";
-import { Page, Scrapbox } from "../deps/scrapbox.ts";
+import { Scrapbox } from "../deps/scrapbox.ts";
 import { getPage } from "../fetch.ts";
 declare const scrapbox: Scrapbox;
 
@@ -9,8 +9,25 @@ export interface Cache {
   project: string;
   title: string;
   lines: { text: string; id: string }[];
+  linksLc: string[];
   loading: boolean;
   linked: {
+    title: string;
+    descriptions: string[];
+    image: string | null;
+  }[];
+}
+export interface Bubble {
+  position: Position;
+  project: string;
+  title: string;
+  lines: { text: string; id: string }[];
+  emptyLinks: string[];
+  loading: boolean;
+  type: LinkType;
+  scrollTo?: ScrollTo;
+  linked: {
+    project: string;
     title: string;
     descriptions: string[];
     image: string | null;
@@ -32,14 +49,46 @@ export interface UseBubblesInit {
   /** cacheの有効期限 (UNIX時刻) */ expired?: number;
   /** 透過的に扱いたいproject名のリスト */ whiteList?: string[];
 }
+export interface ShowInit {
+  position: Position;
+  scrollTo?: ScrollTo;
+  type: LinkType;
+}
+export interface UseBubbleResult {
+  /** 表示するbubblesのデータ */
+  bubbles: Bubble[];
+
+  /** 指定したページのデータをcacheする
+   *
+   * @param project cacheしたいページのproject
+   * @param title cahceしたいページのtitle
+   */
+  cache: (project: string, title: string) => Promise<void>;
+
+  /** 指定した階層にbubbleを表示する
+   *
+   * @param depth 表示したい階層
+   * @param project bubbleの発生源のproject
+   * @param title bubbleの発生源のtitle
+   * @param init bubbleの表示位置などのデータ
+   */
+  show: (depth: number, project: string, title: string, init: ShowInit) => void;
+
+  /** 指定した階層以降のbubblesを消す
+   *
+   * @param depth ここで指定した階層以降のbubblesを消す
+   */
+  hide: (depth: number) => void;
+}
 export function useBubbles(
   { expired = 60, whiteList: _whiteList = [] }: UseBubblesInit,
-) {
+): UseBubbleResult {
   const [caches, setCaches] = useState(new Map<string, Cache>());
   // 表示するデータのcache idのリストと表示位置とのペアのリスト
   const [selectedList, setSelectedList] = useState<
     { ids: string[]; position: Position; scrollTo?: ScrollTo; type: LinkType }[]
   >([]);
+  const [emptyLinks, setEmptyLinks] = useState(new Set<string>());
 
   // このリストにあるproject以外は表示しない
   const whiteList = useMemo(
@@ -48,7 +97,7 @@ export function useBubbles(
   );
 
   /** whiteList中のprojectに存在する同名のページを全てcacheする */
-  const cache = useCallback((project: string, title: string) => {
+  const cache = useCallback(async (project: string, title: string) => {
     // whiteListにないprojectの場合は何もしない
     if (!whiteList.includes(project)) return;
 
@@ -62,7 +111,7 @@ export function useBubbles(
     setCaches((oldCaches) => {
       for (const project of whiteList) {
         const id = toId(project, title);
-        const { lines = [], linked = [], loading = false } =
+        const { lines = [], linked = [], linksLc = [], loading = false } =
           oldCaches.get(id) ??
             {};
         // 別のPromiseで更新中のリソースのID記憶しておく
@@ -72,6 +121,7 @@ export function useBubbles(
           title,
           loading: true,
           lines,
+          linksLc,
           linked,
         });
       }
@@ -79,15 +129,15 @@ export function useBubbles(
     });
 
     // 各ページを非同期に読み込む
-    const promises = [] as Promise<void>[];
+    const promises = [] as Promise<readonly [boolean, number]>[];
     for (const project of whiteList) {
       const promise = (async () => {
         const data = await getPage(project, title, { expired });
         const id = toId(project, title);
 
         // ページを取得できなかったら更新しない
-        if ("name" in data) return;
-        const { lines, links, relatedPages: { links1hop } } = data;
+        if ("name" in data) return [true, 0] as const;
+        const { lines, persistent, links, relatedPages: { links1hop } } = data;
 
         // 逆リンクを取得する
         const linksLc = links.map((link) => toLc(link));
@@ -107,14 +157,33 @@ export function useBubbles(
             loading: false,
             lines: lines.slice(1), // タイトルを除く
             linked,
+            linksLc,
           });
           return new Map(oldCaches);
         });
+
+        // 空リンクかどうかを返す
+        return [!persistent, linked.length] as const;
       })();
+
       promises.push(promise);
     }
 
-    return Promise.all(promises);
+    // 空リンクかどうかを登録する
+    const data = await Promise.all(promises);
+    setEmptyLinks((list) => {
+      if (data.some(([flag]) => !flag)) {
+        // 一つでも中身のあるページが有るなら空リンクでない
+        list.delete(toLc(title));
+      } else if (data.reduce((sum, [, links]) => sum + links, 0) > 1) {
+        // 逆リンクが2つ以上あるなら空リンクでない
+        // ここではprojectを横断して計算している
+        list.delete(toLc(title));
+      } else {
+        list.add(toLc(title));
+      }
+      return new Set(list);
+    });
   }, [whiteList, expired]);
 
   /** depth階層目にカードを表示する */
@@ -131,6 +200,8 @@ export function useBubbles(
     ) => {
       // whiteListにないprojectの場合は何もしない
       if (!whiteList.includes(project)) return;
+      // 空リンクの場合も何もしない
+      if (emptyLinks.has(toLc(title))) return;
 
       setSelectedList((list) => {
         // 指定されたprojectのtext bubbleが最優先で表示されるようにする
@@ -143,7 +214,7 @@ export function useBubbles(
         return [...list.slice(0, depth), { ids, ...options }];
       });
     },
-    [whiteList],
+    [whiteList, emptyLinks],
   );
 
   /** depth階層以降のカードを消す */
@@ -152,22 +223,25 @@ export function useBubbles(
     [],
   );
 
-  const cards = useMemo(
+  const bubbles = useMemo(
     () => {
       // 以前の階層のtext bubbleで使ったページはcard bubbleに使わない
       const showedPageIds = [
         toId(scrapbox.Project.name, scrapbox.Page.title ?? ""),
       ];
+
       return selectedList.flatMap(({ ids, ...rest }) => {
         const cacheList = ids.flatMap((id) =>
           caches.has(id) ? [caches.get(id)!] : []
         );
+
         // text bubbleで表示するページを決める
-        const { project, title, lines } = cacheList
+        const { project, title, lines, linksLc } = cacheList
           .find((cache) => cache.lines.length > 0) ?? cacheList[0];
         const linked = cacheList.flatMap(
           ({ project, linked }) => linked.map((page) => ({ ...page, project })),
         );
+
         const card = {
           project,
           title,
@@ -179,6 +253,7 @@ export function useBubbles(
               ? [{ project, title, ...page }]
               : []
           ),
+          emptyLinks: linksLc.filter((link) => emptyLinks.has(toLc(link))),
           loading: cacheList.every(({ loading }) => loading),
           ...rest,
         };
@@ -190,5 +265,5 @@ export function useBubbles(
     [caches, selectedList],
   );
 
-  return { cards, cache, show, hide };
+  return { bubbles, cache, show, hide };
 }

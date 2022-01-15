@@ -9,7 +9,7 @@ import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./hooks/useBubbles.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
-import { isLiteralStrings, toId, toLc } from "./utils.ts";
+import { isLiteralStrings, toId } from "./utils.ts";
 import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./hooks/usePromiseSettledAnytimes.ts";
@@ -36,7 +36,7 @@ export interface AppProps {
 const App = (
   { delay, expired, whiteList, scrollTargets }: AppProps,
 ) => {
-  const { cards, cache, show, hide } = useBubbles({ expired, whiteList });
+  const { bubbles, cache, show, hide } = useBubbles({ expired, whiteList });
   const getTheme = useProjectTheme();
   const [waitPointerEnter, handlePointerEnter] = usePromiseSettledAnytimes<
     PointerEvent
@@ -145,10 +145,11 @@ const App = (
         href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css"
       />
       <style>{CSS}</style>
-      {cards.map(({
+      {bubbles.map(({
         project,
         title,
         lines,
+        emptyLinks,
         position,
         scrollTo,
         type,
@@ -163,9 +164,10 @@ const App = (
             position={position}
             scrollTo={scrollTo}
             lines={lines}
+            emptyLinks={emptyLinks}
             onPointerEnterCapture={handlePointerEnter}
             onClick={() => hide(index + 1)}
-            hasChildCards={cards.length > index + 1}
+            hasChildCards={bubbles.length > index + 1}
           />
           <CardBubble
             position={position}

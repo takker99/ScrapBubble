@@ -55,6 +55,7 @@ declare global {
 export type PageProps = {
   project: string;
   lines: { text: string; id: string }[] | string[];
+  emptyLinks: string[];
   title: string;
   noIndent?: boolean;
   scrollTo?: ScrollTo;
@@ -82,7 +83,7 @@ function hasLink(link: string, nodes: NodeType[]): boolean {
 }
 
 export function Page(
-  { lines, project, title, noIndent, scrollTo }: PageProps,
+  { lines, project, title, emptyLinks, noIndent, scrollTo }: PageProps,
 ) {
   const _blocks = useParser(lines, { hasTitle: false });
   const lineIds = useMemo(
@@ -170,6 +171,7 @@ export function Page(
                 block={block}
                 project={project}
                 title={title}
+                emptyLinks={emptyLinks}
                 noIndent={noIndent}
                 ids={block.ids}
                 scrollId={scrollId}
@@ -187,7 +189,11 @@ export function Page(
               >
                 {block.nodes.length > 0
                   ? block.nodes.map((node) => (
-                    <Node node={node} project={project} />
+                    <Node
+                      node={node}
+                      project={project}
+                      emptyLinks={emptyLinks}
+                    />
                   ))
                   : <br />}
               </Line>
@@ -290,13 +296,20 @@ type TableProps = {
   block: TableType;
   project: string;
   title: string;
+  emptyLinks: string[];
   noIndent?: boolean;
   scrollId?: string;
   ids: string[];
 };
 const Table = (
-  { block: { fileName, cells, indent }, project, title, ids, scrollId }:
-    TableProps,
+  {
+    block: { fileName, cells, indent },
+    project,
+    title,
+    emptyLinks,
+    ids,
+    scrollId,
+  }: TableProps,
 ) => (
   <>
     <Line index={ids[0]} indent={indent} permalink={ids[0] === scrollId}>
@@ -321,7 +334,9 @@ const Table = (
           <span className="table-block table-block-row">
             {cell.map((row, index) => (
               <span className={`cell col-${index}`}>
-                {row.map((node) => <Node node={node} project={project} />)}
+                {row.map((node) => (
+                  <Node node={node} project={project} emptyLinks={emptyLinks} />
+                ))}
               </span>
             ))}
           </span>
@@ -334,8 +349,9 @@ const Table = (
 type NodeProps = {
   node: NodeType;
   project: string;
+  emptyLinks: string[];
 };
-const Node = ({ node, project }: NodeProps) => {
+const Node = ({ node, project, emptyLinks }: NodeProps) => {
   switch (node.type) {
     case "code":
       return <Code node={node} />;
@@ -346,18 +362,20 @@ const Node = ({ node, project }: NodeProps) => {
     case "helpfeel":
       return <Helpfeel node={node} />;
     case "quote":
-      return <Quote node={node} project={project} />;
+      return <Quote node={node} project={project} emptyLinks={emptyLinks} />;
     case "strong":
-      return <Strong node={node} project={project} />;
+      return <Strong node={node} project={project} emptyLinks={emptyLinks} />;
     case "decoration":
-      return <Decoration node={node} project={project} />;
+      return (
+        <Decoration node={node} project={project} emptyLinks={emptyLinks} />
+      );
     case "plain":
     case "blank":
       return <Plain node={node} />;
     case "hashTag":
-      return <HashTag node={node} project={project} />;
+      return <HashTag node={node} project={project} emptyLinks={emptyLinks} />;
     case "link":
-      return <Link node={node} project={project} />;
+      return <Link node={node} project={project} emptyLinks={emptyLinks} />;
     case "googleMap":
       return <GoogleMap node={node} />;
     case "icon":
@@ -415,29 +433,40 @@ const Helpfeel = ({ node: { text } }: HelpfeelProps) => (
 type QuoteProps = {
   node: QuoteNode;
   project: string;
+  emptyLinks: string[];
 };
-const Quote = ({ node: { nodes }, project }: QuoteProps) => (
+const Quote = ({ node: { nodes }, project, emptyLinks }: QuoteProps) => (
   <blockquote className="quote">
-    {nodes.map((node) => <Node node={node} project={project} />)}
+    {nodes.map((node) => (
+      <Node node={node} project={project} emptyLinks={emptyLinks} />
+    ))}
   </blockquote>
 );
 
 type StrongProps = {
   node: StrongNode;
   project: string;
+  emptyLinks: string[];
 };
-const Strong = ({ node: { nodes }, project }: StrongProps) => (
+const Strong = ({ node: { nodes }, project, emptyLinks }: StrongProps) => (
   <strong>
-    {nodes.map((node) => <Node node={node} project={project} />)}
+    {nodes.map((node) => (
+      <Node node={node} project={project} emptyLinks={emptyLinks} />
+    ))}
   </strong>
 );
 type DecorationProps = {
   node: DecorationNode;
   project: string;
+  emptyLinks: string[];
 };
-const Decoration = ({ node: { decos, nodes }, project }: DecorationProps) => (
+const Decoration = (
+  { node: { decos, nodes }, project, emptyLinks }: DecorationProps,
+) => (
   <span className={decos.map((deco) => `deco-${deco}`).join(" ")}>
-    {nodes.map((node) => <Node node={node} project={project} />)}
+    {nodes.map((node) => (
+      <Node node={node} project={project} emptyLinks={emptyLinks} />
+    ))}
   </span>
 );
 type GoogleMapProps = {
@@ -531,11 +560,14 @@ const StrongImage = ({ node: { src } }: StrongImageProps) => (
 type HashTagProps = {
   node: HashTagNode;
   project: string;
+  emptyLinks: string[];
 };
-const HashTag = ({ node: { href }, project }: HashTagProps) => (
+const HashTag = ({ node: { href }, project, emptyLinks }: HashTagProps) => (
   <a
     href={`/${project}/${encodeTitle(href)}`}
-    className="page-link"
+    className={`page-link${
+      emptyLinks.includes(toLc(href)) ? " empty-page-link" : ""
+    }`}
     type="hashTag"
     rel={project === scrapbox.Project.name ? "route" : "noopener noreferrer"}
     target={project === scrapbox.Project.name ? "" : "_blank"}
@@ -546,8 +578,11 @@ const HashTag = ({ node: { href }, project }: HashTagProps) => (
 type LinkProps = {
   node: LinkNode;
   project: string;
+  emptyLinks: string[];
 };
-const Link = ({ node: { pathType, href, content }, project }: LinkProps) => {
+const Link = (
+  { node: { pathType, href, content }, project, emptyLinks }: LinkProps,
+) => {
   switch (pathType) {
     case "relative":
     case "root": {
@@ -557,7 +592,11 @@ const Link = ({ node: { pathType, href, content }, project }: LinkProps) => {
       });
       return (
         <a
-          className="page-link"
+          className={`page-link${
+            title !== undefined && emptyLinks.includes(toLc(title))
+              ? " empty-page-link"
+              : ""
+          }`}
           type="link"
           href={`/${_project}${
             title === undefined
