@@ -2,12 +2,12 @@ import { useCallback, useMemo, useState } from "../deps/preact.tsx";
 import { encodeTitle, toId, toLc } from "../utils.ts";
 import type { LinkType, ScrollTo } from "../types.ts";
 import { Page, Scrapbox } from "../deps/scrapbox.ts";
+import { getPage } from "../fetch.ts";
 declare const scrapbox: Scrapbox;
 
 export interface Cache {
   project: string;
   title: string;
-  checked: number; // 最後にデータを取得したUNIX時刻
   lines: { text: string; id: string }[];
   loading: boolean;
   linked: {
@@ -47,60 +47,77 @@ export function useBubbles(
     [_whiteList],
   );
 
-  /** 特定のprojectのpageの情報をcacheする */
-  const _cache = useCallback(async (project: string, title: string) => {
-    const id = toId(project, title);
-    const now = new Date().getTime() / 1000; // cacheの検証開始時刻
-    let _expired = true;
-    setCaches((oldCaches) => {
-      const { checked = 0, lines = [], linked = [] } = oldCaches.get(id) ?? {};
-      _expired = checked + expired < now;
-      oldCaches.set(id, {
-        project,
-        title,
-        loading: _expired,
-        lines,
-        linked,
-        checked: now,
-      });
-      return new Map(oldCaches);
-    });
-    if (!_expired) return;
+  /** whiteList中のprojectに存在する同名のページを全てcacheする */
+  const cache = useCallback((project: string, title: string) => {
+    // whiteListにないprojectの場合は何もしない
+    if (!whiteList.includes(project)) return;
 
-    // cacheが寿命切れのときは再生成する
-    let cache: Cache | undefined = undefined;
-    try {
-      cache = await fetchPage(project, title);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setCaches((oldCaches) => {
-        const { lines = [], linked = [], checked = now } = oldCaches.get(id) ??
-          {};
+    // whiteListにあるprojectを全てcacheする
+
+    // このリストにあるIDのリソースは更新しない
+    // 別のPromiseで更新している最中
+    const loadingIds = [] as ReturnType<typeof toId>[];
+
+    // まず読込中フラグを同期処理で立てておく
+    setCaches((oldCaches) => {
+      for (const project of whiteList) {
+        const id = toId(project, title);
+        const { lines = [], linked = [], loading = false } =
+          oldCaches.get(id) ??
+            {};
+        // 別のPromiseで更新中のリソースのID記憶しておく
+        if (loading) loadingIds.push(id);
         oldCaches.set(id, {
           project,
           title,
-          loading: false,
-          // cacheの取得に失敗していたら更新しない
-          lines: cache?.lines ?? lines,
-          linked: cache?.linked ?? linked,
-          checked,
+          loading: true,
+          lines,
+          linked,
         });
-        return new Map(oldCaches);
-      });
-    }
-  }, [expired]);
+      }
+      return new Map(oldCaches);
+    });
 
-  // whiteList中のprojectに存在する同名のページを全てcacheする
-  const cache = useCallback(async (project: string, title: string) => {
-    // whiteListにないprojectの場合は何もしない
-    if (!whiteList.includes(project)) return;
-    // whiteListにあるprojectについてもcacheしておく
+    // 各ページを非同期に読み込む
+    const promises = [] as Promise<void>[];
     for (const _project of whiteList) {
-      await _cache(_project, title);
+      const promise = (async () => {
+        const data = await getPage(project, title, { expired });
+        const id = toId(project, title);
+
+        // ページを取得できなかったら更新しない
+        if ("name" in data) return;
+        const { lines, links, relatedPages: { links1hop } } = data;
+
+        // 逆リンクを取得する
+        const linksLc = links.map((link) => toLc(link));
+        const linked = links1hop.flatMap(({
+          title,
+          descriptions,
+          image,
+        }) =>
+          !linksLc.includes(toLc(title)) ? [{ title, descriptions, image }] : []
+        );
+
+        // データを更新する
+        setCaches((oldCaches) => {
+          oldCaches.set(id, {
+            project,
+            title,
+            loading: false,
+            lines,
+            linked,
+          });
+          return new Map(oldCaches);
+        });
+      })();
+      promises.push(promise);
     }
-  }, [_cache, whiteList]);
-  // depth階層目にカードを表示する
+
+    return Promise.all(promises);
+  }, [whiteList, expired]);
+
+  /** depth階層目にカードを表示する */
   const show = useCallback(
     (
       depth: number,
@@ -122,7 +139,8 @@ export function useBubbles(
     },
     [whiteList],
   );
-  // depth階層以降のカードを消す
+
+  /** depth階層以降のカードを消す */
   const hide = useCallback(
     (depth: number) => setSelectedList((list) => [...list.slice(0, depth)]),
     [],
@@ -167,33 +185,4 @@ export function useBubbles(
   );
 
   return { cards, cache, show, hide };
-}
-
-async function fetchPage(
-  project: string,
-  title: string,
-): Promise<Cache | undefined> {
-  const res = await fetch(
-    `/api/pages/${project}/${encodeTitle(title)}?followRename=true`,
-  );
-  const checked = new Date().getTime() / 1000;
-  // 存在しないページの時
-  if (!res.ok) return;
-  const { lines, links, relatedPages: { links1hop } }: Page = await res.json();
-
-  // 逆リンクを取得する
-  const linksLc = links.map((link) => toLc(link));
-  const pages = links1hop.flatMap(({
-    title,
-    descriptions,
-    image,
-  }) => !linksLc.includes(toLc(title)) ? [{ title, descriptions, image }] : []);
-  return {
-    project,
-    title,
-    checked,
-    loading: false,
-    lines: lines.slice(1), // titleを除く
-    linked: pages,
-  };
 }
