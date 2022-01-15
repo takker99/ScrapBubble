@@ -129,14 +129,14 @@ export function useBubbles(
     });
 
     // 各ページを非同期に読み込む
-    const promises = [] as Promise<boolean>[];
+    const promises = [] as Promise<readonly [boolean, number]>[];
     for (const project of whiteList) {
       const promise = (async () => {
         const data = await getPage(project, title, { expired });
         const id = toId(project, title);
 
         // ページを取得できなかったら更新しない
-        if ("name" in data) return true;
+        if ("name" in data) return [true, 0] as const;
         const { lines, persistent, links, relatedPages: { links1hop } } = data;
 
         // 逆リンクを取得する
@@ -163,19 +163,24 @@ export function useBubbles(
         });
 
         // 空リンクかどうかを返す
-        return !persistent && linked.length === 0;
+        return [!persistent, linked.length] as const;
       })();
 
       promises.push(promise);
     }
 
     // 空リンクかどうかを登録する
-    const flags = await Promise.all(promises);
+    const data = await Promise.all(promises);
     setEmptyLinks((list) => {
-      if (flags.every((flag) => flag)) {
-        list.add(toLc(title));
-      } else {
+      if (data.some(([flag]) => !flag)) {
+        // 一つでも中身のあるページが有るなら空リンクでない
         list.delete(toLc(title));
+      } else if (data.reduce((sum, [, links]) => sum + links, 0) > 1) {
+        // 逆リンクが2つ以上あるなら空リンクでない
+        // ここではprojectを横断して計算している
+        list.delete(toLc(title));
+      } else {
+        list.add(toLc(title));
       }
       return new Set(list);
     });
