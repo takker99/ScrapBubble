@@ -1,4 +1,5 @@
 @import "./page.css";
+@import "./statusBar.css";
 
 .text-bubble {
   padding: 5px 0px 5px 5px;
@@ -63,3 +64,4 @@
   text-decoration: none;
   color: var(--tool-text-color, #363c49);
 }
+
