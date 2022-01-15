@@ -208,12 +208,14 @@ export function mount(
 function isTitle(
   element: HTMLElement,
 ): element is HTMLSpanElement {
-  return element.matches(".line-title .text");
+  return element instanceof HTMLSpanElement &&
+    element.matches(".line-title .text");
 }
 function isPageLink(
   element: HTMLElement,
 ): element is HTMLAnchorElement {
-  return element.classList.contains("page-link");
+  return element instanceof HTMLAnchorElement &&
+    element.classList.contains("page-link");
 }
 function getLinkType(element: HTMLSpanElement | HTMLAnchorElement): LinkType {
   return isPageLink(element)
