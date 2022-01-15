@@ -16,6 +16,21 @@ export interface Cache {
     image: string | null;
   }[];
 }
+export interface Bubble {
+  position: Position;
+  project: string;
+  title: string;
+  lines: { text: string; id: string }[];
+  loading: boolean;
+  type: LinkType;
+  scrollTo?: ScrollTo;
+  linked: {
+    project: string;
+    title: string;
+    descriptions: string[];
+    image: string | null;
+  }[];
+}
 export type Position =
   & {
     top: number;
@@ -32,9 +47,40 @@ export interface UseBubblesInit {
   /** cacheの有効期限 (UNIX時刻) */ expired?: number;
   /** 透過的に扱いたいproject名のリスト */ whiteList?: string[];
 }
+export interface ShowInit {
+  position: Position;
+  scrollTo?: ScrollTo;
+  type: LinkType;
+}
+export interface UseBubbleResult {
+  /** 表示するbubblesのデータ */
+  bubbles: Bubble[];
+
+  /** 指定したページのデータをcacheする
+   *
+   * @param project cacheしたいページのproject
+   * @param title cahceしたいページのtitle
+   */
+  cache: (project: string, title: string) => Promise<void>;
+
+  /** 指定した階層にbubbleを表示する
+   *
+   * @param depth 表示したい階層
+   * @param project bubbleの発生源のproject
+   * @param title bubbleの発生源のtitle
+   * @param init bubbleの表示位置などのデータ
+   */
+  show: (depth: number, project: string, title: string, init: ShowInit) => void;
+
+  /** 指定した階層以降のbubblesを消す
+   *
+   * @param depth ここで指定した階層以降のbubblesを消す
+   */
+  hide: (depth: number) => void;
+}
 export function useBubbles(
   { expired = 60, whiteList: _whiteList = [] }: UseBubblesInit,
-) {
+): UseBubbleResult {
   const [caches, setCaches] = useState(new Map<string, Cache>());
   // 表示するデータのcache idのリストと表示位置とのペアのリスト
   const [selectedList, setSelectedList] = useState<
@@ -48,7 +94,7 @@ export function useBubbles(
   );
 
   /** whiteList中のprojectに存在する同名のページを全てcacheする */
-  const cache = useCallback((project: string, title: string) => {
+  const cache = useCallback(async (project: string, title: string) => {
     // whiteListにないprojectの場合は何もしない
     if (!whiteList.includes(project)) return;
 
@@ -114,7 +160,7 @@ export function useBubbles(
       promises.push(promise);
     }
 
-    return Promise.all(promises);
+    await Promise.all(promises);
   }, [whiteList, expired]);
 
   /** depth階層目にカードを表示する */
@@ -152,7 +198,7 @@ export function useBubbles(
     [],
   );
 
-  const bubbles = useMemo(
+  const bubbles: Bubble[] = useMemo(
     () => {
       // 以前の階層のtext bubbleで使ったページはcard bubbleに使わない
       const showedPageIds = [
