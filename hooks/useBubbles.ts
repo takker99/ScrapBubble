@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "../deps/preact.tsx";
-import { toLc } from "../utils.ts";
+import { encodeTitle, toLc } from "../utils.ts";
 import type { LinkType, ScrollTo } from "../types.ts";
 import { Page, Scrapbox } from "../deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
@@ -170,14 +170,18 @@ export function useBubbles(
   return { cards, cache, show, hide };
 }
 
+/** 同一ページか判定するためのIDを作る */
 function toId(project: string, titleLc: string) {
   return `/${project}/${titleLc}`;
 }
+
 async function fetchPage(
   project: string,
-  titleLc: string,
+  title: string,
 ): Promise<Cache | undefined> {
-  const res = await fetch(`/api/pages/${project}/${titleLc}?followRename=true`);
+  const res = await fetch(
+    `/api/pages/${project}/${encodeTitle(title)}?followRename=true`,
+  );
   const checked = new Date().getTime() / 1000;
   // 存在しないページの時
   if (!res.ok) return;
@@ -192,7 +196,7 @@ async function fetchPage(
   }) => !linksLc.includes(toLc(title)) ? [{ title, descriptions, image }] : []);
   return {
     project,
-    titleLc,
+    titleLc: toLc(title),
     checked,
     loading: false,
     lines: lines.slice(1), // titleを除く
