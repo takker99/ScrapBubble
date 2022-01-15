@@ -17,7 +17,7 @@ export function useProjectTheme() {
     }
 
     // 未取得のprojectなら新規取得処理を行う
-    if (map.has(project)) {
+    if (!map.has(project)) {
       // 先にdefault themeを設定し、projectの情報を取得でき次第変更する
       setMap((oldMap) => {
         oldMap.set(project, defaultTheme);
