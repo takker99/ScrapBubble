@@ -33,5 +33,5 @@ export function isLiteralStrings<S extends readonly string[]>(
 
 /** 同一ページか判定するためのIDを作る */
 export function toId(project: string, title: string) {
-  return `/${project}/${toLc(title)}`;
+  return `/${project}/${toLc(title)}` as const;
 }
