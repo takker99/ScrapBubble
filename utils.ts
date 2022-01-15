@@ -23,3 +23,10 @@ export function exposeState<T, E = unknown>(promise: Promise<T>) {
     .catch((result) => state = { state: "rejected", result });
   return () => state;
 }
+
+export function isLiteralStrings<S extends readonly string[]>(
+  value: string | undefined,
+  ...literals: S
+): value is S[number] {
+  return value !== undefined && literals.includes(value);
+}

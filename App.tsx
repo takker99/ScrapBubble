@@ -9,7 +9,7 @@ import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./hooks/useBubbles.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
-import { toLc } from "./utils.ts";
+import { isLiteralStrings, toLc } from "./utils.ts";
 import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./hooks/usePromiseSettledAnytimes.ts";
@@ -43,6 +43,7 @@ const App = (
   >();
 
   useEffect(() => {
+    /** trueになったらevent loopを終了する */
     let finished = false;
     (async () => {
       while (!finished) {
@@ -85,19 +86,21 @@ const App = (
         // スクロール先を設定する
         const scrollTo = hash !== "" && scrollTargets.includes("lineId")
           ? { type: "id", value: hash } as const
-          : link.dataset.linkedTo
-          ? link.dataset.linkedTo &&
-              (["link", "hashtag", "title"] as const).some((type) =>
-                link.dataset.linkedType === type && scrollTargets.includes(type)
-              )
-            ? { type: "link", value: link.dataset.linkedTo } as const
-            : undefined
+          : link.dataset.linkedTo &&
+              isLiteralStrings(
+                link.dataset.linkedType,
+                "link",
+                "hashtag",
+                "title",
+              ) && scrollTargets.includes(link.dataset.linkedType)
+          ? { type: "link", value: link.dataset.linkedTo } as const
           : undefined;
 
         // 表示位置を計算する
         const { top, right, left, bottom } = link.getBoundingClientRect();
         const root = getEditor().getBoundingClientRect();
-        const adjustRight = (left - root.left) / root.width > 0.5; // 右寄せにするかどうか
+        // linkが画面の右寄りにあったら、bubbleを左側に出す
+        const adjustRight = (left - root.left) / root.width > 0.5;
         show(depth, project, titleLc, {
           scrollTo,
           position: {
