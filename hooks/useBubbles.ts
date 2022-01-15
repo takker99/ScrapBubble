@@ -80,7 +80,7 @@ export function useBubbles(
 
     // 各ページを非同期に読み込む
     const promises = [] as Promise<void>[];
-    for (const _project of whiteList) {
+    for (const project of whiteList) {
       const promise = (async () => {
         const data = await getPage(project, title, { expired });
         const id = toId(project, title);
