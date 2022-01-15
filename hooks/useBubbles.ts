@@ -131,10 +131,9 @@ export function useBubbles(
   const cards = useMemo(
     () => {
       // 以前の階層のtext bubbleで使ったページはcard bubbleに使わない
-      const showedPages = [{
-        project: scrapbox.Project.name,
-        titleLc: toLc(scrapbox.Page.title ?? ""),
-      }];
+      const showedPageIds = [
+        toId(scrapbox.Project.name, scrapbox.Page.title ?? ""),
+      ];
       return selectedList.flatMap(({ ids, ...rest }) => {
         const cacheList = ids.flatMap((id) =>
           caches.has(id) ? [caches.get(id)!] : []
@@ -148,18 +147,18 @@ export function useBubbles(
         const card = {
           project,
           title,
-          lines: toLc(title) === showedPages[0].titleLc ? [] : lines, // editorで開いているページは表示しない
+          // editorで開いているページは表示しない
+          lines: toId(project, title) === showedPageIds[0] ? [] : lines,
+          // 既に開いているページは関連ページリストに出さない
           linked: linked.flatMap(({ project, title, ...page }) =>
-            !showedPages.some((page) =>
-                page.project === project && page.titleLc === toLc(title)
-              )
+            !showedPageIds.includes(toId(project, title))
               ? [{ project, title, ...page }]
               : []
           ),
           loading: cacheList.every(({ loading }) => loading),
           ...rest,
         };
-        showedPages.push({ project, titleLc: toLc(title) });
+        showedPageIds.push(toId(project, title));
         // linesもlinkedも空のときは消す
         return card.lines.length > 0 || card.linked.length > 0 ? [card] : [];
       });
