@@ -6,11 +6,12 @@
 import { Page } from "./Page.tsx";
 import { Fragment, FunctionComponent, h } from "./deps/preact.tsx";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
+import { encodeTitle } from "./utils.ts";
 declare const scrapbox: Scrapbox;
 
 export type TextBubbleProps = {
   project: string;
-  titleLc: string;
+  title: string;
   lines: {
     text: string;
     id: string;
@@ -31,7 +32,7 @@ export type TextBubbleProps = {
 };
 export const TextBubble = ({
   project,
-  titleLc,
+  title,
   lines,
   hasChildCards,
   position,
@@ -64,13 +65,13 @@ export const TextBubble = ({
         >
           <StatusBar>
             {project !== scrapbox.Project.name && (
-              <ProjectBadge project={project} titleLc={titleLc} />
+              <ProjectBadge project={project} title={title} />
             )}
           </StatusBar>
           <Page
             lines={lines}
             project={project}
-            titleLc={titleLc}
+            title={title}
             scrollTo={scrollTo}
           />
         </div>
@@ -85,12 +86,12 @@ const StatusBar: FunctionComponent = ({ children }) => (
 
 type ProjectBadgeProps = {
   project: string;
-  titleLc: string;
+  title: string;
 };
-function ProjectBadge({ project, titleLc }: ProjectBadgeProps) {
+function ProjectBadge({ project, title }: ProjectBadgeProps) {
   return (
     <a
-      href={`/${project}/${titleLc}`}
+      href={`/${project}/${encodeTitle(title)}`}
       target="_blank"
       rel="noopener noreferrer"
     >

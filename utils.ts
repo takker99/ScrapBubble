@@ -30,3 +30,8 @@ export function isLiteralStrings<S extends readonly string[]>(
 ): value is S[number] {
   return value !== undefined && literals.includes(value);
 }
+
+/** 同一ページか判定するためのIDを作る */
+export function toId(project: string, title: string) {
+  return `/${project}/${toLc(title)}` as const;
+}
