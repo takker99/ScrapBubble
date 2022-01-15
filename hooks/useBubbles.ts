@@ -189,15 +189,14 @@ async function fetchPage(
 
   // 逆リンクを取得する
   const linksLc = links.map((link) => toLc(link));
-  const titleLc = toLc(title);
   const pages = links1hop.flatMap(({
     title,
     descriptions,
     image,
-  }) => !linksLc.includes(titleLc) ? [{ title, descriptions, image }] : []);
+  }) => !linksLc.includes(toLc(title)) ? [{ title, descriptions, image }] : []);
   return {
     project,
-    titleLc,
+    titleLc: toLc(title),
     checked,
     loading: false,
     lines: lines.slice(1), // titleを除く
