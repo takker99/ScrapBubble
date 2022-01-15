@@ -105,7 +105,7 @@ export function useBubbles(
             project,
             title,
             loading: false,
-            lines,
+            lines: lines.slice(1), // タイトルを除く
             linked,
           });
           return new Map(oldCaches);
