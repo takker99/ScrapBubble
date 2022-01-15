@@ -149,6 +149,7 @@ const App = (
         project,
         title,
         lines,
+        emptyLinks,
         position,
         scrollTo,
         type,
@@ -163,6 +164,7 @@ const App = (
             position={position}
             scrollTo={scrollTo}
             lines={lines}
+            emptyLinks={emptyLinks}
             onPointerEnterCapture={handlePointerEnter}
             onClick={() => hide(index + 1)}
             hasChildCards={bubbles.length > index + 1}

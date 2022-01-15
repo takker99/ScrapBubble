@@ -16,6 +16,7 @@ export type TextBubbleProps = {
     text: string;
     id: string;
   }[];
+  emptyLinks: string[];
   hasChildCards: boolean;
   index: number;
   position: {
@@ -34,6 +35,7 @@ export const TextBubble = ({
   project,
   title,
   lines,
+  emptyLinks,
   hasChildCards,
   position,
   theme,
@@ -70,6 +72,7 @@ export const TextBubble = ({
           </StatusBar>
           <Page
             lines={lines}
+            emptyLinks={emptyLinks}
             project={project}
             title={title}
             scrollTo={scrollTo}
