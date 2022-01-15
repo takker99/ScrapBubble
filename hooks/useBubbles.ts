@@ -248,7 +248,7 @@ export function useBubbles(
               ? [{ project, title, ...page }]
               : []
           ),
-          emptyLinks: linksLc.filter((link) => !emptyLinks.has(toLc(link))),
+          emptyLinks: linksLc.filter((link) => emptyLinks.has(toLc(link))),
           loading: cacheList.every(({ loading }) => loading),
           ...rest,
         };
