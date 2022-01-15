@@ -9,7 +9,7 @@ import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./hooks/useBubbles.ts";
 import { useEventListener } from "./hooks/useEventListener.ts";
-import { isLiteralStrings, toLc } from "./utils.ts";
+import { isLiteralStrings, toId, toLc } from "./utils.ts";
 import { useProjectTheme } from "./hooks/useProjectTheme.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./hooks/usePromiseSettledAnytimes.ts";
@@ -58,17 +58,20 @@ const App = (
         // 処理を<a>か.line-titleのときに限定する
         if (!isPageLink(link) && !isTitle(link)) continue;
 
-        const { project = scrapbox.Project.name, title, hash = "" } =
-          isPageLink(link)
-            ? parseLink({
-              pathType: "root",
-              href: `${new URL(link.href).pathname}${new URL(link.href).hash}`,
-            })
-            : { project: scrapbox.Project.name, title: scrapbox.Page.title };
+        const {
+          project = scrapbox.Project.name,
+          title: encodedTitle,
+          hash = "",
+        } = isPageLink(link)
+          ? parseLink({
+            pathType: "root",
+            href: `${new URL(link.href).pathname}${new URL(link.href).hash}`,
+          })
+          : { project: scrapbox.Project.name, title: scrapbox.Page.title };
         // [/project]の形のリンクは何もしない
         if (project === "") return;
-        const titleLc = toLc(decodeURIComponent(title ?? ""));
-        cache(project, titleLc);
+        const title = decodeURIComponent(encodedTitle ?? "");
+        cache(project, title);
 
         // delay以内にカーソルが離れるかクリックしたら何もしない
         try {
@@ -101,7 +104,7 @@ const App = (
         const root = getEditor().getBoundingClientRect();
         // linkが画面の右寄りにあったら、bubbleを左側に出す
         const adjustRight = (left - root.left) / root.width > 0.5;
-        show(depth, project, titleLc, {
+        show(depth, project, title, {
           scrollTo,
           position: {
             top: Math.round(bottom - root.top),
@@ -144,17 +147,17 @@ const App = (
       <style>{CSS}</style>
       {cards.map(({
         project,
-        titleLc,
+        title,
         lines,
         position,
         scrollTo,
         type,
         linked,
       }, index) => (
-        <Fragment key={`/${project}/${titleLc}/`}>
+        <Fragment key={toId(project, title)}>
           <TextBubble
             project={project}
-            titleLc={titleLc}
+            title={title}
             theme={getTheme(project)}
             index={index + 1}
             position={position}
@@ -169,7 +172,7 @@ const App = (
             cards={linked.map(
               ({ project, ...rest }) => ({
                 project,
-                linkedTo: titleLc,
+                linkedTo: title,
                 linkedType: type,
                 theme: getTheme(project),
                 ...rest,

@@ -55,7 +55,7 @@ declare global {
 export type PageProps = {
   project: string;
   lines: { text: string; id: string }[] | string[];
-  titleLc: string;
+  title: string;
   noIndent?: boolean;
   scrollTo?: ScrollTo;
 };
@@ -82,7 +82,7 @@ function hasLink(link: string, nodes: NodeType[]): boolean {
 }
 
 export function Page(
-  { lines, project, titleLc, noIndent, scrollTo }: PageProps,
+  { lines, project, title, noIndent, scrollTo }: PageProps,
 ) {
   const _blocks = useParser(lines, { hasTitle: false });
   const lineIds = useMemo(
@@ -156,7 +156,7 @@ export function Page(
                 key={block.ids[0]}
                 block={block}
                 project={project}
-                titleLc={titleLc}
+                title={title}
                 noIndent={noIndent}
                 ids={block.ids}
                 scrollId={scrollId}
@@ -169,7 +169,7 @@ export function Page(
                 key={block.ids[0]}
                 block={block}
                 project={project}
-                titleLc={titleLc}
+                title={title}
                 noIndent={noIndent}
                 ids={block.ids}
                 scrollId={scrollId}
@@ -221,12 +221,12 @@ type CodeBlockProps = {
   project: string;
   block: CodeBlockType;
   noIndent?: boolean;
-  titleLc: string;
+  title: string;
   ids: string[];
   scrollId?: string;
 };
 const CodeBlock = (
-  { block: { fileName, content, indent }, project, titleLc, ids, scrollId }:
+  { block: { fileName, content, indent }, project, title, ids, scrollId }:
     CodeBlockProps,
 ) => {
   const [buttonLabel, setButtonLabel] = useState("\uf0c5");
@@ -254,7 +254,9 @@ const CodeBlock = (
             {fileName.includes(".")
               ? (
                 <a
-                  href={`/api/code/${project}/${titleLc}/${fileName}`}
+                  href={`/api/code/${project}/${
+                    encodeTitle(title)
+                  }/${fileName}`}
                   target="_blank"
                 >
                   {fileName}
@@ -287,13 +289,13 @@ const CodeBlock = (
 type TableProps = {
   block: TableType;
   project: string;
-  titleLc: string;
+  title: string;
   noIndent?: boolean;
   scrollId?: string;
   ids: string[];
 };
 const Table = (
-  { block: { fileName, cells, indent }, project, titleLc, ids, scrollId }:
+  { block: { fileName, cells, indent }, project, title, ids, scrollId }:
     TableProps,
 ) => (
   <>
@@ -301,7 +303,7 @@ const Table = (
       <span className="table-block">
         <span className="table-block-start">
           <a
-            href={`/api/table/${project}/${titleLc}/${fileName}.csv`}
+            href={`/api/table/${project}/${encodeTitle(title)}/${fileName}.csv`}
             target="_blank"
           >
             {fileName}
