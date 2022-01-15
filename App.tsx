@@ -43,6 +43,7 @@ const App = (
   >();
 
   useEffect(() => {
+    /** trueになったらevent loopを終了する */
     let finished = false;
     (async () => {
       while (!finished) {
@@ -97,7 +98,8 @@ const App = (
         // 表示位置を計算する
         const { top, right, left, bottom } = link.getBoundingClientRect();
         const root = getEditor().getBoundingClientRect();
-        const adjustRight = (left - root.left) / root.width > 0.5; // 右寄せにするかどうか
+        // linkが画面の右寄りにあったら、bubbleを左側に出す
+        const adjustRight = (left - root.left) / root.width > 0.5;
         show(depth, project, titleLc, {
           scrollTo,
           position: {

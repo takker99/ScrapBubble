@@ -9,12 +9,15 @@ export function useProjectTheme() {
   const [map, setMap] = useState(new Map<string, Theme>());
 
   const getTheme = useCallback((project: string) => {
+    // 自分のプロジェクトのテーマは、<html>の data-project-theme属性から取得する
     if (project === scrapbox.Project.name) {
       const theme = document.documentElement.dataset.projectTheme ??
         defaultTheme;
       return isTheme(theme) ? theme : defaultTheme;
     }
-    if (!map.has(project)) {
+
+    // 未取得のprojectなら新規取得処理を行う
+    if (map.has(project)) {
       // 先にdefault themeを設定し、projectの情報を取得でき次第変更する
       setMap((oldMap) => {
         oldMap.set(project, defaultTheme);
