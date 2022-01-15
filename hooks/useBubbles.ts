@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "../deps/preact.tsx";
-import { toLc } from "../utils.ts";
+import { encodeTitle, toLc } from "../utils.ts";
 import type { LinkType, ScrollTo } from "../types.ts";
 import { Page, Scrapbox } from "../deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
@@ -173,11 +173,14 @@ export function useBubbles(
 function toId(project: string, titleLc: string) {
   return `/${project}/${titleLc}`;
 }
+
 async function fetchPage(
   project: string,
-  titleLc: string,
+  title: string,
 ): Promise<Cache | undefined> {
-  const res = await fetch(`/api/pages/${project}/${titleLc}?followRename=true`);
+  const res = await fetch(
+    `/api/pages/${project}/${encodeTitle(title)}?followRename=true`,
+  );
   const checked = new Date().getTime() / 1000;
   // 存在しないページの時
   if (!res.ok) return;
@@ -185,11 +188,12 @@ async function fetchPage(
 
   // 逆リンクを取得する
   const linksLc = links.map((link) => toLc(link));
+  const titleLc = toLc(title);
   const pages = links1hop.flatMap(({
     title,
     descriptions,
     image,
-  }) => !linksLc.includes(toLc(title)) ? [{ title, descriptions, image }] : []);
+  }) => !linksLc.includes(titleLc) ? [{ title, descriptions, image }] : []);
   return {
     project,
     titleLc,
