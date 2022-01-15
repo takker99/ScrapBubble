@@ -4,7 +4,7 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 import { Page } from "./Page.tsx";
-import { Fragment, h } from "./deps/preact.tsx";
+import { Fragment, FunctionComponent, h } from "./deps/preact.tsx";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -62,8 +62,11 @@ export const TextBubble = ({
               }),
           }}
         >
-          {project !== scrapbox.Project.name &&
-            <ProjectBadge project={project} titleLc={titleLc} />}
+          <StatusBar>
+            {project !== scrapbox.Project.name && (
+              <ProjectBadge project={project} titleLc={titleLc} />
+            )}
+          </StatusBar>
           <Page
             lines={lines}
             project={project}
@@ -75,6 +78,10 @@ export const TextBubble = ({
     </>
   );
 };
+
+const StatusBar: FunctionComponent = ({ children }) => (
+  <div className="status-bar top-right">{children}</div>
+);
 
 type ProjectBadgeProps = {
   project: string;

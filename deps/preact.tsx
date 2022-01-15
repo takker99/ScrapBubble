@@ -10,5 +10,8 @@ export {
   render,
   toChildArray,
 } from "https://esm.sh/preact@10.6.4";
-export type { ComponentChildren } from "https://esm.sh/preact@10.6.4";
+export type {
+  ComponentChildren,
+  FunctionComponent,
+} from "https://esm.sh/preact@10.6.4";
 export * from "https://esm.sh/preact@10.6.4/hooks";
