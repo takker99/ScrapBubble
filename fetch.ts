@@ -13,7 +13,7 @@ import type {
 } from "./deps/scrapbox.ts";
 
 let cache: Cache | undefined;
-const cacheVersion = "0.2.0"; // release前に更新する
+const cacheVersion = "0.2.1"; // release前に更新する
 const cacheName = `ScrapBubble-${cacheVersion}`;
 
 /** Options for `getPage()` */
