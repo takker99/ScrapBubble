@@ -105,7 +105,7 @@ export function useBubbles(
 
     // このリストにあるIDのリソースは更新しない
     // 別のPromiseで更新している最中
-    const loadingIds = [] as ReturnType<typeof toId>[];
+    const loadingIds = new Set<ReturnType<typeof toId>>();
 
     // まず読込中フラグを同期処理で立てておく
     setCaches((oldCaches) => {
@@ -114,8 +114,8 @@ export function useBubbles(
         const { lines = [], linked = [], linksLc = [], loading = false } =
           oldCaches.get(id) ??
             {};
-        // 別のPromiseで更新中のリソースのID記憶しておく
-        if (loading) loadingIds.push(id);
+        // 別のPromiseで更しているページのID記憶しておく
+        if (loading) loadingIds.add(id);
         oldCaches.set(id, {
           project,
           title,
@@ -132,8 +132,10 @@ export function useBubbles(
     const promises = [] as Promise<readonly [boolean, number]>[];
     for (const project of whiteList) {
       const promise = (async () => {
-        const data = await getPage(project, title, { expired });
         const id = toId(project, title);
+        // 別のPromiseで読込中のページは飛ばす
+        if (loadingIds.has(id)) return [true, 0] as const;
+        const data = await getPage(project, title, { expired });
 
         // ページを取得できなかったら更新しない
         if ("name" in data) return [true, 0] as const;
