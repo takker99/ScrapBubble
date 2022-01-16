@@ -262,7 +262,7 @@ export function useBubbles(
         return card.lines.length > 0 || card.linked.length > 0 ? [card] : [];
       });
     },
-    [caches, selectedList],
+    [caches, selectedList, emptyLinks],
   );
 
   return { bubbles, cache, show, hide };
