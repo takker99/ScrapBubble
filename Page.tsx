@@ -48,7 +48,7 @@ declare const scrapbox: Scrapbox;
 declare global {
   interface Window {
     /** CSRF token */
-    _csrf: string;
+    _csrf?: string;
   }
 }
 
