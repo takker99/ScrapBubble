@@ -5,7 +5,7 @@ import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 const defaultTheme = "default-light";
-export function useProjectTheme() {
+export const useProjectTheme = (): (project: string) => Theme => {
   const [map, setMap] = useState(new Map<string, Theme>());
 
   const getTheme = useCallback((project: string) => {
@@ -45,4 +45,4 @@ export function useProjectTheme() {
   }, [map]);
 
   return getTheme;
-}
+};

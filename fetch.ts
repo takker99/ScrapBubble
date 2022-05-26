@@ -27,11 +27,11 @@ export interface GetPageOption {
  * @param title 取得したいページのtitle 大文字小文字は問わない
  * @param options オプション
  */
-export async function getPage(
+export const getPage = async (
   project: string,
   title: string,
   options?: GetPageOption,
-) {
+): Promise<NotFoundError | NotLoggedInError | NotMemberError | Page> => {
   const path = `https://scrapbox.io/api/pages/${project}/${
     encodeTitle(toLc(title))
   }?followRename=${options?.followRename ?? true}`;
@@ -51,17 +51,23 @@ export async function getPage(
     ) as (NotFoundError | NotLoggedInError | NotMemberError);
   }
   return (await res.json()) as Page;
-}
+};
 
 /** get /api/projects/:projectname
  *
  * @param project 取得したいprojectの名前
  * @param options オプション
  */
-export async function getProject(
+export const getProject = async (
   project: string,
   options?: Omit<GetPageOption, "followRename">,
-) {
+): Promise<
+  | NotFoundError
+  | NotLoggedInError
+  | NotMemberError
+  | NotMemberProject
+  | MemberProject
+> => {
   const path = `https://scrapbox.io/api/projects/${project}`;
 
   const res = await fetch(path, options ?? {});
@@ -79,13 +85,16 @@ export async function getProject(
     ) as (NotFoundError | NotLoggedInError | NotMemberError);
   }
   return (await res.json()) as (NotMemberProject | MemberProject);
-}
+};
 
 type FetchOption = {
   /** cacheの有効期限 */ expired?: number;
 };
 /** cache機能つきfetch */
-export async function fetch(path: string, options: FetchOption) {
+export const fetch = async (
+  path: string,
+  options: FetchOption,
+): Promise<Response> => {
   const { expired = 60 /* defaultは1分 */ } = options;
 
   const cachedRes = await globalThis.caches.match(path);
@@ -103,4 +112,4 @@ export async function fetch(path: string, options: FetchOption) {
     // cacheを返す
     return cachedRes;
   }
-}
+};

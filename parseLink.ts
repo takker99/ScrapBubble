@@ -2,9 +2,9 @@ export type ScrapboxLink = {
   href: string;
   pathType: "root" | "relative";
 };
-export function parseLink(
+export const parseLink = (
   link: ScrapboxLink,
-) {
+) => {
   if (link.pathType === "root") {
     const [, project = "", title = ""] = link.href.match(
       /\/([\w\-]+)(?:\/?|\/(.*))$/,
@@ -24,4 +24,4 @@ export function parseLink(
       ? { title: link.href }
       : { title: link.href.slice(0, -1 - hash.length), hash };
   }
-}
+};

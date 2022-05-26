@@ -80,9 +80,9 @@ export interface UseBubbleResult {
    */
   hide: (depth: number) => void;
 }
-export function useBubbles(
+export const useBubbles = (
   { expired = 60, whiteList: _whiteList = [] }: UseBubblesInit,
-): UseBubbleResult {
+): UseBubbleResult => {
   const [caches, setCaches] = useState(new Map<string, Cache>());
   // 表示するデータのcache idのリストと表示位置とのペアのリスト
   const [selectedList, setSelectedList] = useState<
@@ -268,4 +268,4 @@ export function useBubbles(
   );
 
   return { bubbles, cache, show, hide };
-}
+};

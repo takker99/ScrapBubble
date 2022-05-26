@@ -61,8 +61,8 @@ export type PageProps = {
   scrollTo?: ScrollTo;
 };
 
-function hasLink(link: string, nodes: NodeType[]): boolean {
-  return nodes.some((node) => {
+const hasLink = (link: string, nodes: NodeType[]): boolean =>
+  nodes.some((node) => {
     switch (node.type) {
       case "hashTag":
         return toLc(node.href) === toLc(link);
@@ -80,11 +80,10 @@ function hasLink(link: string, nodes: NodeType[]): boolean {
         return hasLink(link, node.nodes);
     }
   });
-}
 
-export function Page(
+export const Page = (
   { lines, project, title, emptyLinks, noIndent, scrollTo }: PageProps,
-) {
+): h.JSX.Element => {
   const _blocks = useParser(lines, { hasTitle: false });
   const lineIds = useMemo(
     () => lines.flatMap((line) => typeof line === "string" ? [] : [line.id]),
@@ -202,7 +201,7 @@ export function Page(
       })}
     </div>
   );
-}
+};
 
 type LineProps = {
   index: string;

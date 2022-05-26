@@ -16,22 +16,19 @@ export type PromiseState<T, E> = {
   result: E;
 };
 
-export function exposeState<T, E = unknown>(promise: Promise<T>) {
+export const exposeState = <T, E = unknown>(promise: Promise<T>) => {
   let state: PromiseState<T, E> = { state: "pending", result: undefined };
   promise
     .then((result) => state = { state: "fulfilled", result })
     .catch((result) => state = { state: "rejected", result });
   return () => state;
-}
+};
 
-export function isLiteralStrings<S extends readonly string[]>(
+export const isLiteralStrings = <S extends readonly string[]>(
   value: string | undefined,
   ...literals: S
-): value is S[number] {
-  return value !== undefined && literals.includes(value);
-}
+): value is S[number] => value !== undefined && literals.includes(value);
 
 /** 同一ページか判定するためのIDを作る */
-export function toId(project: string, title: string) {
-  return `/${project}/${toLc(title)}` as const;
-}
+export const toId = (project: string, title: string): `/${string}/${string}` =>
+  `/${project}/${toLc(title)}`;

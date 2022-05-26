@@ -190,14 +190,14 @@ const App = (
   );
 };
 
-export function mount(
+export const mount = (
   {
     delay = 500,
     expired = 60,
     whiteList = [],
     scrollTargets = ["link", "hashtag", "lineId", "title"],
   }: Partial<AppProps> = {},
-) {
+): void => {
   const app = document.createElement("div");
   app.dataset.userscriptName = userscriptName;
   getEditor().append(app);
@@ -211,22 +211,21 @@ export function mount(
     />,
     shadowRoot,
   );
-}
+};
 
-function isTitle(
+const isTitle = (
   element: HTMLElement,
-): element is HTMLSpanElement {
-  return element instanceof HTMLSpanElement &&
-    element.matches(".line-title .text");
-}
-function isPageLink(
+): element is HTMLSpanElement =>
+  element instanceof HTMLSpanElement &&
+  element.matches(".line-title .text");
+
+const isPageLink = (
   element: HTMLElement,
-): element is HTMLAnchorElement {
-  return element instanceof HTMLAnchorElement &&
-    element.classList.contains("page-link");
-}
-function getLinkType(element: HTMLSpanElement | HTMLAnchorElement): LinkType {
-  return isPageLink(element)
+): element is HTMLAnchorElement =>
+  element instanceof HTMLAnchorElement &&
+  element.classList.contains("page-link");
+
+const getLinkType = (element: HTMLSpanElement | HTMLAnchorElement): LinkType =>
+  isPageLink(element)
     ? (element.type === "link" ? "link" : "hashtag")
     : "title";
-}
