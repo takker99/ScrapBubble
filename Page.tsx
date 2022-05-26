@@ -40,7 +40,7 @@ import {
 import { encodeTitle, toLc } from "./utils.ts";
 import { parseLink } from "./parseLink.ts";
 import { sleep } from "./sleep.ts";
-import { useParser } from "./hooks/useParser.ts";
+import { useParser } from "./useParser.ts";
 import type { ScrollTo } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;

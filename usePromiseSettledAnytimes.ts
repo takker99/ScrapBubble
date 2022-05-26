@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "../deps/preact.tsx";
+import { useCallback, useRef } from "./deps/preact.tsx";
 
 function useRefFn<T extends unknown[], U>() {
   type Fn = (...args: T) => U;

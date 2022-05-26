@@ -1,8 +1,8 @@
-import { useCallback, useMemo, useState } from "../deps/preact.tsx";
-import { toId, toLc } from "../utils.ts";
-import type { LinkType, ScrollTo } from "../types.ts";
-import { Scrapbox } from "../deps/scrapbox.ts";
-import { getPage } from "../fetch.ts";
+import { useCallback, useMemo, useState } from "./deps/preact.tsx";
+import { toId, toLc } from "./utils.ts";
+import type { LinkType, ScrollTo } from "./types.ts";
+import { Scrapbox } from "./deps/scrapbox.ts";
+import { getPage } from "./fetch.ts";
 declare const scrapbox: Scrapbox;
 
 export interface Cache {
