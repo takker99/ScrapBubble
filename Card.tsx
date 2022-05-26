@@ -14,7 +14,7 @@ import {
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
 import { encodeTitle } from "./utils.ts";
-import { useParser } from "./hooks/useParser.ts";
+import { useParser } from "./useParser.ts";
 import type { LinkType } from "./types.ts";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;

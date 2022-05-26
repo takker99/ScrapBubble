@@ -2,8 +2,8 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 
-import { useMemo } from "../deps/preact.tsx";
-import { parse, ParserOption } from "../deps/scrapbox-parser.ts";
+import { useMemo } from "./deps/preact.tsx";
+import { parse, ParserOption } from "./deps/scrapbox-parser.ts";
 
 export type Line = { text: string; id: string };
 export function useParser(
