@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "./deps/preact.tsx";
 
-function useRefFn<T extends unknown[], U>() {
+const useRefFn = <T extends unknown[], U>() => {
   type Fn = (...args: T) => U;
   const ref = useRef<Fn>();
   const fn = useCallback((...args: T) => {
@@ -8,9 +8,13 @@ function useRefFn<T extends unknown[], U>() {
   }, []);
   const setFn = useCallback((fn: Fn) => ref.current = fn, []);
   return [fn, setFn] as const;
-}
+};
 
-export function usePromiseSettledAnytimes<T, E = unknown>() {
+export const usePromiseSettledAnytimes = <T, E = unknown>(): readonly [
+  () => Promise<T>,
+  (args: T) => void,
+  (error: E) => void,
+] => {
   const [resolve, setResolve] = useRefFn<[T], void>();
   const [reject, setReject] = useRefFn<[E], void>();
 
@@ -23,4 +27,4 @@ export function usePromiseSettledAnytimes<T, E = unknown>() {
     ), []);
 
   return [waitForSettled, resolve, reject] as const;
-}
+};

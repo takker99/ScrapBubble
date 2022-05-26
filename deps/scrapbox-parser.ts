@@ -14,6 +14,7 @@ export type {
   Line,
   LinkNode,
   Node,
+  Page,
   ParserOption,
   PlainNode,
   QuoteNode,

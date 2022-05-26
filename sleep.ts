@@ -1,4 +1,6 @@
-export const sleep = (milliseconds: number) => {
+export const sleep = (
+  milliseconds: number,
+): Promise<void> & { cancel: () => void } => {
   let cancel = () => {};
   const pending = new Promise<void>(
     (resolve, reject) => {

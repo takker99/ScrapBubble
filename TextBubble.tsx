@@ -43,45 +43,43 @@ export const TextBubble = ({
   onPointerEnterCapture,
   scrollTo,
   onClick,
-}: TextBubbleProps) => {
-  return (
-    <>
-      {lines.length > 0 && (
-        <div
-          className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
-          data-theme={theme}
-          data-index={index}
-          onPointerEnterCapture={onPointerEnterCapture}
-          onClick={onClick}
-          style={{
-            top: `${position.top}px`,
-            maxWidth: `${position.maxWidth}px`,
-            ...("left" in position
-              ? {
-                left: `${position.left}px`,
-              }
-              : {
-                right: `${position.right}px`,
-              }),
-          }}
-        >
-          <StatusBar>
-            {project !== scrapbox.Project.name && (
-              <ProjectBadge project={project} title={title} />
-            )}
-          </StatusBar>
-          <Page
-            lines={lines}
-            emptyLinks={emptyLinks}
-            project={project}
-            title={title}
-            scrollTo={scrollTo}
-          />
-        </div>
-      )}
-    </>
-  );
-};
+}: TextBubbleProps) => (
+  <>
+    {lines.length > 0 && (
+      <div
+        className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
+        data-theme={theme}
+        data-index={index}
+        onPointerEnterCapture={onPointerEnterCapture}
+        onClick={onClick}
+        style={{
+          top: `${position.top}px`,
+          maxWidth: `${position.maxWidth}px`,
+          ...("left" in position
+            ? {
+              left: `${position.left}px`,
+            }
+            : {
+              right: `${position.right}px`,
+            }),
+        }}
+      >
+        <StatusBar>
+          {project !== scrapbox.Project.name && (
+            <ProjectBadge project={project} title={title} />
+          )}
+        </StatusBar>
+        <Page
+          lines={lines}
+          emptyLinks={emptyLinks}
+          project={project}
+          title={title}
+          scrollTo={scrollTo}
+        />
+      </div>
+    )}
+  </>
+);
 
 const StatusBar: FunctionComponent = ({ children }) => (
   <div className="status-bar top-right">{children}</div>
@@ -91,14 +89,12 @@ type ProjectBadgeProps = {
   project: string;
   title: string;
 };
-function ProjectBadge({ project, title }: ProjectBadgeProps) {
-  return (
-    <a
-      href={`/${project}/${encodeTitle(title)}`}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {project}
-    </a>
-  );
-}
+const ProjectBadge = ({ project, title }: ProjectBadgeProps): h.JSX.Element => (
+  <a
+    href={`/${project}/${encodeTitle(title)}`}
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    {project}
+  </a>
+);

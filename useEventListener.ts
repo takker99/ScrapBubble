@@ -10,7 +10,7 @@ type Listener<E extends EventTarget, K extends keyof EventMap<E>> = E extends
   : E extends HTMLElement ? (this: HTMLElement, ev: EventMap<E>[K]) => void
   : EventListenerOrEventListenerObject;
 
-export function useEventListener<
+export const useEventListener = <
   E extends EventTarget,
   K extends (keyof EventMap<E>) & string,
 >(
@@ -18,9 +18,9 @@ export function useEventListener<
   type: K,
   listener: Listener<E, K>,
   options?: boolean | AddEventListenerOptions,
-) {
+): void => {
   useEffect(() => {
     element.addEventListener(type, listener, options);
     return () => element.removeEventListener(type, listener, options);
   }, [element, type, options]);
-}
+};
