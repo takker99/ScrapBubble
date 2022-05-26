@@ -9,11 +9,12 @@ import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { useEventListener } from "./useEventListener.ts";
-import { isLiteralStrings, toId } from "./utils.ts";
+import { toId } from "./utils.ts";
 import { useProjectTheme } from "./useProjectTheme.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./usePromiseSettledAnytimes.ts";
 import { getEditor } from "./dom.ts";
+import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
 import { parseLink } from "./parseLink.ts";
 import type { LinkType } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
@@ -212,18 +213,6 @@ export const mount = (
     shadowRoot,
   );
 };
-
-const isTitle = (
-  element: HTMLElement,
-): element is HTMLSpanElement =>
-  element instanceof HTMLSpanElement &&
-  element.matches(".line-title .text");
-
-const isPageLink = (
-  element: HTMLElement,
-): element is HTMLAnchorElement =>
-  element instanceof HTMLAnchorElement &&
-  element.classList.contains("page-link");
 
 const getLinkType = (element: HTMLSpanElement | HTMLAnchorElement): LinkType =>
   isPageLink(element)
