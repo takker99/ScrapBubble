@@ -47,7 +47,10 @@ const App = (
 ) => {
   const { bubbles, change } = useBubbles();
   const projects = useMemo(
-    () => [...new Set([scrapbox.Project.name, ...whiteList])],
+    () => [
+      scrapbox.Project.name,
+      ...whiteList.filter((project) => project !== scrapbox.Project.name),
+    ],
     [whiteList],
   );
   const [waitPointerEnter, handlePointerEnter] = usePromiseSettledAnytimes<

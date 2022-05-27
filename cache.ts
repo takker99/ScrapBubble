@@ -42,7 +42,7 @@ export const fetch = async (
     }
     if (req.url.includes("/api/pages/")) {
       const json = (await res.clone().json());
-      if (json.persistent === true) {
+      if (json.persistent === false) {
         await cache.put(req, res.clone());
       }
     }
