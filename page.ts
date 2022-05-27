@@ -78,7 +78,7 @@ export const loadPage = async (
 
   try {
     // TODO:データ取得処理はもう少し工夫する
-    const res = await fetchPage(title, project, {
+    const res = await fetchPage(project, title, {
       fetch: (req) => fetch(req),
     });
     pageMap.set(id, { loading: false, value: res });
