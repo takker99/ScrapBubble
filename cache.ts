@@ -27,18 +27,24 @@ export const fetch = async (
 ): Promise<Response> => {
   const { expired = 60 /* defaultは1分 */ } = options ?? {};
 
-  const cachedRes =
-    await findLatestCache(new Request(path), { ignoreSearch: true }) ??
-      await cache.match(path, { ignoreSearch: true });
+  const req = new Request(path);
+  const cachedRes = await findLatestCache(req, { ignoreSearch: true }) ??
+    await cache.match(req, { ignoreSearch: true });
   const cached = new Date(cachedRes?.headers?.get?.("Date") ?? 0).getTime() /
     1000;
   if (!cachedRes || cached + expired < new Date().getTime() / 1000) {
     // 有効期限切れかcacheがなければ、fetchし直す
     const res = await globalThis.fetch(path);
 
-    // 有効でない応答のみ自前のcacheに格納する
+    // 有効でない応答と空ページのみ自前のcacheに格納する
     if (!res.ok) {
-      await cache.put(path, res.clone());
+      await cache.put(req, res.clone());
+    }
+    if (req.url.includes("/api/pages/")) {
+      const json = (await res.clone().json());
+      if (json.persistent === true) {
+        await cache.put(req, res.clone());
+      }
     }
 
     return res;
