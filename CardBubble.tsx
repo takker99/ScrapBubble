@@ -14,7 +14,6 @@ export type CardBubbleProps = {
     image: string | null;
     project: string;
     title: string;
-    theme: Theme;
     linkedTo: string;
     linkedType: LinkType;
   }[];
@@ -50,14 +49,13 @@ export const CardBubble = ({
   >
     <ul>
       {cards.map((
-        { project, title, theme, descriptions, image, linkedTo, linkedType },
+        { project, title, descriptions, image, linkedTo, linkedType },
       ) => (
         <li>
           <Card
             key={`/${project}/${title}`}
             project={project}
             title={title}
-            theme={theme}
             linkedTo={linkedTo}
             linkedType={linkedType}
             descriptions={descriptions}

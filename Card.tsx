@@ -15,8 +15,9 @@ import {
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
 import { useParser } from "./useParser.ts";
+import { useTheme } from "./useTheme.ts";
 import type { LinkType } from "./types.ts";
-import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
+import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 export type CardProps = {
@@ -24,7 +25,6 @@ export type CardProps = {
   title: string;
   descriptions: string[];
   thumbnail: string;
-  theme: Theme;
   linkedTo: string;
   linkedType: LinkType;
 };
@@ -35,13 +35,13 @@ export const Card = ({
   thumbnail,
   linkedTo,
   linkedType,
-  theme,
   ...props
 }: CardProps) => {
   const blocks = useParser(thumbnail ? [] : descriptions, { hasTitle: false }, [
     thumbnail,
     descriptions,
   ]);
+  const theme = useTheme(project);
 
   return (
     <a
