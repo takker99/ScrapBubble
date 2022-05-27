@@ -67,11 +67,15 @@ export const Bubble = ({
   /** 表示するページ */
   const pages = useMemo(() => {
     const titleLc = toTitleLc(source.title);
+    // 先に空ページを除いておく
+    const existPages = pages_.filter((page) => page.persistent);
+
     if (scrapbox.Page.title) {
       // 現在閲覧しているページと同じページしかないときは何も表示しない
       if (
         titleLc === toTitleLc(scrapbox.Page.title) &&
-        pages_.length === 1 && pages_[0].project === scrapbox.Project.name
+        existPages.length === 1 &&
+        existPages[0].project === scrapbox.Project.name
       ) {
         return [];
       }
@@ -79,7 +83,7 @@ export const Bubble = ({
     // すでに表示しているページか空リンクの場合は表示しない
     return parentSources.some((source) => source.titleLc === titleLc)
       ? []
-      : pages_.filter((page) => page.persistent);
+      : existPages;
   }, [pages_, scrapbox.Page.title, source.title]);
   const cards_ = useBackCards(source.title, pages);
   /** 表示するカード */
