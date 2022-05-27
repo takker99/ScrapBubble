@@ -25,8 +25,8 @@ export const usePages = (
   // データの初期化
   useEffect(() => {
     setPages(projects.flatMap((project) => {
-      const page = getPage(title, project, watchList, options);
-      return page ? [{ project, ...page }] : [];
+      const res = getPage(title, project, watchList, options);
+      return res?.ok === true ? [{ project, ...res.value }] : [];
     }));
   }, [title, projects, watchList, options]);
 

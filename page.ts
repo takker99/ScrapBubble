@@ -27,20 +27,19 @@ export interface LoadPageOptions {
 /** /api/projects/:projectの結果を取得する
  *
  * @param title 取得したいページのタイトル
- * @return projectの情報。未初期化もしくは読み込み中のときは`undefined`を返す
+ * @return pageの情報。未初期化もしくは読み込み中のときは`undefined`を返す
  */
 export const getPage = (
   title: string,
   project: string,
   watchList: ProjectId[],
   options?: LoadPageOptions,
-): Page | undefined => {
+): PageResult | undefined => {
   const id = toId(project, title);
   const state = pageMap.get(id);
-  const res = state?.value;
   loadPage(title, project, watchList, options);
 
-  return res?.ok ? res.value : undefined;
+  return state?.value;
 };
 
 /** 特定のページの更新を購読する */

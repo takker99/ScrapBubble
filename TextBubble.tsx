@@ -42,12 +42,12 @@ export const TextBubble = ({
             getPage(link, project, watchList, { ignoreFetch: true })
           );
           return pages.every((page) => {
-            if (!page) return true;
+            if (!page?.ok) return true;
 
             const {
               persistent,
               relatedPages: { links1hop, projectLinks1hop },
-            } = page;
+            } = page.value;
 
             return !persistent && links1hop.length === 0 &&
               projectLinks1hop.length === 0;
