@@ -74,16 +74,24 @@ const App = (
         cache(project, title);
 
         // delay以内にカーソルが離れるかクリックしたら何もしない
+        const waited = sleep(delay);
+        const cancel = () => waited.cancel();
         try {
-          const waited = sleep(delay);
-          link.addEventListener("pointerleave", () => waited.cancel(), {
-            once: true,
-          });
-          link.addEventListener("click", () => waited.cancel(), { once: true });
+          link.addEventListener("click", cancel);
+          link.addEventListener("pointerleave", cancel);
+          link.addEventListener("pointerup", cancel);
+          link.addEventListener("pointercancel", cancel);
+          link.addEventListener("pointerout", cancel);
           await waited;
         } catch (e) {
           if (e === "cancelled") continue;
           throw e;
+        } finally {
+          link.removeEventListener("click", cancel);
+          link.removeEventListener("pointerleave", cancel);
+          link.removeEventListener("pointerup", cancel);
+          link.removeEventListener("pointercancel", cancel);
+          link.removeEventListener("pointerout", cancel);
         }
 
         // スクロール先を設定する
