@@ -3,8 +3,7 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { TextBubble } from "./TextBubble.tsx";
-import { CardBubble } from "./CardBubble.tsx";
+import { Bubble } from "./Bubble.tsx";
 import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect, useMemo } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
@@ -167,26 +166,15 @@ const App = (
       />
       <style>{CSS}</style>
       {bubbles.map((bubble, index) => (
-        <Fragment key={toId(bubble.project, bubble.title)}>
-          <TextBubble
-            source={bubble}
-            projects={projects}
-            watchList={watchList}
-            index={index + 1}
-            onPointerEnterCapture={handlePointerEnter}
-            onClick={() =>
-              change(index + 1)}
-            hasChildCards={bubbles.length > index + 1}
-          />
-          <CardBubble
-            source={bubble}
-            projects={projects}
-            watchList={watchList}
-            index={index + 1}
-            onPointerEnterCapture={handlePointerEnter}
-            onClick={() => change(index + 1)}
-          />
-        </Fragment>
+        <Bubble
+          key={toId(bubble.project, bubble.title)}
+          sources={bubbles}
+          projects={projects}
+          watchList={watchList}
+          index={index + 1}
+          onPointerEnterCapture={handlePointerEnter}
+          onClick={() => change(index + 1)}
+        />
       ))}
     </>
   );
