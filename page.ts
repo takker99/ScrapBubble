@@ -134,11 +134,13 @@ export const loadPage = async (
 
 /** ページデータが更新されているか判定する
  *
- * タイトル、ページID、更新日時が全て同じなら、更新されてないと判断する
+ * 空ページの場合はlinkedを、中身のあるページはupdatedで判定する
  */
 const doesUpdate = (oldPage: Page, newPage: Page) =>
-  oldPage.id !== newPage.id || oldPage.title !== newPage.title ||
-  oldPage.updated !== newPage.updated;
+  oldPage.persistent !== newPage.persistent ||
+  (oldPage.persistent
+    ? oldPage.updated !== newPage.updated
+    : oldPage.linked !== newPage.linked);
 
 interface PathOptions {
   followRename?: boolean;
