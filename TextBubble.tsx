@@ -42,7 +42,8 @@ export const TextBubble = ({
             getPage(link, project, watchList, { ignoreFetch: true })
           );
           return pages.every((page) => {
-            if (!page?.ok) return true;
+            // 全てのページを取得し終わるまで、空リンク判定を保留する
+            if (!page?.ok) return false;
 
             const {
               persistent,
