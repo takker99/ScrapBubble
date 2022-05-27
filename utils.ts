@@ -1,9 +1,4 @@
-export const toLc = (title: string) => title.toLowerCase().replaceAll(" ", "_");
-export const encodeTitle = (title: string) =>
-  title.replaceAll(" ", "_").replace(
-    /[/?#\{}^|<>]/g,
-    (char) => encodeURIComponent(char),
-  );
+import { toTitleLc } from "./deps/scrapbox-std.ts";
 
 export type PromiseState<T, E> = {
   state: "pending";
@@ -24,11 +19,6 @@ export const exposeState = <T, E = unknown>(promise: Promise<T>) => {
   return () => state;
 };
 
-export const isLiteralStrings = <S extends readonly string[]>(
-  value: string | undefined,
-  ...literals: S
-): value is S[number] => value !== undefined && literals.includes(value);
-
 /** 同一ページか判定するためのIDを作る */
 export const toId = (project: string, title: string): `/${string}/${string}` =>
-  `/${project}/${toLc(title)}`;
+  `/${project}/${toTitleLc(title)}`;

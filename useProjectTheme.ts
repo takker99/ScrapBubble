@@ -1,5 +1,6 @@
 import { useCallback, useState } from "./deps/preact.tsx";
-import { getProject } from "./fetch.ts";
+import { getProject } from "./deps/scrapbox-std.ts";
+import { fetch } from "./cache.ts";
 import { isTheme } from "./deps/scrapbox.ts";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
@@ -27,12 +28,15 @@ export const useProjectTheme = (): (project: string) => Theme => {
       // projectのtheme情報を取得する
       (async () => {
         try {
-          const res = await getProject(project);
+          const res = await getProject(project, { fetch: (req) => fetch(req) });
           // project情報を取得できなかったときはdefaultのままにする
-          if (!("theme" in res)) return;
+          if (!res.ok) return;
 
           setMap((oldMap) => {
-            oldMap.set(project, isTheme(res.theme) ? res.theme : defaultTheme);
+            oldMap.set(
+              project,
+              isTheme(res.value.theme) ? res.value.theme : defaultTheme,
+            );
             return oldMap;
           });
         } catch (e: unknown) {

@@ -9,12 +9,14 @@ import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { useEventListener } from "./useEventListener.ts";
-import { isLiteralStrings, toId } from "./utils.ts";
+import { toId } from "./utils.ts";
 import { useProjectTheme } from "./useProjectTheme.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./usePromiseSettledAnytimes.ts";
-import { getEditor } from "./dom.ts";
+import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
+import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
+import { editor } from "./deps/scrapbox-std.ts";
 import type { LinkType } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
@@ -42,6 +44,8 @@ const App = (
     PointerEvent
   >();
 
+  const editorDiv = editor();
+  ensureHTMLDivElement(editorDiv, "#editor");
   useEffect(() => {
     /** trueになったらevent loopを終了する */
     let finished = false;
@@ -101,7 +105,7 @@ const App = (
 
         // 表示位置を計算する
         const { top, right, left, bottom } = link.getBoundingClientRect();
-        const root = getEditor().getBoundingClientRect();
+        const root = editorDiv.getBoundingClientRect();
         // linkが画面の右寄りにあったら、bubbleを左側に出す
         const adjustRight = (left - root.left) / root.width > 0.5;
         show(depth, project, title, {
@@ -122,8 +126,7 @@ const App = (
     })();
     return () => finished = true;
   }, [delay, cache, show]);
-  const editor = getEditor();
-  useEventListener(editor, "pointerenter", handlePointerEnter, {
+  useEventListener(editorDiv, "pointerenter", handlePointerEnter, {
     capture: true,
   });
   useEventListener(document, "click", (e) => {
@@ -200,7 +203,9 @@ export const mount = (
 ): void => {
   const app = document.createElement("div");
   app.dataset.userscriptName = userscriptName;
-  getEditor().append(app);
+  const editorDiv = editor();
+  ensureHTMLDivElement(editorDiv, "#editor");
+  editorDiv.append(app);
   const shadowRoot = app.attachShadow({ mode: "open" });
   render(
     <App
@@ -212,18 +217,6 @@ export const mount = (
     shadowRoot,
   );
 };
-
-const isTitle = (
-  element: HTMLElement,
-): element is HTMLSpanElement =>
-  element instanceof HTMLSpanElement &&
-  element.matches(".line-title .text");
-
-const isPageLink = (
-  element: HTMLElement,
-): element is HTMLAnchorElement =>
-  element instanceof HTMLAnchorElement &&
-  element.classList.contains("page-link");
 
 const getLinkType = (element: HTMLSpanElement | HTMLAnchorElement): LinkType =>
   isPageLink(element)
