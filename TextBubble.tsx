@@ -51,8 +51,8 @@ export const TextBubble = ({
               relatedPages: { links1hop, projectLinks1hop },
             } = page.value;
 
-            return !persistent && links1hop.length === 0 &&
-              projectLinks1hop.length === 0;
+            return !persistent &&
+              links1hop.length + projectLinks1hop.length < 2;
           });
         })
       ),
