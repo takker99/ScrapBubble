@@ -6,7 +6,11 @@ export type {
   NotMemberError,
   NotMemberProject,
   Page,
+  ProjectId,
+  ProjectRelatedPage,
   RelatedPage,
+  StringLc,
+  UnixTime,
 } from "https://raw.githubusercontent.com/scrapbox-jp/types/0.3.4/rest.ts";
 export type { Scrapbox } from "https://raw.githubusercontent.com/scrapbox-jp/types/0.3.4/userscript.ts";
 

@@ -4,65 +4,66 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 import { h } from "./deps/preact.tsx";
-import type { LinkType } from "./types.ts";
-import type { Theme } from "./deps/scrapbox.ts";
 import { Card } from "./Card.tsx";
+import { useBackCards } from "./useBackCards.ts";
+import { toId } from "./utils.ts";
+import type { BubbleSource } from "./useBubbles.ts";
+import type { ProjectId } from "./deps/scrapbox.ts";
 
 export type CardBubbleProps = {
-  cards: {
-    descriptions: string[];
-    image: string | null;
-    project: string;
-    title: string;
-    linkedTo: string;
-    linkedType: LinkType;
-  }[];
+  source: BubbleSource;
+  projects: string[];
+  watchList: ProjectId[];
   index: number;
-  position: {
-    bottom: number;
-    maxWidth: number;
-  } & ({ left: number } | { right: number });
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
 };
 export const CardBubble = ({
-  cards,
+  source,
+  projects,
+  watchList,
   index,
-  position,
   ...rest
-}: CardBubbleProps) => (
-  <div
-    className="card-bubble"
-    data-index={index}
-    style={{
-      bottom: `${position.bottom}px`,
-      maxWidth: `${position.maxWidth}px`,
-      ...("left" in position
-        ? {
-          left: `${position.left}px`,
-        }
-        : {
-          right: `${position.right}px`,
-        }),
-    }}
-    {...rest}
-  >
-    <ul>
-      {cards.map((
-        { project, title, descriptions, image, linkedTo, linkedType },
-      ) => (
-        <li>
-          <Card
-            key={`/${project}/${title}`}
-            project={project}
-            title={title}
-            linkedTo={linkedTo}
-            linkedType={linkedType}
-            descriptions={descriptions}
-            thumbnail={image ?? ""}
-          />
-        </li>
-      ))}
-    </ul>
-  </div>
-);
+}: CardBubbleProps) => {
+  const position = source.position;
+  const cards = useBackCards(source.title, [
+    ...new Set([source.project, ...projects]),
+  ], watchList);
+
+  return (
+    <div
+      className="card-bubble"
+      data-index={index}
+      style={{
+        bottom: `${position.bottom}px`,
+        maxWidth: `${position.maxWidth}px`,
+        ...("left" in position
+          ? {
+            left: `${position.left}px`,
+          }
+          : {
+            right: `${position.right}px`,
+          }),
+      }}
+      {...rest}
+    >
+      <ul>
+        {cards.map((
+          { projectName, title, descriptions, image },
+        ) => (
+          <li>
+            <Card
+              key={toId(projectName, title)}
+              project={projectName}
+              title={title}
+              linkedTo={source.title}
+              linkedType={source.type}
+              descriptions={descriptions}
+              thumbnail={image ?? ""}
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};

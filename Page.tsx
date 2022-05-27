@@ -42,7 +42,7 @@ import { sleep } from "./sleep.ts";
 import { useParser } from "./useParser.ts";
 import type { ScrollTo } from "./types.ts";
 import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
-import type { Scrapbox } from "./deps/scrapbox.ts";
+import type { Scrapbox, StringLc } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 declare global {
@@ -55,7 +55,7 @@ declare global {
 export type PageProps = {
   project: string;
   lines: { text: string; id: string }[] | string[];
-  emptyLinks: string[];
+  emptyLinks: StringLc[];
   title: string;
   noIndent?: boolean;
   scrollTo?: ScrollTo;

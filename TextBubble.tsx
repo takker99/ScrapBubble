@@ -4,50 +4,62 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 import { Page } from "./Page.tsx";
-import { Fragment, FunctionComponent, h } from "./deps/preact.tsx";
+import { Fragment, FunctionComponent, h, useMemo } from "./deps/preact.tsx";
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import { useTheme } from "./useTheme.ts";
-import type { Scrapbox } from "./deps/scrapbox.ts";
+import { usePages } from "./usePages.ts";
+import { getPage } from "./page.ts";
+import type { BubbleSource } from "./useBubbles.ts";
+import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 export type TextBubbleProps = {
-  project: string;
-  title: string;
-  lines: {
-    text: string;
-    id: string;
-  }[];
-  emptyLinks: string[];
+  projects: string[];
+  watchList: ProjectId[];
+  source: BubbleSource;
   hasChildCards: boolean;
   index: number;
-  position: {
-    top: number;
-    maxWidth: number;
-  } & ({ left: number } | { right: number });
-  scrollTo?: {
-    type: "id" | "link";
-    value: string;
-  };
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
 };
 export const TextBubble = ({
-  project,
-  title,
-  lines,
-  emptyLinks,
+  projects,
+  watchList,
+  source,
   hasChildCards,
-  position,
   index,
   onPointerEnterCapture,
-  scrollTo,
   onClick,
 }: TextBubbleProps) => {
-  const theme = useTheme(project);
+  const theme = useTheme(source.project);
+  const pages = usePages(source.title, projects, watchList);
+  const position = source.position;
+  const emptyLinksList = useMemo(
+    () =>
+      pages.map((page) =>
+        page.links.filter((link) => {
+          const pages = projects.map((project) =>
+            getPage(link, project, watchList, { ignoreFetch: true })
+          );
+          return pages.every((page) => {
+            if (!page) return true;
+
+            const {
+              persistent,
+              relatedPages: { links1hop, projectLinks1hop },
+            } = page;
+
+            return !persistent && links1hop.length === 0 &&
+              projectLinks1hop.length === 0;
+          });
+        })
+      ),
+    [pages, projects, watchList],
+  );
 
   return (
     <>
-      {lines.length > 0 && (
+      {pages.length > 0 && pages[0].lines.length > 0 && (
         <div
           className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
           data-index={index}
@@ -67,16 +79,16 @@ export const TextBubble = ({
           }}
         >
           <StatusBar>
-            {project !== scrapbox.Project.name && (
-              <ProjectBadge project={project} title={title} />
+            {pages[0].project !== scrapbox.Project.name && (
+              <ProjectBadge project={pages[0].project} title={pages[0].title} />
             )}
           </StatusBar>
           <Page
-            lines={lines}
-            emptyLinks={emptyLinks}
-            project={project}
-            title={title}
-            scrollTo={scrollTo}
+            lines={pages[0].lines}
+            project={pages[0].project}
+            title={pages[0].title}
+            emptyLinks={emptyLinksList[0]}
+            scrollTo={source.scrollTo}
           />
         </div>
       )}

@@ -19,6 +19,7 @@ export const exposeState = <T, E = unknown>(promise: Promise<T>) => {
   return () => state;
 };
 
+export type ID = `/${string}/${string}`;
 /** 同一ページか判定するためのIDを作る */
-export const toId = (project: string, title: string): `/${string}/${string}` =>
+export const toId = (project: string, title: string): ID =>
   `/${project}/${toTitleLc(title)}`;
