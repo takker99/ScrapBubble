@@ -36,6 +36,7 @@ export const useTheme = (project: string): Theme => {
           const theme = isTheme(res.value.theme)
             ? res.value.theme
             : defaultTheme;
+          themeMap.set(project, theme);
           emitter.dispatch(project, theme);
         } catch (e: unknown) {
           // 想定外のエラーはログに出す
