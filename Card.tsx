@@ -5,6 +5,7 @@
 /// <reference lib="dom"/>
 import { Fragment, h } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
+import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import {
   FormulaNode,
   HashTagNode,
@@ -13,7 +14,6 @@ import {
   Node as NodeType,
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
-import { encodeTitle } from "./utils.ts";
 import { useParser } from "./useParser.ts";
 import type { LinkType } from "./types.ts";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
@@ -50,7 +50,7 @@ export const Card = ({
       data-theme={theme}
       data-linked-to={linkedTo}
       data-linked-type={linkedType}
-      href={`/${project}/${encodeTitle(title)}`}
+      href={`/${project}/${encodeTitleURI(title)}`}
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}
       {...props}
@@ -155,7 +155,7 @@ const Icon = ({ node: { pathType, path }, project: _project }: IconProps) => {
   return (
     <img
       class="icon"
-      src={`/api/pages/${project}/${encodeTitle(title)}/icon`}
+      src={`/api/pages/${project}/${encodeTitleURI(title)}/icon`}
     />
   );
 };

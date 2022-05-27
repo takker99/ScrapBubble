@@ -37,11 +37,11 @@ import {
   StrongNode,
   Table as TableType,
 } from "./deps/scrapbox-parser.ts";
-import { encodeTitle, toLc } from "./utils.ts";
 import { parseLink } from "./parseLink.ts";
 import { sleep } from "./sleep.ts";
 import { useParser } from "./useParser.ts";
 import type { ScrollTo } from "./types.ts";
+import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -65,14 +65,14 @@ const hasLink = (link: string, nodes: NodeType[]): boolean =>
   nodes.some((node) => {
     switch (node.type) {
       case "hashTag":
-        return toLc(node.href) === toLc(link);
+        return toTitleLc(node.href) === toTitleLc(link);
       case "link": {
         if (node.pathType !== "relative") return false;
         const { title = "" } = parseLink({
           pathType: "relative",
           href: node.href,
         });
-        return toLc(title) === toLc(link);
+        return toTitleLc(title) === toTitleLc(link);
       }
       case "quote":
       case "strong":
@@ -260,7 +260,7 @@ const CodeBlock = (
               ? (
                 <a
                   href={`/api/code/${project}/${
-                    encodeTitle(title)
+                    encodeTitleURI(title)
                   }/${fileName}`}
                   target="_blank"
                 >
@@ -315,7 +315,9 @@ const Table = (
       <span className="table-block">
         <span className="table-block-start">
           <a
-            href={`/api/table/${project}/${encodeTitle(title)}/${fileName}.csv`}
+            href={`/api/table/${project}/${
+              encodeTitleURI(title)
+            }/${fileName}.csv`}
             target="_blank"
           >
             {fileName}
@@ -511,7 +513,7 @@ const Icon = (
       path,
     ]
     : path.match(/\/([\w\-]+)\/(.+)$/)?.slice?.(1) ?? [_project, path];
-  const titleLc = encodeTitle(title);
+  const titleLc = encodeTitleURI(title);
   return (
     <a
       href={`/${project}/${titleLc}`}
@@ -563,9 +565,9 @@ type HashTagProps = {
 };
 const HashTag = ({ node: { href }, project, emptyLinks }: HashTagProps) => (
   <a
-    href={`/${project}/${encodeTitle(href)}`}
+    href={`/${project}/${encodeTitleURI(href)}`}
     className={`page-link${
-      emptyLinks.includes(toLc(href)) ? " empty-page-link" : ""
+      emptyLinks.includes(toTitleLc(href)) ? " empty-page-link" : ""
     }`}
     type="hashTag"
     rel={project === scrapbox.Project.name ? "route" : "noopener noreferrer"}
@@ -592,7 +594,7 @@ const Link = (
       return (
         <a
           className={`page-link${
-            title !== undefined && emptyLinks.includes(toLc(title))
+            title !== undefined && emptyLinks.includes(toTitleLc(title))
               ? " empty-page-link"
               : ""
           }`}
@@ -600,7 +602,7 @@ const Link = (
           href={`/${_project}${
             title === undefined
               ? ""
-              : `/${encodeTitle(title)}${hash === "" ? "" : `#${hash}`}`
+              : `/${encodeTitleURI(title)}${hash === "" ? "" : `#${hash}`}`
           }`}
           rel={_project === scrapbox.Project.name
             ? "route"

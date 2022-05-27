@@ -1,7 +1,7 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { encodeTitle, toLc } from "./utils.ts";
+import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { isScrapboxError } from "./deps/scrapbox.ts";
 import type {
   MemberProject,
@@ -33,7 +33,7 @@ export const getPage = async (
   options?: GetPageOption,
 ): Promise<NotFoundError | NotLoggedInError | NotMemberError | Page> => {
   const path = `https://scrapbox.io/api/pages/${project}/${
-    encodeTitle(toLc(title))
+    encodeTitleURI(toTitleLc(title))
   }?followRename=${options?.followRename ?? true}`;
 
   const res = await fetch(path, options ?? {});

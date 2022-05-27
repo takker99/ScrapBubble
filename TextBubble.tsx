@@ -5,8 +5,8 @@
 /// <reference lib="dom"/>
 import { Page } from "./Page.tsx";
 import { Fragment, FunctionComponent, h } from "./deps/preact.tsx";
+import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
-import { encodeTitle } from "./utils.ts";
 declare const scrapbox: Scrapbox;
 
 export type TextBubbleProps = {
@@ -91,7 +91,7 @@ type ProjectBadgeProps = {
 };
 const ProjectBadge = ({ project, title }: ProjectBadgeProps): h.JSX.Element => (
   <a
-    href={`/${project}/${encodeTitle(title)}`}
+    href={`/${project}/${encodeTitleURI(title)}`}
     target="_blank"
     rel="noopener noreferrer"
   >
