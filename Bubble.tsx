@@ -19,8 +19,10 @@ import type {
 } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
-const makeStyle = (position: Position) => ({
-  top: `${position.top}px`,
+const makeStyle = (position: Position, type: "page" | "card") => ({
+  ...(type === "page"
+    ? { top: `${position.top}px` }
+    : { bottom: `${position.bottom}px` }),
   maxWidth: `${position.maxWidth}px`,
   ...("left" in position
     ? {
@@ -127,7 +129,7 @@ export const Bubble = ({
           data-theme={theme}
           onPointerEnterCapture={onPointerEnterCapture}
           onClick={onClick}
-          style={makeStyle(position)}
+          style={makeStyle(position, "page")}
         >
           <StatusBar>
             {pages[0].project !== scrapbox.Project.name && (
@@ -149,7 +151,7 @@ export const Bubble = ({
         data-theme={theme}
         onPointerEnterCapture={onPointerEnterCapture}
         onClick={onClick}
-        style={makeStyle(position)}
+        style={makeStyle(position, "card")}
       >
         <ul>
           {cards.map((
