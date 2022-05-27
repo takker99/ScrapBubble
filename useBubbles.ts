@@ -1,9 +1,9 @@
 import { useCallback, useMemo, useState } from "./deps/preact.tsx";
-import { toTitleLc } from "./deps/scrapbox-std.ts";
+import { getPage, toTitleLc } from "./deps/scrapbox-std.ts";
+import { fetch } from "./cache.ts";
 import { toId } from "./utils.ts";
 import type { LinkType, ScrollTo } from "./types.ts";
 import { Scrapbox } from "./deps/scrapbox.ts";
-import { getPage } from "./fetch.ts";
 declare const scrapbox: Scrapbox;
 
 export interface Cache {
@@ -136,11 +136,14 @@ export const useBubbles = (
         const id = toId(project, title);
         // 別のPromiseで読込中のページは飛ばす
         if (loadingIds.has(id)) return [true, 0] as const;
-        const data = await getPage(project, title, { expired });
+        const res = await getPage(project, title, {
+          fetch: (req) => fetch(req, { expired }),
+        });
 
         // ページを取得できなかったら更新しない
-        if ("name" in data) return [true, 0] as const;
-        const { lines, persistent, links, relatedPages: { links1hop } } = data;
+        if (!res.ok) return [true, 0] as const;
+        const { lines, persistent, links, relatedPages: { links1hop } } =
+          res.value;
 
         // 逆リンクを取得する
         const linksLc = links.map((link) => toTitleLc(link));
