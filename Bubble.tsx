@@ -85,7 +85,7 @@ export const Bubble = ({
       ? []
       : existPages;
   }, [pages_, scrapbox.Page.title, source.title]);
-  const cards_ = useBackCards(source.title, pages);
+  const cards_ = useBackCards(source.title, pages_);
   /** 表示するカード */
   const cards = useMemo(
     () =>
