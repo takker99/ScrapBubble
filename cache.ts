@@ -28,23 +28,15 @@ export const fetch = async (
   const { expired = 60 /* defaultは1分 */ } = options ?? {};
 
   const req = new Request(path);
-  const cachedRes = await findLatestCache(req, { ignoreSearch: true }) ??
-    await cache.match(req, { ignoreSearch: true });
-  const cached = new Date(cachedRes?.headers?.get?.("Date") ?? 0).getTime() /
-    1000;
-  if (!cachedRes || cached + expired < new Date().getTime() / 1000) {
+  const cachedRes = await findCache(req);
+
+  if (!cachedRes || isExpiredResponse(cachedRes, expired)) {
     // 有効期限切れかcacheがなければ、fetchし直す
     const res = await globalThis.fetch(path);
 
-    // 有効でない応答と空ページのみ自前のcacheに格納する
+    // 有効でない応答のみ自前のcacheに格納する
     if (!res.ok) {
       await cache.put(req, res.clone());
-    }
-    if (req.url.includes("/api/pages/")) {
-      const json = (await res.clone().json());
-      if (json.persistent === false) {
-        await cache.put(req, res.clone());
-      }
     }
 
     return res;
@@ -52,4 +44,31 @@ export const fetch = async (
     // cacheを返す
     return cachedRes;
   }
+};
+
+/** cacheからデータを取得する */
+export const findCache = async (
+  req: Request,
+): Promise<Response | undefined> => {
+  const cachedRes = await findLatestCache(req, { ignoreSearch: true }) ??
+    await cache.match(req, { ignoreSearch: true });
+  return cachedRes;
+};
+
+/** cacheに格納する */
+export const putCache = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  await cache.put(req, res);
+};
+
+/** 有効期限切れのresponseかどうか調べる */
+export const isExpiredResponse = (
+  response: Response,
+  expired: number,
+): boolean => {
+  const updated = new Date(response.headers.get("Date") ?? 0).getTime() /
+    1000;
+  return updated + expired < new Date().getTime() / 1000;
 };
