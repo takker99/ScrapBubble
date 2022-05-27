@@ -73,11 +73,11 @@ export const loadPage = async (
   const id = toId(project, title);
   const state = pageMap.get(id);
   if (state?.loading === true) return;
-  let oldRes = state?.value;
+  let oldResult = state?.value;
 
   // 排他ロックをかける
   // これで同時に同じページの更新が走らないようにする
-  pageMap.set(id, { loading: true, value: oldRes });
+  pageMap.set(id, { loading: true, value: oldResult });
 
   try {
     const req = makeRequest(project, title, { followRename: true, watchList });
@@ -86,16 +86,16 @@ export const loadPage = async (
     const cachedRes = await findCache(req);
     if (cachedRes) {
       const result = await formatResponse(req, cachedRes);
-      pageMap.set(id, { loading: true, value: result });
 
       // 更新があればeventを発行する
       if (
-        result.ok && (!oldRes?.ok ||
-          doesUpdate(oldRes.value, result.value))
+        result.ok && (!oldResult?.ok ||
+          doesUpdate(oldResult.value, result.value))
       ) {
+        pageMap.set(id, { loading: true, value: result });
         emitter.dispatch(id, result.value);
+        oldResult = result;
       }
-      oldRes = result;
     }
 
     // 2. 有効期限が切れているなら、新しくデータをnetworkから取ってくる
@@ -117,8 +117,8 @@ export const loadPage = async (
 
     // 更新があればeventを発行する
     if (
-      result.ok && (!oldRes?.ok ||
-        doesUpdate(oldRes.value, result.value))
+      result.ok && (!oldResult?.ok ||
+        doesUpdate(oldResult.value, result.value))
     ) {
       emitter.dispatch(id, result.value);
     }
