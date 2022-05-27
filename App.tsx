@@ -79,9 +79,6 @@ const App = (
         try {
           link.addEventListener("click", cancel);
           link.addEventListener("pointerleave", cancel);
-          link.addEventListener("pointerup", cancel);
-          link.addEventListener("pointercancel", cancel);
-          link.addEventListener("pointerout", cancel);
           await waited;
         } catch (e) {
           if (e === "cancelled") continue;
@@ -89,9 +86,6 @@ const App = (
         } finally {
           link.removeEventListener("click", cancel);
           link.removeEventListener("pointerleave", cancel);
-          link.removeEventListener("pointerup", cancel);
-          link.removeEventListener("pointercancel", cancel);
-          link.removeEventListener("pointerout", cancel);
         }
 
         // スクロール先を設定する
