@@ -50,9 +50,7 @@ const App = (
     (async () => {
       while (!finished) {
         const event = await waitPointerEnter();
-        if (!(event.currentTarget instanceof HTMLDivElement)) {
-          throw TypeError(`event.currentTarget must be HTMLDivElement`);
-        }
+        ensureHTMLDivElement(event.currentTarget, "event.currentTarget");
         const base = event.currentTarget;
         const depth = parseInt(base.dataset.index ?? "0");
         const link = event.target as HTMLElement;
