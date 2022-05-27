@@ -43,6 +43,7 @@ export const useTheme = (project: string): Theme => {
         }
       })();
     }
+
     return () => emitter.off(project, setTheme);
   }, [project]);
 
