@@ -69,7 +69,7 @@ export const Bubble = ({
       // 現在閲覧しているページと同じページしかないときは何も表示しない
       if (
         titleLc === toTitleLc(scrapbox.Page.title) &&
-        pages_.length === 0 && pages_[0].project === scrapbox.Project.name
+        pages_.length === 1 && pages_[0].project === scrapbox.Project.name
       ) {
         return [];
       }
