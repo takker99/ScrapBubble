@@ -6,7 +6,8 @@
 import { Page } from "./Page.tsx";
 import { Fragment, FunctionComponent, h } from "./deps/preact.tsx";
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
-import type { Scrapbox, Theme } from "./deps/scrapbox.ts";
+import { useTheme } from "./useTheme.ts";
+import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 export type TextBubbleProps = {
@@ -23,7 +24,6 @@ export type TextBubbleProps = {
     top: number;
     maxWidth: number;
   } & ({ left: number } | { right: number });
-  theme: Theme;
   scrollTo?: {
     type: "id" | "link";
     value: string;
@@ -38,48 +38,51 @@ export const TextBubble = ({
   emptyLinks,
   hasChildCards,
   position,
-  theme,
   index,
   onPointerEnterCapture,
   scrollTo,
   onClick,
-}: TextBubbleProps) => (
-  <>
-    {lines.length > 0 && (
-      <div
-        className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
-        data-theme={theme}
-        data-index={index}
-        onPointerEnterCapture={onPointerEnterCapture}
-        onClick={onClick}
-        style={{
-          top: `${position.top}px`,
-          maxWidth: `${position.maxWidth}px`,
-          ...("left" in position
-            ? {
-              left: `${position.left}px`,
-            }
-            : {
-              right: `${position.right}px`,
-            }),
-        }}
-      >
-        <StatusBar>
-          {project !== scrapbox.Project.name && (
-            <ProjectBadge project={project} title={title} />
-          )}
-        </StatusBar>
-        <Page
-          lines={lines}
-          emptyLinks={emptyLinks}
-          project={project}
-          title={title}
-          scrollTo={scrollTo}
-        />
-      </div>
-    )}
-  </>
-);
+}: TextBubbleProps) => {
+  const theme = useTheme(project);
+
+  return (
+    <>
+      {lines.length > 0 && (
+        <div
+          className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
+          data-index={index}
+          data-theme={theme}
+          onPointerEnterCapture={onPointerEnterCapture}
+          onClick={onClick}
+          style={{
+            top: `${position.top}px`,
+            maxWidth: `${position.maxWidth}px`,
+            ...("left" in position
+              ? {
+                left: `${position.left}px`,
+              }
+              : {
+                right: `${position.right}px`,
+              }),
+          }}
+        >
+          <StatusBar>
+            {project !== scrapbox.Project.name && (
+              <ProjectBadge project={project} title={title} />
+            )}
+          </StatusBar>
+          <Page
+            lines={lines}
+            emptyLinks={emptyLinks}
+            project={project}
+            title={title}
+            scrollTo={scrollTo}
+          />
+        </div>
+      )}
+    </>
+  );
+};
 
 const StatusBar: FunctionComponent = ({ children }) => (
   <div className="status-bar top-right">{children}</div>

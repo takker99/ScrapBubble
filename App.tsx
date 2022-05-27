@@ -10,7 +10,6 @@ import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { useEventListener } from "./useEventListener.ts";
 import { toId } from "./utils.ts";
-import { useProjectTheme } from "./useProjectTheme.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./usePromiseSettledAnytimes.ts";
 import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
@@ -39,7 +38,6 @@ const App = (
   { delay, expired, whiteList, scrollTargets }: AppProps,
 ) => {
   const { bubbles, cache, show, hide } = useBubbles({ expired, whiteList });
-  const getTheme = useProjectTheme();
   const [waitPointerEnter, handlePointerEnter] = usePromiseSettledAnytimes<
     PointerEvent
   >();
@@ -162,7 +160,6 @@ const App = (
           <TextBubble
             project={project}
             title={title}
-            theme={getTheme(project)}
             index={index + 1}
             position={position}
             scrollTo={scrollTo}
@@ -179,7 +176,6 @@ const App = (
                 project,
                 linkedTo: title,
                 linkedType: type,
-                theme: getTheme(project),
                 ...rest,
               }),
             )}
