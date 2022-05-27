@@ -125,8 +125,10 @@ export const loadPage = async (
   } catch (e: unknown) {
     // 想定外のエラーはログに出す
     console.error(e);
+  } finally {
     // ロック解除
-    pageMap.set(id, { loading: false, value: oldRes });
+    const result = pageMap.get(id);
+    pageMap.set(id, { loading: false, value: result?.value });
   }
 };
 
