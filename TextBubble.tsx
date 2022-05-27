@@ -43,7 +43,8 @@ export const TextBubble = ({
           );
           return pages.every((page) => {
             // 全てのページを取得し終わるまで、空リンク判定を保留する
-            if (!page?.ok) return false;
+            if (!page) return false;
+            if (!page.ok) return true;
 
             const {
               persistent,
