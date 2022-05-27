@@ -27,8 +27,9 @@ export const fetch = async (
 ): Promise<Response> => {
   const { expired = 60 /* defaultは1分 */ } = options ?? {};
 
-  const cachedRes = await findLatestCache(new Request(path)) ??
-    await cache.match(path);
+  const cachedRes =
+    await findLatestCache(new Request(path), { ignoreSearch: true }) ??
+      await cache.match(path, { ignoreSearch: true });
   const cached = new Date(cachedRes?.headers?.get?.("Date") ?? 0).getTime() /
     1000;
   if (!cachedRes || cached + expired < new Date().getTime() / 1000) {
