@@ -101,7 +101,7 @@ export const loadPage = async (
     // 2. 有効期限が切れているなら、新しくデータをnetworkから取ってくる
     if (options?.ignoreFetch === true) return;
     if (
-      cachedRes && !isExpiredResponse(cachedRes, options?.expired ?? 60 * 1000)
+      cachedRes && !isExpiredResponse(cachedRes, options?.expired ?? 60)
     ) {
       return;
     }

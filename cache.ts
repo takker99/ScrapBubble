@@ -63,7 +63,11 @@ export const putCache = async (
   await cache.put(req, res);
 };
 
-/** 有効期限切れのresponseかどうか調べる */
+/** 有効期限切れのresponseかどうか調べる
+ *
+ * @param response 調べるresponse
+ * @param expired 寿命(単位はs)
+ */
 export const isExpiredResponse = (
   response: Response,
   expired: number,
