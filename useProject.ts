@@ -31,14 +31,13 @@ export const useProject = (project: string): ProjectResult | undefined => {
   const [projectResult, setProjectResult] = useState<ProjectResult>();
 
   useEffect(() => {
-    const state = projectMap.get(project);
+    emitter.on(project, setProjectResult);
 
+    const state = projectMap.get(project);
     if (state) {
       setProjectResult(state.loading ? undefined : state.value);
-      emitter.on(project, setProjectResult);
     } else {
       projectMap.set(project, { loading: true });
-      emitter.on(project, setProjectResult);
       setProjectResult(undefined);
 
       // projectの情報を取得する
@@ -50,6 +49,8 @@ export const useProject = (project: string): ProjectResult | undefined => {
         } catch (e: unknown) {
           // 想定外のエラーはログに出す
           console.error(e);
+          // 未初期化状態に戻す
+          projectMap.delete(project);
         }
       })();
     }
