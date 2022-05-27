@@ -6,6 +6,14 @@ let cache: Cache | undefined;
 const cacheVersion = "0.2.1"; // release前に更新する
 const cacheName = `ScrapBubble-${cacheVersion}`;
 
+// 古いcacheがあったら削除しておく
+for (const name of await globalThis.caches.keys()) {
+  if (name.startsWith("ScrapBubble-") && name !== cacheName) {
+    await globalThis.caches.delete(name);
+    console.log(`[ScrapBubble] deleted old cache :"${name}"`);
+  }
+}
+
 type FetchOption = {
   /** cacheの有効期限 */ expired?: number;
 };
