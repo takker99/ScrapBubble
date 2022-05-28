@@ -46,6 +46,10 @@ export const Bubble = ({
 }: BubbleProps) => {
   const source = useMemo(() => sources[index - 1], [sources, index]);
 
+  /** 親階層で表示しているページ
+   *
+   * これらは子階層で表示しないようにする
+   */
   const parentSources = useMemo(
     () =>
       sources.slice(0, index - 1).map((source) => ({
