@@ -133,7 +133,7 @@ const updateApiCache = async (
     i = counter++;
 
     console.log(
-      `%c[{i}][${oldResult ? "cache loaded" : "cache unloaded"}]Get lock`,
+      `%c[${i}][${oldResult ? "cache loaded" : "cache unloaded"}]Get lock`,
       "color: gray;",
       id,
     );
@@ -182,7 +182,7 @@ const updateApiCache = async (
     const res = await fetch(req);
     if (debugMode) {
       console.log(
-        `%c[{i}]Fetch`,
+        `%c[${i}]Fetch`,
         "color: gray;",
         id,
       );
@@ -219,7 +219,7 @@ const updateApiCache = async (
     pageMap.set(id, { loading: false, value: result?.value });
     if (debugMode) {
       console.log(
-        `%c[{i}]Unlock`,
+        `%c[${i}]Unlock`,
         "color: gray;",
         id,
       );
