@@ -141,12 +141,14 @@ const updateApiCache = async (
 
   try {
     const req = makeRequest(project, title, { followRename: true, watchList });
+    const url = new URL(req.url);
+    const pureURL = `${url.origin}${url.pathname}`;
 
     // 1. cacheから取得する
     if (debugMode) {
       console.time(`[${i}]Get cache ${id}`);
     }
-    const cachedRes = await findCache(req);
+    const cachedRes = await findCache(pureURL);
     if (debugMode) {
       console.timeEnd(`[${i}]Get cache ${id}`);
     }
@@ -188,12 +190,7 @@ const updateApiCache = async (
       );
     }
     const result = await formatResponse(req, res.clone());
-    // エラーか空ページなら、自前のcacheに保存しておく
-    if (!result.ok || !result.value.persistent) {
-      const url = new URL(req.url);
-      const pureURL = `${url.origin}${url.pathname}`;
-      await putCache(new Request(pureURL), res);
-    }
+    await putCache(pureURL, res);
 
     // 更新があればeventを発行する
     if (

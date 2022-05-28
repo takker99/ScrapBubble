@@ -2,8 +2,6 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 
-import { findLatestCache } from "./deps/scrapbox-std.ts";
-
 const cacheVersion = "0.2.1"; // release前に更新する
 const cacheName = `ScrapBubble-${cacheVersion}`;
 const cache = await globalThis.caches.open(cacheName);
@@ -19,7 +17,8 @@ for (const name of await globalThis.caches.keys()) {
 type FetchOption = {
   /** cacheの有効期限 */
   expired?: number;
-};
+} & CacheQueryOptions;
+
 /** cache機能つきfetch */
 export const fetch = async (
   path: string | Request,
@@ -28,16 +27,13 @@ export const fetch = async (
   const { expired = 60 /* defaultは1分 */ } = options ?? {};
 
   const req = new Request(path);
-  const cachedRes = await findCache(req);
+  const cachedRes = await findCache(req, options);
 
   if (!cachedRes || isExpiredResponse(cachedRes, expired)) {
     // 有効期限切れかcacheがなければ、fetchし直す
     const res = await globalThis.fetch(path);
 
-    // 有効でない応答のみ自前のcacheに格納する
-    if (!res.ok) {
-      await cache.put(req, res.clone());
-    }
+    await cache.put(req, res.clone());
 
     return res;
   } else {
@@ -48,16 +44,15 @@ export const fetch = async (
 
 /** cacheからデータを取得する */
 export const findCache = async (
-  req: Request,
+  req: string | Request,
+  options?: CacheQueryOptions,
 ): Promise<Response | undefined> => {
-  const cachedRes = await findLatestCache(req, { ignoreSearch: true }) ??
-    await cache.match(req, { ignoreSearch: true });
-  return cachedRes;
+  return await cache.match(req, options);
 };
 
 /** cacheに格納する */
 export const putCache = async (
-  req: Request,
+  req: string | Request,
   res: Response,
 ): Promise<void> => {
   await cache.put(req, res);
