@@ -59,13 +59,57 @@ export const unsubscribe = (
   listener: Listener<PageResult>,
 ) => emitter.off(toId(project, title), listener);
 
-/** ページデータを取得し、cacheに格納する */
-export const loadPage = async (
+type TaskArg = [string, ProjectId[], LoadPageOptions | undefined];
+const tasks = [] as { project: string; argList: TaskArg[] }[];
+let timer: number | undefined;
+const interval = 250;
+
+/** ページデータ更新タスクを追加する
+ *
+ * 追加されたタスクは、同名projectのページから最後に追加された順に`interval`msごとに実行される
+ */
+const addTask = (project: string, ...args: TaskArg) => {
+  const task = tasks.find((task) => task.project === project);
+  const argList = task?.argList ?? [];
+  if (!task) tasks.push({ project, argList });
+
+  argList.push(args);
+  // task runner
+  // `interval`msごとに1つずつデータを更新する
+  timer ??= setInterval(() => {
+    const task = tasks.find((task) => task.argList.length > 0);
+    if (!task) {
+      clearInterval(timer);
+      timer = undefined;
+      return;
+    }
+    updateApiCache(task.project, ...task.argList.pop()!);
+  }, interval);
+};
+
+/** ページデータを取得し、cacheに格納する
+ *
+ * cacheは一定間隔ごとに、同じprojectのページから優先して行う
+ */
+export const loadPage = (
   title: string,
   project: string,
   watchList: ProjectId[],
   options?: LoadPageOptions,
-): Promise<void> => {
+) => {
+  const id = toId(project, title);
+  const state = pageMap.get(id);
+  if (state?.loading === true) return;
+
+  addTask(project, title, watchList, options);
+};
+
+const updateApiCache = async (
+  project: string,
+  title: string,
+  watchList: ProjectId[],
+  options?: LoadPageOptions,
+) => {
   const id = toId(project, title);
   const state = pageMap.get(id);
   if (state?.loading === true) return;
