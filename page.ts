@@ -155,8 +155,6 @@ const updateApiCache = async (
       const pureURL = `${url.origin}${url.pathname}`;
       await putCache(new Request(pureURL), res);
     }
-    // ロック解除
-    pageMap.set(id, { loading: false, value: result });
 
     // 更新があればeventを発行する
     if (
@@ -164,6 +162,7 @@ const updateApiCache = async (
       (result.ok && (!oldResult.ok ||
         doesUpdate(oldResult.value, result.value)))
     ) {
+      pageMap.set(id, { loading: false, value: result });
       emitter.dispatch(id, result);
     }
   } catch (e: unknown) {
