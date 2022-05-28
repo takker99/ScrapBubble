@@ -110,7 +110,9 @@ export const loadPage = async (
     const result = await formatResponse(req, res.clone());
     // エラーか空ページなら、自前のcacheに保存しておく
     if (!result.ok || !result.value.persistent) {
-      await putCache(req, res);
+      const url = new URL(req.url);
+      const pureURL = `${url.origin}${url.pathname}`;
+      await putCache(new Request(pureURL), res);
     }
     // ロック解除
     pageMap.set(id, { loading: false, value: result });
