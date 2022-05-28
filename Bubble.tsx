@@ -38,7 +38,7 @@ export type BubbleProps = {
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
 };
 export const Bubble = ({
-  projects,
+  projects: projects_,
   sources,
   index,
   onPointerEnterCapture,
@@ -61,13 +61,41 @@ export const Bubble = ({
       index,
     ],
   );
+  /** source.projectも含めたprojectのリスト */
+  const projects = useMemo(
+    () => [
+      source.project,
+      ...projects_.filter((project) => project !== source.project),
+    ],
+    [projects_, source.project],
+  );
+  /** bubble発生源が`projects_`にあるprojectでなければ`true` */
+  const isUnlistedProject = useMemo(() => projects_.includes(source.project), [
+    projects_,
+    source.project,
+  ]);
   const theme = useTheme(source.project);
-  const pages_ = usePages(source.title, projects);
+  const pages_ = usePages(
+    source.title,
+    isUnlistedProject ? [source.project] : projects,
+  );
+  const pagesWithoutExternal = useMemo(
+    () =>
+      isUnlistedProject
+        // external linksだけ取得する
+        ? pages_.map((page) => {
+          page.persistent = false;
+          page.relatedPages.links1hop = [];
+          return page;
+        })
+        : pages_,
+    [isUnlistedProject, pages_],
+  );
   /** 表示するページ */
   const pages = useMemo(() => {
     const titleLc = toTitleLc(source.title);
-    // 先に空ページを除いておく
-    const existPages = pages_.filter((page) => page.persistent);
+    // 先に空ページとprojects_に無いページを除いておく
+    const existPages = pagesWithoutExternal.filter((page) => page.persistent);
 
     if (scrapbox.Page.title) {
       // 現在閲覧しているページと同じページしかないときは何も表示しない
@@ -83,8 +111,13 @@ export const Bubble = ({
     return parentSources.some((source) => source.titleLc === titleLc)
       ? []
       : existPages;
-  }, [pages_, scrapbox.Page.title, source.title]);
-  const cards_ = useBackCards(source.title, pages_);
+  }, [
+    pagesWithoutExternal,
+    scrapbox.Page.title,
+    source.title,
+  ]);
+  const cards_ = useBackCards(source.title, pagesWithoutExternal);
+
   /** 表示するカード */
   const cards = useMemo(
     () =>

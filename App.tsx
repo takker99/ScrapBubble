@@ -87,8 +87,8 @@ const App = (
         const title = decodeURIComponent(encodedTitle ?? "");
 
         // 必要なデータを先読みする
-        for (const project of projects) {
-          loadPage(title, project, watchList);
+        for (const project2 of [project, ...projects]) {
+          loadPage(title, project2, watchList);
         }
 
         // delay以内にカーソルが離れるかクリックしたら何もしない
