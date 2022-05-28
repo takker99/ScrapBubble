@@ -3,10 +3,9 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { TextBubble } from "./TextBubble.tsx";
-import { CardBubble } from "./CardBubble.tsx";
+import { Bubble } from "./Bubble.tsx";
 import { CSS } from "./app.min.css.ts";
-import { Fragment, h, render, useEffect } from "./deps/preact.tsx";
+import { Fragment, h, render, useEffect, useMemo } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { useEventListener } from "./useEventListener.ts";
 import { toId } from "./utils.ts";
@@ -15,17 +14,25 @@ import { usePromiseSettledAnytimes } from "./usePromiseSettledAnytimes.ts";
 import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
 import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
+import { getWatchList } from "./watchList.ts";
+import { loadPage } from "./page.ts";
 import { editor } from "./deps/scrapbox-std.ts";
 import type { LinkType } from "./types.ts";
-import type { Scrapbox } from "./deps/scrapbox.ts";
+import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 const userscriptName = "scrap-bubble";
 
 export interface AppProps {
-  /** hoverしてからbubbleを表示するまでのタイムラグ */ delay: number;
-  /** cacheの有効期間 */ expired: number;
-  /** 透過的に扱うprojectのリスト */ whiteList: string[];
+  /** hoverしてからbubbleを表示するまでのタイムラグ */
+  delay: number;
+
+  /** 透過的に扱うprojectのリスト */
+  whiteList: string[];
+
+  /** watch list */
+  watchList: ProjectId[];
+
   /** リンク先へスクロールする機能を有効にする対象
    *
    * `link`: []で囲まれたリンク
@@ -35,9 +42,16 @@ export interface AppProps {
   scrollTargets: ("title" | "link" | "hashtag" | "lineId")[];
 }
 const App = (
-  { delay, expired, whiteList, scrollTargets }: AppProps,
+  { delay, whiteList, scrollTargets, watchList }: AppProps,
 ) => {
-  const { bubbles, cache, show, hide } = useBubbles({ expired, whiteList });
+  const { bubbles, change } = useBubbles();
+  const projects = useMemo(
+    () => [
+      scrapbox.Project.name,
+      ...whiteList.filter((project) => project !== scrapbox.Project.name),
+    ],
+    [whiteList],
+  );
   const [waitPointerEnter, handlePointerEnter] = usePromiseSettledAnytimes<
     PointerEvent
   >();
@@ -71,7 +85,11 @@ const App = (
         // [/project]の形のリンクは何もしない
         if (project === "") return;
         const title = decodeURIComponent(encodedTitle ?? "");
-        cache(project, title);
+
+        // 必要なデータを先読みする
+        for (const project of projects) {
+          loadPage(title, project, watchList);
+        }
 
         // delay以内にカーソルが離れるかクリックしたら何もしない
         const waited = sleep(delay);
@@ -106,7 +124,9 @@ const App = (
         const root = editorDiv.getBoundingClientRect();
         // linkが画面の右寄りにあったら、bubbleを左側に出す
         const adjustRight = (left - root.left) / root.width > 0.5;
-        show(depth, project, title, {
+        change(depth, {
+          project,
+          title,
           scrollTo,
           position: {
             top: Math.round(bottom - root.top),
@@ -123,18 +143,18 @@ const App = (
       }
     })();
     return () => finished = true;
-  }, [delay, cache, show]);
+  }, [delay, change, whiteList, watchList]);
   useEventListener(editorDiv, "pointerenter", handlePointerEnter, {
     capture: true,
   });
   useEventListener(document, "click", (e) => {
     const target = e.target as HTMLElement;
     if (target.dataset.userscriptName === userscriptName) return;
-    hide(0);
+    change(0);
   }, { capture: true });
 
   useEffect(() => {
-    const callback = () => hide(0);
+    const callback = () => change(0);
     scrapbox.addListener("page:changed", callback);
     return () => scrapbox.removeListener("page:changed", callback);
   }, []);
@@ -146,57 +166,28 @@ const App = (
         href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css"
       />
       <style>{CSS}</style>
-      {bubbles.map(({
-        project,
-        title,
-        lines,
-        emptyLinks,
-        position,
-        scrollTo,
-        type,
-        linked,
-      }, index) => (
-        <Fragment key={toId(project, title)}>
-          <TextBubble
-            project={project}
-            title={title}
-            index={index + 1}
-            position={position}
-            scrollTo={scrollTo}
-            lines={lines}
-            emptyLinks={emptyLinks}
-            onPointerEnterCapture={handlePointerEnter}
-            onClick={() => hide(index + 1)}
-            hasChildCards={bubbles.length > index + 1}
-          />
-          <CardBubble
-            position={position}
-            cards={linked.map(
-              ({ project, ...rest }) => ({
-                project,
-                linkedTo: title,
-                linkedType: type,
-                ...rest,
-              }),
-            )}
-            index={index + 1}
-            onPointerEnterCapture={handlePointerEnter}
-            onClick={() => hide(index + 1)}
-          />
-        </Fragment>
+      {bubbles.map((bubble, index) => (
+        <Bubble
+          key={toId(bubble.project, bubble.title)}
+          sources={bubbles}
+          projects={projects}
+          index={index + 1}
+          onPointerEnterCapture={handlePointerEnter}
+          onClick={() => change(index + 1)}
+        />
       ))}
     </>
   );
 };
 
-export const mount = (
-  {
+export const mount = (init?: Partial<AppProps>): void => {
+  const {
     delay = 500,
-    expired = 60,
     whiteList = [],
+    watchList = getWatchList().slice(0, 100),
     scrollTargets = ["link", "hashtag", "lineId", "title"],
-  }: Partial<AppProps> = {},
-): void => {
+  } = init ?? {};
+
   const app = document.createElement("div");
   app.dataset.userscriptName = userscriptName;
   const editorDiv = editor();
@@ -206,8 +197,8 @@ export const mount = (
   render(
     <App
       delay={delay}
-      expired={expired}
       whiteList={whiteList}
+      watchList={watchList}
       scrollTargets={scrollTargets}
     />,
     shadowRoot,
