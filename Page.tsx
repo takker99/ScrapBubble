@@ -84,7 +84,7 @@ const hasLink = (link: string, nodes: NodeType[]): boolean =>
 export const Page = (
   { lines, project, title, emptyLinks, noIndent, scrollTo }: PageProps,
 ): h.JSX.Element => {
-  const _blocks = useParser(lines, { hasTitle: false });
+  const _blocks = useParser(lines, { hasTitle: true });
   const lineIds = useMemo(
     () => lines.flatMap((line) => typeof line === "string" ? [] : [line.id]),
     [lines],
@@ -149,7 +149,20 @@ export const Page = (
       {blocks.map((block) => {
         switch (block.type) {
           case "title":
-            return <div />; // dummy
+            return (
+              <>
+                <Line
+                  key={block.id}
+                  index={block.id}
+                  indent={0}
+                  noIndent={noIndent}
+                  permalink={block.id === scrollId}
+                >
+                  <Plain node={block} />
+                </Line>
+                <hr />
+              </>
+            );
           case "codeBlock": {
             return (
               <CodeBlock
@@ -490,7 +503,7 @@ const GoogleMap = (
   </span>
 );
 type PlainProps = {
-  node: PlainNode | BlankNode;
+  node: Pick<PlainNode | BlankNode, "text">;
 };
 const Plain = ({ node: { text } }: PlainProps) => <>{text}</>;
 type IconProps =
