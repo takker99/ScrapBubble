@@ -131,7 +131,7 @@ export const Bubble = ({
   );
   const position = source.position;
   /** 空リンクのリスト */
-  const emptyLinks = useEmptyLinks(pages, projects);
+  const emptyLinks = useEmptyLinks(pages, isUnlistedProject ? [] : projects);
 
   return (
     <>
