@@ -20,6 +20,7 @@ import { editor } from "./deps/scrapbox-std.ts";
 import type { LinkType } from "./types.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
+export { setDebugMode } from "./page.ts";
 
 const userscriptName = "scrap-bubble";
 
