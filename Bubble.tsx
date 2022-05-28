@@ -11,7 +11,6 @@ import { useTheme } from "./useTheme.ts";
 import { usePages } from "./usePages.ts";
 import { useBackCards } from "./useBackCards.ts";
 import { useEmptyLinks } from "./useEmptyLinks.ts";
-import { getPage } from "./page.ts";
 import { toId } from "./utils.ts";
 import type { BubbleSource, Position } from "./useBubbles.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
@@ -62,7 +61,6 @@ export const Bubble = ({
       index,
     ],
   );
-  const hasChildCards = useMemo(() => sources.length > index, [sources, index]);
   const theme = useTheme(source.project);
   const pages_ = usePages(source.title, projects);
   /** 表示するページ */
@@ -106,7 +104,7 @@ export const Bubble = ({
     <>
       {pages.length > 0 && pages[0].lines.length > 0 && (
         <div
-          className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
+          className="text-bubble"
           data-index={index}
           data-theme={theme}
           onPointerEnterCapture={onPointerEnterCapture}
