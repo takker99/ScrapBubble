@@ -223,6 +223,7 @@ const updateApiCache = async (
         "color: gray;",
         id,
       );
+      counter--;
     }
   }
 };
