@@ -2,7 +2,7 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 
-const cacheVersion = "0.2.1"; // release前に更新する
+const cacheVersion = "0.3.0"; // release前に更新する
 const cacheName = `ScrapBubble-${cacheVersion}`;
 const cache = await globalThis.caches.open(cacheName);
 
