@@ -15,9 +15,9 @@ import {
   ProjectId,
 } from "./deps/scrapbox.ts";
 
-const emitter = makeEmitter<ID, Page>();
+const emitter = makeEmitter<ID, PageResult>();
 
-type PageResult = Result<
+export type PageResult = Result<
   Page,
   NotFoundError | NotLoggedInError | NotMemberError
 >;
@@ -49,14 +49,14 @@ export const getPage = (
 export const subscribe = (
   title: string,
   project: string,
-  listener: Listener<Page>,
+  listener: Listener<PageResult>,
 ) => emitter.on(toId(project, title), listener);
 
 /** 特定のページの更新購読を解除する */
 export const unsubscribe = (
   title: string,
   project: string,
-  listener: Listener<Page>,
+  listener: Listener<PageResult>,
 ) => emitter.off(toId(project, title), listener);
 
 /** ページデータを取得し、cacheに格納する */
@@ -85,11 +85,12 @@ export const loadPage = async (
 
       // 更新があればeventを発行する
       if (
-        result.ok && (!oldResult?.ok ||
-          doesUpdate(oldResult.value, result.value))
+        !oldResult ||
+        (result.ok && (!oldResult.ok ||
+          doesUpdate(oldResult.value, result.value)))
       ) {
         pageMap.set(id, { loading: true, value: result });
-        emitter.dispatch(id, result.value);
+        emitter.dispatch(id, result);
         oldResult = result;
       }
     }
@@ -115,10 +116,11 @@ export const loadPage = async (
 
     // 更新があればeventを発行する
     if (
-      result.ok && (!oldResult?.ok ||
-        doesUpdate(oldResult.value, result.value))
+      !oldResult ||
+      (result.ok && (!oldResult.ok ||
+        doesUpdate(oldResult.value, result.value)))
     ) {
-      emitter.dispatch(id, result.value);
+      emitter.dispatch(id, result);
     }
   } catch (e: unknown) {
     // 想定外のエラーはログに出す

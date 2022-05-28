@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "./deps/preact.tsx";
 import { toTitleLc } from "./deps/scrapbox-std.ts";
-import { PageWithProject } from "./usePages.ts";
-import { getPage, subscribe, unsubscribe } from "./page.ts";
+import { getPage, PageResult, subscribe, unsubscribe } from "./page.ts";
 import type { Page } from "./deps/scrapbox.ts";
 
 /** 指定したページに含まれる空リンクを返すhooks
@@ -10,7 +9,7 @@ import type { Page } from "./deps/scrapbox.ts";
  * @return 空リンクのリスト
  */
 export const useEmptyLinks = (
-  pages: PageWithProject[],
+  pages: Page[],
   projects: string[],
 ): string[] => {
   /** ページ中の全てのリンク */
@@ -40,15 +39,14 @@ export const useEmptyLinks = (
           projects.map((project) => {
             const page = getPage(link, project);
             if (!page) return 2;
-            if (!page.ok) return 0;
-            return getLinkedPoint(page.value);
+            return getLinkedPoint(page);
           }),
         ]),
       ),
     );
 
     /** ページデータを更新するcallback */
-    const updateData = (linkLc: string, project: string, page: Page) =>
+    const updateData = (linkLc: string, project: string, page: PageResult) =>
       setLinkedPoints((map) => {
         const points = map.get(linkLc);
         const point = getLinkedPoint(page);
@@ -65,7 +63,8 @@ export const useEmptyLinks = (
     const callbacks = [] as Parameters<typeof subscribe>[];
     for (const linkLc of linksLc) {
       for (const project of projects) {
-        const callback = (page: Page) => updateData(linkLc, project, page);
+        const callback = (page: PageResult) =>
+          updateData(linkLc, project, page);
         subscribe(linkLc, project, callback);
         callbacks.push([linkLc, project, callback]);
       }
@@ -87,15 +86,18 @@ export const useEmptyLinks = (
 /** 与えられたリンクの逆リンク指数を計算する
  *
  * 全てのprojectからの指数の合計が1以下なら空リンクと判定する
+ * ページエラーは空リンクとみなす
  *
  * @param page リンクのページデータ
- * @return 空リンクなら`true`
+ * @return 逆リンク指数
  */
-const getLinkedPoint = (page: Page): number => {
+const getLinkedPoint = (page: PageResult): number => {
+  if (!page.ok) return 0;
+
   const {
     persistent,
     relatedPages: { links1hop, projectLinks1hop },
-  } = page;
+  } = page.value;
 
   return persistent ? 2 : links1hop.length + projectLinks1hop.length;
 };

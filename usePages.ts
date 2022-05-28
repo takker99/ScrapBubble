@@ -1,6 +1,12 @@
 import { useEffect, useState } from "./deps/preact.tsx";
-import { Page } from "./deps/scrapbox.ts";
-import { getPage, LoadPageOptions, subscribe, unsubscribe } from "./page.ts";
+import type { Page } from "./deps/scrapbox.ts";
+import {
+  getPage,
+  LoadPageOptions,
+  PageResult,
+  subscribe,
+  unsubscribe,
+} from "./page.ts";
 
 export interface PageWithProject extends Page {
   project: string;
@@ -30,19 +36,21 @@ export const usePages = (
   // データ更新用listenerの登録
   useEffect(() => {
     /** ページデータを更新する */
-    const updateData = (project: string, page: Page) =>
+    const updateData = (project: string, page: PageResult) => {
+      if (!page.ok) return;
       setPages((pages) =>
         projects.flatMap((project_) => {
-          if (project_ === project) return { project, ...page };
+          if (project_ === project) return { project, ...page.value };
           const page_ = pages.find((page) => page.project === project_);
           return page_ ? [page_] : [];
         })
       );
+    };
 
     // 更新を購読する
     const callbacks = [] as Parameters<typeof subscribe>[];
     for (const project of projects) {
-      const callback = (page: Page) => updateData(project, page);
+      const callback = (page: PageResult) => updateData(project, page);
       subscribe(title, project, callback);
       callbacks.push([title, project, callback]);
     }
