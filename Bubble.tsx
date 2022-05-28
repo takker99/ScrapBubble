@@ -70,7 +70,7 @@ export const Bubble = ({
     [projects_, source.project],
   );
   /** bubble発生源が`projects_`にあるprojectでなければ`true` */
-  const isUnlistedProject = useMemo(() => projects_.includes(source.project), [
+  const isUnlistedProject = useMemo(() => !projects_.includes(source.project), [
     projects_,
     source.project,
   ]);
