@@ -10,6 +10,7 @@ import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { useTheme } from "./useTheme.ts";
 import { usePages } from "./usePages.ts";
 import { useBackCards } from "./useBackCards.ts";
+import { useEmptyLinks } from "./useEmptyLinks.ts";
 import { getPage } from "./page.ts";
 import { toId } from "./utils.ts";
 import type { BubbleSource, Position } from "./useBubbles.ts";
@@ -99,28 +100,7 @@ export const Bubble = ({
   );
   const position = source.position;
   /** 空リンクのリスト */
-  const emptyLinksList = useMemo(
-    () =>
-      pages.map((page) =>
-        page.links.filter((link) => {
-          const pages = projects.map((project) => getPage(link, project));
-          return pages.every((page) => {
-            // 全てのページを取得し終わるまで、空リンク判定を保留する
-            if (!page) return false;
-            if (!page.ok) return true;
-
-            const {
-              persistent,
-              relatedPages: { links1hop, projectLinks1hop },
-            } = page.value;
-
-            return !persistent &&
-              links1hop.length + projectLinks1hop.length < 2;
-          });
-        })
-      ),
-    [pages, projects],
-  );
+  const emptyLinks = useEmptyLinks(pages, projects);
 
   return (
     <>
@@ -142,7 +122,7 @@ export const Bubble = ({
             lines={pages[0].lines}
             project={pages[0].project}
             title={pages[0].title}
-            emptyLinks={emptyLinksList[0]}
+            emptyLinks={emptyLinks}
             scrollTo={source.scrollTo}
           />
         </div>
