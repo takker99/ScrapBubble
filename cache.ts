@@ -2,8 +2,6 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 
-import { findLatestCache } from "./deps/scrapbox-std.ts";
-
 const cacheVersion = "0.2.1"; // release前に更新する
 const cacheName = `ScrapBubble-${cacheVersion}`;
 const cache = await globalThis.caches.open(cacheName);
