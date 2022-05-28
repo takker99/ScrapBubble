@@ -139,13 +139,11 @@ const App = (
               : document.documentElement.clientWidth - left - 10,
           },
           type: getLinkType(link),
-          bubbled: false,
         });
       }
     })();
     return () => finished = true;
   }, [delay, change, whiteList, watchList]);
-
   useEventListener(editorDiv, "pointerenter", handlePointerEnter, {
     capture: true,
   });
@@ -160,14 +158,6 @@ const App = (
     scrapbox.addListener("page:changed", callback);
     return () => scrapbox.removeListener("page:changed", callback);
   }, []);
-
-  const onBubbleList = useMemo(
-    () =>
-      bubbles.map(({ bubbled: _, ...rest }, i) =>
-        (value: boolean) => change(i, { bubbled: value, ...rest })
-      ),
-    [bubbles, change],
-  );
 
   return (
     <>
@@ -184,7 +174,6 @@ const App = (
           index={index + 1}
           onPointerEnterCapture={handlePointerEnter}
           onClick={() => change(index + 1)}
-          onBubble={onBubbleList[index]}
         />
       ))}
     </>

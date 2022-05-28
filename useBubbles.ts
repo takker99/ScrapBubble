@@ -19,9 +19,6 @@ export interface BubbleSource {
 
   /** 発生源の種類 */
   type: LinkType;
-
-  /** bubbleを表示しているかどうか */
-  bubbled: boolean;
 }
 
 export type Position =
