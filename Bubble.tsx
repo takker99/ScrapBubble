@@ -5,13 +5,18 @@
 /// <reference lib="dom"/>
 import { Page } from "./Page.tsx";
 import { Card } from "./Card.tsx";
-import { Fragment, FunctionComponent, h, useMemo } from "./deps/preact.tsx";
+import {
+  Fragment,
+  FunctionComponent,
+  h,
+  useEffect,
+  useMemo,
+} from "./deps/preact.tsx";
 import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { useTheme } from "./useTheme.ts";
 import { usePages } from "./usePages.ts";
 import { useBackCards } from "./useBackCards.ts";
 import { useEmptyLinks } from "./useEmptyLinks.ts";
-import { getPage } from "./page.ts";
 import { toId } from "./utils.ts";
 import type { BubbleSource, Position } from "./useBubbles.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
@@ -37,6 +42,7 @@ export type BubbleProps = {
   index: number;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
   onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
+  onBubble?: (bubbled: boolean) => void;
 };
 export const Bubble = ({
   projects,
@@ -44,6 +50,7 @@ export const Bubble = ({
   index,
   onPointerEnterCapture,
   onClick,
+  onBubble,
 }: BubbleProps) => {
   const source = useMemo(() => sources[index - 1], [sources, index]);
 
@@ -62,7 +69,14 @@ export const Bubble = ({
       index,
     ],
   );
-  const hasChildCards = useMemo(() => sources.length > index, [sources, index]);
+  /** 子階層でbubbleがあるかどうか
+   *
+   * あればスクロールをロックする
+   */
+  const isChildBubbled = useMemo(
+    () => sources.length > index && sources[index].bubbled,
+    [sources, index],
+  );
   const theme = useTheme(source.project);
   const pages_ = usePages(source.title, projects);
   /** 表示するページ */
@@ -102,11 +116,17 @@ export const Bubble = ({
   /** 空リンクのリスト */
   const emptyLinks = useEmptyLinks(pages, projects);
 
+  // bubbleするものがないとき発火
+  useEffect(() => onBubble?.(pages.length + cards.length > 0), [
+    pages,
+    cards,
+    onBubble,
+  ]);
   return (
     <>
       {pages.length > 0 && pages[0].lines.length > 0 && (
         <div
-          className={`text-bubble${hasChildCards ? " no-scroll" : ""}`}
+          className={`text-bubble${isChildBubbled ? " no-scroll" : ""}`}
           data-index={index}
           data-theme={theme}
           onPointerEnterCapture={onPointerEnterCapture}
