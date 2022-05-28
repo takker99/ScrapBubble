@@ -8,15 +8,12 @@ import { Card } from "./Card.tsx";
 import { Fragment, FunctionComponent, h, useMemo } from "./deps/preact.tsx";
 import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { useTheme } from "./useTheme.ts";
-import { PageWithProject, usePages } from "./usePages.ts";
+import { usePages } from "./usePages.ts";
+import { useBackCards } from "./useBackCards.ts";
 import { getPage } from "./page.ts";
 import { toId } from "./utils.ts";
 import type { BubbleSource, Position } from "./useBubbles.ts";
-import type {
-  ProjectId,
-  ProjectRelatedPage,
-  Scrapbox,
-} from "./deps/scrapbox.ts";
+import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 const makeStyle = (position: Position, type: "page" | "card") => ({
@@ -48,6 +45,7 @@ export const Bubble = ({
   onClick,
 }: BubbleProps) => {
   const source = useMemo(() => sources[index - 1], [sources, index]);
+
   const parentSources = useMemo(
     () =>
       sources.slice(0, index - 1).map((source) => ({
@@ -192,45 +190,3 @@ const ProjectBadge = ({ project, title }: ProjectBadgeProps): h.JSX.Element => (
     {project}
   </a>
 );
-
-/** 指定したリンクの逆リンクを取得するhooks
- *
- * @param title リンクの名前
- * @param pages ページデータ
- * @return 逆リンクのリスト
- */
-const useBackCards = (
-  title: string,
-  pages: PageWithProject[],
-): ProjectRelatedPage[] => {
-  const backCards = useMemo(() =>
-    pages.flatMap((page) => {
-      const cards = [] as ProjectRelatedPage[];
-      const { projectLinks, relatedPages: { links1hop, projectLinks1hop } } =
-        page;
-      const projectLinksLc = projectLinks.map((link) => toTitleLc(link));
-
-      // 1 hop linksのうち、titleにリンクしているページのみ抽出する
-      cards.push(
-        ...links1hop.flatMap((card) =>
-          card.linksLc.includes(toTitleLc(title))
-            ? [{ projectName: page.project, ...card }]
-            : []
-        ),
-      );
-
-      // external linksのうち、順リンクがないもののみ抽出する
-      // 逆リンクがあるものも除かれてしまうが、判定方法がないので断念する
-      cards.push(
-        ...projectLinks1hop.filter((card) =>
-          !projectLinksLc.includes(
-            toTitleLc(`/${card.projectName}/${card.title}`),
-          )
-        ),
-      );
-
-      return cards;
-    }), [pages, title]);
-
-  return backCards;
-};
