@@ -86,6 +86,7 @@ const App = (
         if (project === "") return;
         const title = decodeURIComponent(encodedTitle ?? "");
 
+        // 必要なデータを先読みする
         for (const project of projects) {
           loadPage(title, project, watchList);
         }
@@ -170,7 +171,6 @@ const App = (
           key={toId(bubble.project, bubble.title)}
           sources={bubbles}
           projects={projects}
-          watchList={watchList}
           index={index + 1}
           onPointerEnterCapture={handlePointerEnter}
           onClick={() => change(index + 1)}

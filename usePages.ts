@@ -1,5 +1,5 @@
 import { useEffect, useState } from "./deps/preact.tsx";
-import { Page, ProjectId } from "./deps/scrapbox.ts";
+import { Page } from "./deps/scrapbox.ts";
 import { getPage, LoadPageOptions, subscribe, unsubscribe } from "./page.ts";
 
 export interface PageWithProject extends Page {
@@ -11,24 +11,21 @@ export type UsePageOptions = LoadPageOptions;
  *
  * @param title 取得したいページのタイトル
  * @param projects 取得先projectのリスト
- * @param watchList external Links用のwatch list
  * @return 取得したページのリスト。順番は`projects`と同じ
  */
 export const usePages = (
   title: string,
   projects: string[],
-  watchList: ProjectId[],
-  options?: UsePageOptions,
 ): PageWithProject[] => {
   const [pages, setPages] = useState<PageWithProject[]>([]);
 
   // データの初期化
   useEffect(() => {
     setPages(projects.flatMap((project) => {
-      const res = getPage(title, project, watchList, options);
+      const res = getPage(title, project);
       return res?.ok === true ? [{ project, ...res.value }] : [];
     }));
-  }, [title, projects, watchList, options]);
+  }, [title, projects]);
 
   // データ更新用listenerの登録
   useEffect(() => {

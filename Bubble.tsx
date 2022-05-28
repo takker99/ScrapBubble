@@ -35,7 +35,6 @@ const makeStyle = (position: Position, type: "page" | "card") => ({
 
 export type BubbleProps = {
   projects: string[];
-  watchList: ProjectId[];
   sources: BubbleSource[];
   index: number;
   onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
@@ -43,7 +42,6 @@ export type BubbleProps = {
 };
 export const Bubble = ({
   projects,
-  watchList,
   sources,
   index,
   onPointerEnterCapture,
@@ -63,7 +61,7 @@ export const Bubble = ({
   );
   const hasChildCards = useMemo(() => sources.length > index, [sources, index]);
   const theme = useTheme(source.project);
-  const pages_ = usePages(source.title, projects, watchList);
+  const pages_ = usePages(source.title, projects);
   /** 表示するページ */
   const pages = useMemo(() => {
     const titleLc = toTitleLc(source.title);
@@ -103,9 +101,7 @@ export const Bubble = ({
     () =>
       pages.map((page) =>
         page.links.filter((link) => {
-          const pages = projects.map((project) =>
-            getPage(link, project, watchList, { ignoreFetch: true })
-          );
+          const pages = projects.map((project) => getPage(link, project));
           return pages.every((page) => {
             // 全てのページを取得し終わるまで、空リンク判定を保留する
             if (!page) return false;
@@ -121,7 +117,7 @@ export const Bubble = ({
           });
         })
       ),
-    [pages, projects, watchList],
+    [pages, projects],
   );
 
   return (
