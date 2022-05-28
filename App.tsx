@@ -86,8 +86,11 @@ const App = (
         if (project === "") return;
         const title = decodeURIComponent(encodedTitle ?? "");
 
-        // 必要なデータを先読みする
-        for (const project2 of [project, ...projects]) {
+        // 必要なデータを読み込む
+        // white listにない外部プロジェクトリンクは、そのページだけを読み込む
+        for (
+          const project2 of projects.includes(project) ? projects : [project]
+        ) {
           loadPage(title, project2, watchList);
         }
 
