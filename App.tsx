@@ -8,7 +8,7 @@ import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect, useMemo } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { useEventListener } from "./useEventListener.ts";
-import { toId } from "./utils.ts";
+import { detectURL, toId } from "./utils.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./usePromiseSettledAnytimes.ts";
 import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
@@ -34,6 +34,13 @@ export interface AppProps {
   /** watch list */
   watchList: ProjectId[];
 
+  /** カスタムCSS
+   *
+   * URL or URL文字列の場合は、CSSファイルへのURLだとみなして<link />で読み込む
+   * それ以外の場合は、インラインCSSとして<style />で読み込む
+   */
+  style: URL | string;
+
   /** リンク先へスクロールする機能を有効にする対象
    *
    * `link`: []で囲まれたリンク
@@ -43,7 +50,7 @@ export interface AppProps {
   scrollTargets: ("title" | "link" | "hashtag" | "lineId")[];
 }
 const App = (
-  { delay, whiteList, scrollTargets, watchList }: AppProps,
+  { delay, whiteList, scrollTargets, watchList, style }: AppProps,
 ) => {
   const { bubbles, change } = useBubbles();
   const projects = useMemo(
@@ -163,6 +170,8 @@ const App = (
     return () => scrapbox.removeListener("page:changed", callback);
   }, []);
 
+  const url = useMemo(() => detectURL(style), [style]);
+
   return (
     <>
       <link
@@ -170,6 +179,9 @@ const App = (
         href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css"
       />
       <style>{CSS}</style>
+      {url !== "" && (url instanceof URL
+        ? <link rel="stylesheet" href={url.href} />
+        : <style>{url}</style>)}
       {bubbles.map((bubble, index) => (
         <Bubble
           key={toId(bubble.project, bubble.title)}
@@ -190,6 +202,7 @@ export const mount = (init?: Partial<AppProps>): void => {
     whiteList = [],
     watchList = getWatchList().slice(0, 100),
     scrollTargets = ["link", "hashtag", "lineId", "title"],
+    style = "",
   } = init ?? {};
 
   const app = document.createElement("div");
@@ -204,6 +217,7 @@ export const mount = (init?: Partial<AppProps>): void => {
       whiteList={whiteList}
       watchList={watchList}
       scrollTargets={scrollTargets}
+      style={style}
     />,
     shadowRoot,
   );
