@@ -1,4 +1,4 @@
-export { parse } from "https://esm.sh/@progfay/scrapbox-parser@7.2.0";
+export { parse } from "https://esm.sh/@progfay/scrapbox-parser@8.0.0";
 export type {
   BlankNode,
   CodeBlock,
@@ -22,4 +22,4 @@ export type {
   StrongImageNode,
   StrongNode,
   Table,
-} from "https://esm.sh/@progfay/scrapbox-parser@7.2.0";
+} from "https://esm.sh/@progfay/scrapbox-parser@8.0.0";
