@@ -400,6 +400,15 @@ const Node = ({ node, project, emptyLinks }: NodeProps) => {
       return <Image node={node} />;
     case "strongImage":
       return <StrongImage node={node} />;
+    case "numberList":
+      return (
+        <>
+          {`${node.number}. `}
+          {node.nodes.map((node) => (
+            <Node node={node} project={project} emptyLinks={emptyLinks} />
+          ))}
+        </>
+      );
   }
 };
 
