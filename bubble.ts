@@ -2,17 +2,9 @@ import { fromResponse, toRequest } from "./page-api.ts";
 import { findCache, isExpiredResponse, putCache } from "./cache.ts";
 import { ID, toId } from "./utils.ts";
 import { Listener, makeEmitter } from "./eventEmitter.ts";
+import { logger } from "./debug.ts";
 import { toTitleLc } from "./deps/scrapbox-std.ts";
 import { Line, Page as RawPage, ProjectId, StringLc } from "./deps/scrapbox.ts";
-
-let debugMode = false;
-/** cache周りのdebug出力の有効・無効の切り替えを行う
- *
- * defaultで`false`
- */
-export const setDebugMode = (enable: boolean): void => {
-  debugMode = enable;
-};
 
 export interface Page {
   title: string;
@@ -175,16 +167,13 @@ const updateApiCache = async (
   // 排他ロックをかける
   // これで同時に同じページの更新が走らないようにする
   bubbleMap.set(id, { loading: true, value: oldResult });
-  let i: number | undefined;
-  if (debugMode) {
-    i = counter++;
+  const i = counter++;
 
-    console.log(
-      `%c[${i}][${oldResult ? "cache loaded" : "cache unloaded"}]Get lock`,
-      "color: gray;",
-      id,
-    );
-  }
+  logger.log(
+    `%c[${i}][${oldResult ? "cache loaded" : "cache unloaded"}]Get lock`,
+    "color: gray;",
+    id,
+  );
 
   try {
     const req = toRequest(project, title, { followRename: true, watchList });
@@ -192,13 +181,9 @@ const updateApiCache = async (
     const pureURL = `${url.origin}${url.pathname}`;
 
     // 1. cacheから取得する
-    if (debugMode) {
-      console.time(`[${i}]Get cache ${id}`);
-    }
+    logger.time(`[${i}]Get cache ${id}`);
     const cachedRes = await findCache(pureURL);
-    if (debugMode) {
-      console.timeEnd(`[${i}]Get cache ${id}`);
-    }
+    logger.timeEnd(`[${i}]Get cache ${id}`);
     if (cachedRes) {
       const result = await fromResponse(cachedRes);
 
@@ -214,13 +199,9 @@ const updateApiCache = async (
         bubbleMap.set(id, { loading: true, value: newBubble });
         apply2HopCards(project, cards2hop, page.updated);
 
-        if (debugMode) {
-          console.time(`[${i}]Dispatch cache ${id}`);
-        }
+        logger.time(`[${i}]Dispatch cache ${id}`);
         emitter.dispatch(id, newBubble);
-        if (debugMode) {
-          console.timeEnd(`[${i}]Dispatch cache ${id}`);
-        }
+        logger.timeEnd(`[${i}]Dispatch cache ${id}`);
         oldResult = newBubble;
       }
     }
@@ -234,13 +215,11 @@ const updateApiCache = async (
     }
 
     const res = await fetch(req);
-    if (debugMode) {
-      console.log(
-        `%c[${i}]Fetch`,
-        "color: gray;",
-        id,
-      );
-    }
+    logger.log(
+      `%c[${i}]Fetch`,
+      "color: gray;",
+      id,
+    );
     const result = await fromResponse(res.clone());
     await putCache(pureURL, res);
 
@@ -253,13 +232,9 @@ const updateApiCache = async (
       bubbleMap.set(id, { loading: true, value: newBubble });
       apply2HopCards(project, cards2hop, page.updated);
 
-      if (debugMode) {
-        console.time(`[${i}]Dispatch cache ${id}`);
-      }
+      logger.time(`[${i}]Dispatch cache ${id}`);
       emitter.dispatch(id, newBubble);
-      if (debugMode) {
-        console.timeEnd(`[${i}]Dispatch cache ${id}`);
-      }
+      logger.timeEnd(`[${i}]Dispatch cache ${id}`);
     }
   } catch (e: unknown) {
     // 想定外のエラーはログに出す
@@ -268,14 +243,12 @@ const updateApiCache = async (
     // ロック解除
     const result = bubbleMap.get(id);
     bubbleMap.set(id, { loading: false, value: result?.value });
-    if (debugMode) {
-      console.log(
-        `%c[${i}]Unlock`,
-        "color: gray;",
-        id,
-      );
-      counter--;
-    }
+    logger.log(
+      `%c[${i}]Unlock`,
+      "color: gray;",
+      id,
+    );
+    counter--;
   }
 };
 
