@@ -678,7 +678,7 @@ const youtubeShortRegExp =
   /https?:\/\/youtu\.be\/([a-zA-Z\d_-]+)(?:\?([^\s]{0,100})|)/;
 const youtubeListRegExp =
   /https?:\/\/(?:www\.|)youtube\.com\/playlist\?((?:[^\s]+&|)list=([a-zA-Z\d_-]+)(?:&[^\s]+|))/;
-function parseYoutube(url: string): YoutubeProps | undefined {
+const parseYoutube = (url: string): YoutubeProps | undefined => {
   {
     const matches = url.match(youtubeRegExp);
     if (matches) {
@@ -720,7 +720,7 @@ function parseYoutube(url: string): YoutubeProps | undefined {
     }
   }
   return undefined;
-}
+};
 const Youtube = ({ videoId, params }: YoutubeProps) => (
   <div className="iframe-video-player">
     <iframe
