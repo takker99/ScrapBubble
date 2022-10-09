@@ -18,15 +18,15 @@ type Tile<T extends unknown[], N extends Digits | DigitsStr | 10 | "10"> = [
 ][N];
 type MakeTupleImpl<T, N extends string, X extends unknown[] = []> =
   string extends N ? never
-    : // 文字列リテラルじゃなくて string 型が渡ってきた場合は変換できない
-    N extends "" ? X
-    : // if (src == '') { return x; }
-    First<N> extends infer U ? U extends DigitsStr ? // const ch = src[0]
-    MakeTupleImpl<
-      T,
-      Tail<N>, // src.slice(1)
-      [...Tile<[T], U>, ...Tile<X, 10> /* x * 10 */]
-    >
-    : never
+    // 文字列リテラルじゃなくて string 型が渡ってきた場合は変換できない
+    : N extends "" ? X
+    // if (src == '') { return x; }
+    : First<N> extends infer U ? U extends DigitsStr // const ch = src[0]
+        ? MakeTupleImpl<
+          T,
+          Tail<N>, // src.slice(1)
+          [...Tile<[T], U>, ...Tile<X, 10> /* x * 10 */]
+        >
+      : never
     : never;
 export type MakeTuple<T, N extends number> = MakeTupleImpl<T, `${N}`>;
