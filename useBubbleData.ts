@@ -13,17 +13,14 @@ export const useBubbleData = (
 ): Bubble => {
   const [bubble, setBubble] = useState<Bubble>({ pages: [], cards: [] });
 
-  useEffect(() => {
+  useEffect(() =>
     // データの初期化
-    {
-      // 先に空にしてちらつきをなくす
-      setBubble({ pages: [], cards: [] });
-      const bubble = load(title, projects);
-      if (bubble) {
-        setBubble(bubble);
-      }
-    }
+    setBubble(load(title, projects) ?? { pages: [], cards: [] }), [
+    title,
+    projects,
+  ]);
 
+  useEffect(() => {
     // データ更新用listenerの登録
     let timer: number | undefined;
     /** ページデータを更新する */
