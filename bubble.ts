@@ -169,21 +169,14 @@ const updateApiCache = async (
   bubbleMap.set(id, { loading: true, value: oldResult });
   const i = counter++;
 
-  logger.log(
-    `%c[${i}][${oldResult ? "cache loaded" : "cache unloaded"}]Get lock`,
-    "color: gray;",
-    id,
-  );
-
+  logger.time(`[${i}] Check update ${id}`);
   try {
     const req = toRequest(project, title, { followRename: true, watchList });
     const url = new URL(req.url);
     const pureURL = `${url.origin}${url.pathname}`;
 
     // 1. cacheから取得する
-    logger.time(`[${i}]Get cache ${id}`);
     const cachedRes = await findCache(pureURL);
-    logger.timeEnd(`[${i}]Get cache ${id}`);
     if (cachedRes) {
       const result = await fromResponse(cachedRes);
 
@@ -199,9 +192,7 @@ const updateApiCache = async (
         bubbleMap.set(id, { loading: true, value: newBubble });
         apply2HopCards(project, cards2hop, page.updated);
 
-        logger.time(`[${i}]Dispatch cache ${id}`);
         emitter.dispatch(id, newBubble);
-        logger.timeEnd(`[${i}]Dispatch cache ${id}`);
         oldResult = newBubble;
       }
     }
@@ -215,11 +206,7 @@ const updateApiCache = async (
     }
 
     const res = await fetch(req);
-    logger.log(
-      `%c[${i}]Fetch`,
-      "color: gray;",
-      id,
-    );
+    logger.debug(`%c[${i}]Fetch`, "color: gray;", id);
     const result = await fromResponse(res.clone());
     await putCache(pureURL, res);
 
@@ -232,9 +219,7 @@ const updateApiCache = async (
       bubbleMap.set(id, { loading: true, value: newBubble });
       apply2HopCards(project, cards2hop, page.updated);
 
-      logger.time(`[${i}]Dispatch cache ${id}`);
       emitter.dispatch(id, newBubble);
-      logger.timeEnd(`[${i}]Dispatch cache ${id}`);
     }
   } catch (e: unknown) {
     // 想定外のエラーはログに出す
@@ -243,11 +228,7 @@ const updateApiCache = async (
     // ロック解除
     const result = bubbleMap.get(id);
     bubbleMap.set(id, { loading: false, value: result?.value });
-    logger.log(
-      `%c[${i}]Unlock`,
-      "color: gray;",
-      id,
-    );
+    logger.timeEnd(`[${i}] Check update ${id}`);
     counter--;
   }
 };
