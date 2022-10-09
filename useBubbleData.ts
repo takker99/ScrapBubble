@@ -15,14 +15,7 @@ export const useBubbleData = (
 
   useLayoutEffect(() => {
     // データの初期化
-    {
-      // 先に空にしてちらつきをなくす
-      setBubble({ pages: [], cards: [] });
-      const bubble = load(title, projects);
-      if (bubble) {
-        setBubble(bubble);
-      }
-    }
+    setBubble(load(title, projects) ?? { pages: [], cards: [] });
 
     // データ更新用listenerの登録
     let timer: number | undefined;
@@ -31,10 +24,7 @@ export const useBubbleData = (
       // 少し待ってからまとめて更新する
       clearTimeout(timer);
       timer = setTimeout(() => {
-        const bubble = load(title, projects);
-        if (bubble) {
-          setBubble(bubble);
-        }
+        setBubble(load(title, projects) ?? { pages: [], cards: [] });
       }, 10);
     };
 
