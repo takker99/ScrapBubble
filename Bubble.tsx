@@ -24,6 +24,7 @@ declare const scrapbox: Scrapbox;
 export interface BubbleProps extends BubbleSource {
   whiteList: string[];
   delay: number;
+  prefetch: (project: string, title: string) => void;
 }
 
 export const Bubble = ({

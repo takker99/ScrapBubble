@@ -31,6 +31,7 @@ export interface CardProps extends BubbleOperators {
   linkedTo: string;
   delay: number;
   linkedType: LinkType;
+  prefetch: (project: string, title: string) => void;
 }
 
 export const Card = ({
@@ -43,6 +44,7 @@ export const Card = ({
   bubble,
   hide,
   delay,
+  prefetch,
   ...props
 }: CardProps) => {
   const blocks = useParser(thumbnail ? [] : descriptions, { hasTitle: false }, [
@@ -57,6 +59,8 @@ export const Card = ({
     const a = ref.current;
 
     const handleEnter = async () => {
+      prefetch(project, title);
+
       if (!await stayHovering(a, delay)) return;
 
       bubble({

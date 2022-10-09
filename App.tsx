@@ -15,7 +15,7 @@ import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
 import { getWatchList } from "./watchList.ts";
 import { calcBubblePosition } from "./position.ts";
-import { prefetch } from "./bubble.ts";
+import { prefetch as prefetch_ } from "./bubble.ts";
 import { editor } from "./deps/scrapbox-std.ts";
 import type { LinkType } from "./types.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
@@ -53,13 +53,22 @@ const App = (
   { delay, whiteList, scrollTargets, watchList, style }: AppProps,
 ) => {
   const [{ bubble, hide }, ...bubbles] = useBubbles();
-  const projects = useMemo(
-    () => [
+
+  /** ページデータを先読みする
+   *
+   * white listにない外部プロジェクトリンクは、そのページだけを読み込む
+   */
+  const prefetch = useCallback((project: string, title: string) => {
+    const projects = [
       scrapbox.Project.name,
       ...whiteList.filter((project) => project !== scrapbox.Project.name),
-    ],
-    [whiteList],
-  );
+    ];
+    prefetch_(
+      title,
+      projects.includes(project) ? projects : [project],
+      watchList,
+    );
+  }, [whiteList, watchList]);
 
   useEffect(() => {
     const editorDiv = editor();
@@ -86,13 +95,7 @@ const App = (
       if (project === "") return;
       const title = decodeURIComponent(encodedTitle ?? "");
 
-      // 必要なデータを読み込む
-      // white listにない外部プロジェクトリンクは、そのページだけを読み込む
-      prefetch(
-        title,
-        projects.includes(project) ? projects : [project],
-        watchList,
-      );
+      prefetch(project, title);
 
       // delay以内にカーソルが離れるかクリックしたら何もしない
       if (!await stayHovering(link, delay)) return;
@@ -126,6 +129,7 @@ const App = (
         capture: true,
       });
   }, [delay, whiteList, watchList]);
+
   useEventListener(document, "click", (e) => {
     const target = e.target as HTMLElement;
     if (target.dataset.userscriptName === userscriptName) return;
@@ -150,7 +154,12 @@ const App = (
         ? <link rel="stylesheet" href={url.href} />
         : <style>{url}</style>)}
       {bubbles.map((bubble) => (
-        <Bubble {...bubble} whiteList={whiteList} delay={delay} />
+        <Bubble
+          {...bubble}
+          whiteList={whiteList}
+          delay={delay}
+          prefetch={prefetch}
+        />
       ))}
     </>
   );

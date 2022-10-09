@@ -58,31 +58,18 @@ export interface PageProps extends BubbleOperators {
   lines: { text: string; id: string }[] | string[];
   noIndent?: boolean;
   scrollTo?: ScrollTo;
+  prefetch: (project: string, title: string) => void;
 }
-
-const hasLink = (link: string, nodes: NodeType[]): boolean =>
-  nodes.some((node) => {
-    switch (node.type) {
-      case "hashTag":
-        return toTitleLc(node.href) === toTitleLc(link);
-      case "link": {
-        if (node.pathType !== "relative") return false;
-        const { title = "" } = parseLink({
-          pathType: "relative",
-          href: node.href,
-        });
-        return toTitleLc(title) === toTitleLc(link);
-      }
-      case "quote":
-      case "strong":
-      case "decoration":
-        return hasLink(link, node.nodes);
-    }
-  });
 
 // <Page />限定のcontext
 const context = createContext<
-  & { title: string; project: string; whiteList: string[]; delay: number }
+  & {
+    title: string;
+    project: string;
+    whiteList: string[];
+    delay: number;
+    prefetch: (project: string, title: string) => void;
+  }
   & BubbleOperators
 >({
   title: "",
@@ -91,6 +78,7 @@ const context = createContext<
   bubble: () => {},
   hide: () => {},
   delay: 0,
+  prefetch: () => {},
 });
 
 export const Page = (
@@ -581,7 +569,7 @@ type ScrapboxLinkProps = {
 const ScrapboxLink = (
   { pathType, href }: ScrapboxLinkProps,
 ) => {
-  const { project: _project, delay, bubble } = useContext(context);
+  const { project: _project, delay, bubble, prefetch } = useContext(context);
   const { project = _project, title, hash = "" } = parseLink({
     pathType,
     href,
@@ -593,6 +581,8 @@ const ScrapboxLink = (
     const a = ref.current;
 
     const handleEnter = async () => {
+      prefetch(project, title);
+
       if (!await stayHovering(a, delay)) return;
 
       bubble({
@@ -775,3 +765,23 @@ const useEmptyLink = (link: string) => {
     [pages, cards],
   );
 };
+
+const hasLink = (link: string, nodes: NodeType[]): boolean =>
+  nodes.some((node) => {
+    switch (node.type) {
+      case "hashTag":
+        return toTitleLc(node.href) === toTitleLc(link);
+      case "link": {
+        if (node.pathType !== "relative") return false;
+        const { title = "" } = parseLink({
+          pathType: "relative",
+          href: node.href,
+        });
+        return toTitleLc(title) === toTitleLc(link);
+      }
+      case "quote":
+      case "strong":
+      case "decoration":
+        return hasLink(link, node.nodes);
+    }
+  });
