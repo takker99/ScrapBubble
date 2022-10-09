@@ -9,7 +9,7 @@ import { Fragment, h, render, useEffect, useMemo } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { useEventListener } from "./useEventListener.ts";
-import { detectURL } from "./utils.ts";
+import { detectURL } from "./detectURL.ts";
 import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
 import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
@@ -137,7 +137,7 @@ const App = (
     return () => scrapbox.removeListener("page:changed", hide);
   }, []);
 
-  const url = useMemo(() => detectURL(style), [style]);
+  const url = useMemo(() => detectURL(style, location.href), [style]);
 
   return (
     <>
