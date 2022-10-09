@@ -759,8 +759,8 @@ const useEmptyLink = (link: string) => {
   return useMemo(
     () =>
       pages.length > 0 || cards.length > 1 || (
-        toTitleLc(cards[1]?.title) === toTitleLc(title) &&
-        cards[1].project === project
+        toTitleLc(cards[0]?.title) === toTitleLc(title) &&
+        cards[0].project === project
       ),
     [pages, cards],
   );
