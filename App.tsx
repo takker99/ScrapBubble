@@ -5,7 +5,14 @@
 /// <reference lib="dom"/>
 import { Bubble } from "./Bubble.tsx";
 import { CSS } from "./app.min.css.ts";
-import { Fragment, h, render, useEffect, useMemo } from "./deps/preact.tsx";
+import {
+  Fragment,
+  h,
+  render,
+  useCallback,
+  useEffect,
+  useMemo,
+} from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { useEventListener } from "./useEventListener.ts";
