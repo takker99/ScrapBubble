@@ -758,10 +758,10 @@ const useEmptyLink = (link: string) => {
 
   return useMemo(
     () =>
-      pages.length > 0 || cards.length > 1 || (
+      pages.length === 0 && cards.length < 2 && (cards.length === 0 || (
         toTitleLc(cards[0]?.title) === toTitleLc(title) &&
         cards[0].project === project
-      ),
+      )),
     [pages, cards],
   );
 };
