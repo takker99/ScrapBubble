@@ -16,6 +16,8 @@ export const useBubbleData = (
   useEffect(() => {
     // データの初期化
     {
+      // 先に空にしてちらつきをなくす
+      setBubble({ pages: [], cards: [] });
       const bubble = load(title, projects);
       if (bubble) {
         setBubble(bubble);
