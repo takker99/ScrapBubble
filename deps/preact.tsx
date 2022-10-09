@@ -5,6 +5,7 @@
 /** @jsx h */
 /** @jsxFrag Fragment */
 export {
+  createContext,
   Fragment,
   h,
   render,

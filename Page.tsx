@@ -6,9 +6,11 @@
 /** @jsxFrag Fragment */
 import {
   ComponentChildren,
+  createContext,
   Fragment,
   h,
   useCallback,
+  useContext,
   useEffect,
   useMemo,
   useRef,
@@ -16,33 +18,29 @@ import {
 } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
 import {
-  BlankNode,
   CodeBlock as CodeBlockType,
-  CodeNode,
-  CommandLineNode,
   DecorationNode,
   FormulaNode,
   GoogleMapNode,
   HashTagNode,
-  HelpfeelNode,
   IconNode,
   ImageNode,
   Line as LineType,
   LinkNode,
   Node as NodeType,
-  PlainNode,
-  QuoteNode,
   StrongIconNode,
-  StrongImageNode,
-  StrongNode,
   Table as TableType,
 } from "./deps/scrapbox-parser.ts";
 import { parseLink } from "./parseLink.ts";
 import { sleep } from "./sleep.ts";
+import { stayHovering } from "./stayHovering.ts";
+import { BubbleOperators } from "./useBubbles.ts";
+import { calcBubblePosition } from "./position.ts";
 import { useParser } from "./useParser.ts";
+import { useBubbleData } from "./useBubbleData.ts";
 import type { ScrollTo } from "./types.ts";
 import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
-import type { Scrapbox, StringLc } from "./deps/scrapbox.ts";
+import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 declare global {
@@ -52,14 +50,15 @@ declare global {
   }
 }
 
-export type PageProps = {
-  project: string;
-  lines: { text: string; id: string }[] | string[];
-  emptyLinks: StringLc[];
+export interface PageProps extends BubbleOperators {
   title: string;
+  project: string;
+  whiteList: string[];
+  delay: number;
+  lines: { text: string; id: string }[] | string[];
   noIndent?: boolean;
   scrollTo?: ScrollTo;
-};
+}
 
 const hasLink = (link: string, nodes: NodeType[]): boolean =>
   nodes.some((node) => {
@@ -81,8 +80,21 @@ const hasLink = (link: string, nodes: NodeType[]): boolean =>
     }
   });
 
+// <Page />限定のcontext
+const context = createContext<
+  & { title: string; project: string; whiteList: string[]; delay: number }
+  & BubbleOperators
+>({
+  title: "",
+  project: "",
+  whiteList: [],
+  bubble: () => {},
+  hide: () => {},
+  delay: 0,
+});
+
 export const Page = (
-  { lines, project, title, emptyLinks, noIndent, scrollTo }: PageProps,
+  { lines, project, title, whiteList, noIndent, scrollTo, ...props }: PageProps,
 ): h.JSX.Element => {
   const _blocks = useParser(lines, { hasTitle: true });
   const lineIds = useMemo(
@@ -133,11 +145,11 @@ export const Page = (
     return id;
   }, [scrollTo, blocks, lineIds]);
 
+  // リンク先にスクロールする
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!scrollId) return;
 
-    // Pageだけスクロールする
     const targetLine = ref.current?.querySelector(`[data-id="${scrollId}"]`);
     const scrollY = window.scrollY;
     targetLine?.scrollIntoView?.({ block: "center" });
@@ -146,72 +158,65 @@ export const Page = (
 
   return (
     <div className="lines" ref={ref}>
-      {blocks.map((block) => {
-        switch (block.type) {
-          case "title":
-            return (
-              <>
+      <context.Provider
+        value={{ project, title, whiteList, ...props }}
+      >
+        {blocks.map((block) => {
+          switch (block.type) {
+            case "title":
+              return (
+                <>
+                  <Line
+                    key={block.id}
+                    index={block.id}
+                    indent={0}
+                    noIndent={noIndent}
+                    permalink={block.id === scrollId}
+                  >
+                    {block.text}
+                  </Line>
+                  <hr />
+                </>
+              );
+            case "codeBlock": {
+              return (
+                <CodeBlock
+                  key={block.ids[0]}
+                  block={block}
+                  noIndent={noIndent}
+                  ids={block.ids}
+                  scrollId={scrollId}
+                />
+              );
+            }
+            case "table": {
+              return (
+                <Table
+                  key={block.ids[0]}
+                  block={block}
+                  noIndent={noIndent}
+                  ids={block.ids}
+                  scrollId={scrollId}
+                />
+              );
+            }
+            case "line":
+              return (
                 <Line
                   key={block.id}
                   index={block.id}
-                  indent={0}
+                  indent={block.indent}
                   noIndent={noIndent}
                   permalink={block.id === scrollId}
                 >
-                  <Plain node={block} />
+                  {block.nodes.length > 0
+                    ? block.nodes.map((node) => <Node node={node} />)
+                    : <br />}
                 </Line>
-                <hr />
-              </>
-            );
-          case "codeBlock": {
-            return (
-              <CodeBlock
-                key={block.ids[0]}
-                block={block}
-                project={project}
-                title={title}
-                noIndent={noIndent}
-                ids={block.ids}
-                scrollId={scrollId}
-              />
-            );
+              );
           }
-          case "table": {
-            return (
-              <Table
-                key={block.ids[0]}
-                block={block}
-                project={project}
-                title={title}
-                emptyLinks={emptyLinks}
-                noIndent={noIndent}
-                ids={block.ids}
-                scrollId={scrollId}
-              />
-            );
-          }
-          case "line":
-            return (
-              <Line
-                key={block.id}
-                index={block.id}
-                indent={block.indent}
-                noIndent={noIndent}
-                permalink={block.id === scrollId}
-              >
-                {block.nodes.length > 0
-                  ? block.nodes.map((node) => (
-                    <Node
-                      node={node}
-                      project={project}
-                      emptyLinks={emptyLinks}
-                    />
-                  ))
-                  : <br />}
-              </Line>
-            );
-        }
-      })}
+        })}
+      </context.Provider>
     </div>
   );
 };
@@ -236,17 +241,15 @@ const Line = ({ index, indent, noIndent, children, permalink }: LineProps) => (
 );
 
 type CodeBlockProps = {
-  project: string;
   block: CodeBlockType;
   noIndent?: boolean;
-  title: string;
   ids: string[];
   scrollId?: string;
 };
 const CodeBlock = (
-  { block: { fileName, content, indent }, project, title, ids, scrollId }:
-    CodeBlockProps,
+  { block: { fileName, content, indent }, ids, scrollId }: CodeBlockProps,
 ) => {
+  const { project, title } = useContext(context);
   const [buttonLabel, setButtonLabel] = useState("\uf0c5");
   const handleClick = useCallback(
     async (e: h.JSX.TargetedMouseEvent<HTMLSpanElement>) => {
@@ -306,9 +309,6 @@ const CodeBlock = (
 
 type TableProps = {
   block: TableType;
-  project: string;
-  title: string;
-  emptyLinks: string[];
   noIndent?: boolean;
   scrollId?: string;
   ids: string[];
@@ -316,112 +316,114 @@ type TableProps = {
 const Table = (
   {
     block: { fileName, cells, indent },
-    project,
-    title,
-    emptyLinks,
     ids,
     scrollId,
   }: TableProps,
-) => (
-  <>
-    <Line index={ids[0]} indent={indent} permalink={ids[0] === scrollId}>
-      <span className="table-block">
-        <span className="table-block-start">
-          <a
-            href={`/api/table/${project}/${
-              encodeTitleURI(title)
-            }/${fileName}.csv`}
-            target="_blank"
-          >
-            {fileName}
-          </a>
-        </span>
-      </span>
-    </Line>
+) => {
+  const { project, title } = useContext(context);
+
+  return (
     <>
-      {cells.map((cell, i) => (
-        <Line
-          index={ids[i + 1]}
-          indent={indent}
-          permalink={ids[i + 1] === scrollId}
-        >
-          <span className="table-block table-block-row">
-            {cell.map((row, index) => (
-              <span className={`cell col-${index}`}>
-                {row.map((node) => (
-                  <Node node={node} project={project} emptyLinks={emptyLinks} />
-                ))}
-              </span>
-            ))}
+      <Line index={ids[0]} indent={indent} permalink={ids[0] === scrollId}>
+        <span className="table-block">
+          <span className="table-block-start">
+            <a
+              href={`/api/table/${project}/${
+                encodeTitleURI(title)
+              }/${fileName}.csv`}
+              target="_blank"
+            >
+              {fileName}
+            </a>
           </span>
-        </Line>
-      ))}
+        </span>
+      </Line>
+      <>
+        {cells.map((cell, i) => (
+          <Line
+            index={ids[i + 1]}
+            indent={indent}
+            permalink={ids[i + 1] === scrollId}
+          >
+            <span className="table-block table-block-row">
+              {cell.map((row, index) => (
+                <span className={`cell col-${index}`}>
+                  {row.map((node) => <Node node={node} />)}
+                </span>
+              ))}
+            </span>
+          </Line>
+        ))}
+      </>
     </>
-  </>
-);
+  );
+};
 
 type NodeProps = {
   node: NodeType;
-  project: string;
-  emptyLinks: string[];
 };
-const Node = ({ node, project, emptyLinks }: NodeProps) => {
+const Node = ({ node }: NodeProps) => {
   switch (node.type) {
     case "code":
-      return <Code node={node} />;
+      return <code className="code">{node.text}</code>;
     case "formula":
       return <Formula node={node} />;
     case "commandLine":
-      return <CommandLine node={node} />;
-    case "helpfeel":
-      return <Helpfeel node={node} />;
-    case "quote":
-      return <Quote node={node} project={project} emptyLinks={emptyLinks} />;
-    case "strong":
-      return <Strong node={node} project={project} emptyLinks={emptyLinks} />;
-    case "decoration":
       return (
-        <Decoration node={node} project={project} emptyLinks={emptyLinks} />
+        <code className="cli">
+          <span className="prefix">{node.symbol}</span>{"  "}
+          <span className="command">{node.text}</span>
+        </code>
       );
+    case "helpfeel":
+      return (
+        <code className="helpfeel">
+          <span className="prefix">?</span>{" "}
+          <span className="entry">{node.text}</span>
+        </code>
+      );
+    case "quote":
+      return (
+        <blockquote className="quote">
+          {node.nodes.map((node) => <Node node={node} />)}
+        </blockquote>
+      );
+    case "strong":
+      return (
+        <strong>
+          {node.nodes.map((node) => <Node node={node} />)}
+        </strong>
+      );
+    case "decoration":
+      return <Decoration node={node} />;
     case "plain":
     case "blank":
-      return <Plain node={node} />;
+      return <>{node.text}</>;
     case "hashTag":
-      return <HashTag node={node} project={project} emptyLinks={emptyLinks} />;
+      return <HashTag node={node} />;
     case "link":
-      return <Link node={node} project={project} emptyLinks={emptyLinks} />;
+      return <Link node={node} />;
     case "googleMap":
       return <GoogleMap node={node} />;
     case "icon":
-      return <Icon node={node} project={project} strong={false} />;
+      return <Icon node={node} />;
     case "strongIcon":
-      return <Icon node={node} project={project} strong />;
+      return <Icon node={node} strong />;
     case "image":
       return <Image node={node} />;
     case "strongImage":
-      return <StrongImage node={node} />;
+      return <img className="image strong-image" src={node.src} />;
     case "numberList":
       return (
         <>
           {`${node.number}. `}
-          {node.nodes.map((node) => (
-            <Node node={node} project={project} emptyLinks={emptyLinks} />
-          ))}
+          {node.nodes.map((node) => <Node node={node} />)}
         </>
       );
   }
 };
 
-type CodeProps = {
-  node: CodeNode;
-};
-const Code = ({ node: { text } }: CodeProps) => (
-  <code className="code">{text}</code>
-);
-
-type FormulaProps = {
-  node: FormulaNode;
-};
+type FormulaProps = { node: FormulaNode };
 const Formula = ({ node: { formula } }: FormulaProps) => {
   const { ref, error, setFormula } = useKaTeX("");
   setFormula(formula);
@@ -434,67 +436,15 @@ const Formula = ({ node: { formula } }: FormulaProps) => {
     </span>
   );
 };
-
-type CommandLineProps = {
-  node: CommandLineNode;
-};
-const CommandLine = ({ node: { text, symbol } }: CommandLineProps) => (
-  <code className="cli">
-    <span className="prefix">{symbol}</span>{" "}
-    <span className="command">{text}</span>
-  </code>
-);
-
-type HelpfeelProps = {
-  node: HelpfeelNode;
-};
-const Helpfeel = ({ node: { text } }: HelpfeelProps) => (
-  <code className="helpfeel">
-    <span className="prefix">?</span> <span className="entry">{text}</span>
-  </code>
-);
-type QuoteProps = {
-  node: QuoteNode;
-  project: string;
-  emptyLinks: string[];
-};
-const Quote = ({ node: { nodes }, project, emptyLinks }: QuoteProps) => (
-  <blockquote className="quote">
-    {nodes.map((node) => (
-      <Node node={node} project={project} emptyLinks={emptyLinks} />
-    ))}
-  </blockquote>
-);
-
-type StrongProps = {
-  node: StrongNode;
-  project: string;
-  emptyLinks: string[];
-};
-const Strong = ({ node: { nodes }, project, emptyLinks }: StrongProps) => (
-  <strong>
-    {nodes.map((node) => (
-      <Node node={node} project={project} emptyLinks={emptyLinks} />
-    ))}
-  </strong>
-);
-type DecorationProps = {
-  node: DecorationNode;
-  project: string;
-  emptyLinks: string[];
-};
+type DecorationProps = { node: DecorationNode };
 const Decoration = (
-  { node: { decos, nodes }, project, emptyLinks }: DecorationProps,
+  { node: { decos, nodes } }: DecorationProps,
 ) => (
   <span className={decos.map((deco) => `deco-${deco}`).join(" ")}>
-    {nodes.map((node) => (
-      <Node node={node} project={project} emptyLinks={emptyLinks} />
-    ))}
+    {nodes.map((node) => <Node node={node} />)}
   </span>
 );
-type GoogleMapProps = {
-  node: GoogleMapNode;
-};
+type GoogleMapProps = { node: GoogleMapNode };
 const GoogleMap = (
   { node: { place, latitude, longitude, zoom } }: GoogleMapProps,
 ) => (
@@ -511,24 +461,17 @@ const GoogleMap = (
     </a>
   </span>
 );
-type PlainProps = {
-  node: Pick<PlainNode | BlankNode, "text">;
+type IconProps = {
+  node: IconNode;
+  strong?: false;
+} | {
+  node: StrongIconNode;
+  strong: true;
 };
-const Plain = ({ node: { text } }: PlainProps) => <>{text}</>;
-type IconProps =
-  & {
-    project: string;
-  }
-  & ({
-    node: IconNode;
-    strong: false;
-  } | {
-    node: StrongIconNode;
-    strong: true;
-  });
 const Icon = (
-  { node: { pathType, path }, strong, project: _project }: IconProps,
+  { node: { pathType, path }, strong }: IconProps,
 ) => {
+  const { project: _project } = useContext(context);
   const [project, title] = pathType === "relative"
     ? [
       _project,
@@ -536,6 +479,7 @@ const Icon = (
     ]
     : path.match(/\/([\w\-]+)\/(.+)$/)?.slice?.(1) ?? [_project, path];
   const titleLc = encodeTitleURI(title);
+
   return (
     <a
       href={`/${project}/${titleLc}`}
@@ -552,9 +496,7 @@ const Icon = (
     </a>
   );
 };
-type ImageProps = {
-  node: ImageNode;
-};
+type ImageProps = { node: ImageNode };
 const Image = ({ node: { link, src } }: ImageProps) => {
   const href = link ||
     // linkが空文字のとき
@@ -573,68 +515,32 @@ const Image = ({ node: { link, src } }: ImageProps) => {
     </a>
   );
 };
-type StrongImageProps = {
-  node: StrongImageNode;
-};
-const StrongImage = ({ node: { src } }: StrongImageProps) => (
-  <img className="image strong-image" src={src} />
-);
 
-type HashTagProps = {
-  node: HashTagNode;
-  project: string;
-  emptyLinks: string[];
+type HashTagProps = { node: HashTagNode };
+const HashTag = ({ node: { href } }: HashTagProps) => {
+  const { project } = useContext(context);
+  const emptyLink = useEmptyLink(href);
+
+  return (
+    <a
+      href={`/${project}/${encodeTitleURI(href)}`}
+      className={`page-link${emptyLink ? " empty-page-link" : ""}`}
+      type="hashTag"
+      rel={project === scrapbox.Project.name ? "route" : "noopener noreferrer"}
+      target={project === scrapbox.Project.name ? "" : "_blank"}
+    >
+      #{href}
+    </a>
+  );
 };
-const HashTag = ({ node: { href }, project, emptyLinks }: HashTagProps) => (
-  <a
-    href={`/${project}/${encodeTitleURI(href)}`}
-    className={`page-link${
-      emptyLinks.includes(toTitleLc(href)) ? " empty-page-link" : ""
-    }`}
-    type="hashTag"
-    rel={project === scrapbox.Project.name ? "route" : "noopener noreferrer"}
-    target={project === scrapbox.Project.name ? "" : "_blank"}
-  >
-    #{href}
-  </a>
-);
-type LinkProps = {
-  node: LinkNode;
-  project: string;
-  emptyLinks: string[];
-};
+type LinkProps = { node: LinkNode };
 const Link = (
-  { node: { pathType, href, content }, project, emptyLinks }: LinkProps,
+  { node: { pathType, href, content } }: LinkProps,
 ) => {
   switch (pathType) {
     case "relative":
-    case "root": {
-      const { project: _project = project, title, hash = "" } = parseLink({
-        pathType,
-        href,
-      });
-      return (
-        <a
-          className={`page-link${
-            title !== undefined && emptyLinks.includes(toTitleLc(title))
-              ? " empty-page-link"
-              : ""
-          }`}
-          type="link"
-          href={`/${_project}${
-            title === undefined
-              ? ""
-              : `/${encodeTitleURI(title)}${hash === "" ? "" : `#${hash}`}`
-          }`}
-          rel={_project === scrapbox.Project.name
-            ? "route"
-            : "noopener noreferrer"}
-          target={_project === scrapbox.Project.name ? "" : "_blank"}
-        >
-          {href}
-        </a>
-      );
-    }
+    case "root":
+      return <ScrapboxLink pathType={pathType} href={href} />;
     case "absolute": {
       const youtube = parseYoutube(href);
       if (youtube) {
@@ -666,6 +572,61 @@ const Link = (
       );
     }
   }
+};
+
+type ScrapboxLinkProps = {
+  pathType: "relative" | "root";
+  href: string;
+};
+const ScrapboxLink = (
+  { pathType, href }: ScrapboxLinkProps,
+) => {
+  const { project: _project, delay, bubble } = useContext(context);
+  const { project = _project, title, hash = "" } = parseLink({
+    pathType,
+    href,
+  });
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    if (!title) return;
+    const a = ref.current;
+
+    const handleEnter = async () => {
+      if (!await stayHovering(a, delay)) return;
+
+      bubble({
+        project,
+        title,
+        type: "link",
+        position: calcBubblePosition(a),
+      });
+    };
+    a.addEventListener("pointerenter", handleEnter);
+
+    return () => a.removeEventListener("pointerenter", handleEnter);
+  }, [project, title, delay]);
+
+  const emptyLink = useEmptyLink(title ?? "");
+
+  return (
+    <a
+      ref={title ? ref : undefined}
+      className={`page-link${
+        title !== undefined && emptyLink ? " empty-page-link" : ""
+      }`}
+      type="link"
+      href={`/${project}${
+        title === undefined
+          ? ""
+          : `/${encodeTitleURI(title)}${hash === "" ? "" : `#${hash}`}`
+      }`}
+      rel={project === scrapbox.Project.name ? "route" : "noopener noreferrer"}
+      target={project === scrapbox.Project.name ? "" : "_blank"}
+    >
+      {href}
+    </a>
+  );
 };
 
 type YoutubeProps = {
@@ -800,3 +761,17 @@ const Video = ({ href }: VideoProps) => (
     />
   </div>
 );
+
+const useEmptyLink = (link: string) => {
+  const { project, title, whiteList } = useContext(context);
+  const { pages, cards } = useBubbleData(link, whiteList);
+
+  return useMemo(
+    () =>
+      pages.length > 0 || cards.length > 1 || (
+        toTitleLc(cards[1]?.title) === toTitleLc(title) &&
+        cards[1].project === project
+      ),
+    [pages, cards],
+  );
+};

@@ -3,7 +3,7 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { Fragment, h } from "./deps/preact.tsx";
+import { Fragment, h, useEffect, useRef } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import {
@@ -16,18 +16,23 @@ import {
 } from "./deps/scrapbox-parser.ts";
 import { useParser } from "./useParser.ts";
 import { useTheme } from "./useTheme.ts";
+import { stayHovering } from "./stayHovering.ts";
+import { BubbleOperators } from "./useBubbles.ts";
+import { calcBubblePosition } from "./position.ts";
 import type { LinkType } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
-export type CardProps = {
+export interface CardProps extends BubbleOperators {
   project: string;
   title: string;
   descriptions: string[];
   thumbnail: string;
   linkedTo: string;
+  delay: number;
   linkedType: LinkType;
-};
+}
+
 export const Card = ({
   project,
   title,
@@ -35,6 +40,9 @@ export const Card = ({
   thumbnail,
   linkedTo,
   linkedType,
+  bubble,
+  hide,
+  delay,
   ...props
 }: CardProps) => {
   const blocks = useParser(thumbnail ? [] : descriptions, { hasTitle: false }, [
@@ -43,8 +51,29 @@ export const Card = ({
   ]);
   const theme = useTheme(project);
 
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const a = ref.current;
+
+    const handleEnter = async () => {
+      if (!await stayHovering(a, delay)) return;
+
+      bubble({
+        project,
+        title,
+        type: "link",
+        position: calcBubblePosition(a),
+      });
+    };
+    a.addEventListener("pointerenter", handleEnter);
+
+    return () => a.removeEventListener("pointerenter", handleEnter);
+  }, [project, title, delay]);
+
   return (
     <a
+      ref={ref}
       className="related-page-card page-link"
       type="link"
       data-theme={theme}
@@ -169,6 +198,7 @@ type LinkProps = {
   node: LinkNode;
 };
 const Link = ({ node: { pathType, href, content } }: LinkProps) =>
-  pathType !== "absolute" ? <span class="page-link">{href}</span> : // contentが空のときはundefinedではなく''になるので、
-  // ??ではなく||でfallback処理をする必要がある
-    <span class="link">{content || href}</span>;
+  pathType !== "absolute"
+    ? <span class="page-link">{href}</span> // contentが空のときはundefinedではなく''になるので、
+    // ??ではなく||でfallback処理をする必要がある
+    : <span class="link">{content || href}</span>;

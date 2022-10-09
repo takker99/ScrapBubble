@@ -7,20 +7,20 @@ import { Bubble } from "./Bubble.tsx";
 import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect, useMemo } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
+import { stayHovering } from "./stayHovering.ts";
 import { useEventListener } from "./useEventListener.ts";
-import { detectURL, toId } from "./utils.ts";
-import { sleep } from "./sleep.ts";
-import { usePromiseSettledAnytimes } from "./usePromiseSettledAnytimes.ts";
+import { detectURL } from "./utils.ts";
 import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
 import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
 import { getWatchList } from "./watchList.ts";
-import { loadPage } from "./page.ts";
+import { calcBubblePosition } from "./position.ts";
+import { prefetch } from "./bubble.ts";
 import { editor } from "./deps/scrapbox-std.ts";
 import type { LinkType } from "./types.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
-export { setDebugMode } from "./page.ts";
+export { setDebugMode } from "./bubble.ts";
 
 const userscriptName = "scrap-bubble";
 
@@ -52,7 +52,7 @@ export interface AppProps {
 const App = (
   { delay, whiteList, scrollTargets, watchList, style }: AppProps,
 ) => {
-  const { bubbles, change } = useBubbles();
+  const [{ bubble, hide }, ...bubbles] = useBubbles();
   const projects = useMemo(
     () => [
       scrapbox.Project.name,
@@ -60,114 +60,81 @@ const App = (
     ],
     [whiteList],
   );
-  const [waitPointerEnter, handlePointerEnter] = usePromiseSettledAnytimes<
-    PointerEvent
-  >();
 
-  const editorDiv = editor();
-  ensureHTMLDivElement(editorDiv, "#editor");
   useEffect(() => {
-    /** trueになったらevent loopを終了する */
-    let finished = false;
-    (async () => {
-      while (!finished) {
-        const event = await waitPointerEnter();
-        ensureHTMLDivElement(event.currentTarget, "event.currentTarget");
-        const base = event.currentTarget;
-        const depth = parseInt(base.dataset.index ?? "0");
-        const link = event.target as HTMLElement;
+    const editorDiv = editor();
+    ensureHTMLDivElement(editorDiv, "#editor");
 
-        // 処理を<a>か.line-titleのときに限定する
-        if (!isPageLink(link) && !isTitle(link)) continue;
+    const handleEnter = async (event: PointerEvent) => {
+      ensureHTMLDivElement(event.currentTarget, "event.currentTarget");
+      const link = event.target as HTMLElement;
 
-        const {
-          project = scrapbox.Project.name,
-          title: encodedTitle,
-          hash = "",
-        } = isPageLink(link)
-          ? parseLink({
-            pathType: "root",
-            href: `${new URL(link.href).pathname}${new URL(link.href).hash}`,
-          })
-          : { project: scrapbox.Project.name, title: scrapbox.Page.title };
-        // [/project]の形のリンクは何もしない
-        if (project === "") return;
-        const title = decodeURIComponent(encodedTitle ?? "");
+      // 処理を<a>か.line-titleのときに限定する
+      if (!isPageLink(link) && !isTitle(link)) return;
 
-        // 必要なデータを読み込む
-        // white listにない外部プロジェクトリンクは、そのページだけを読み込む
-        for (
-          const project2 of projects.includes(project) ? projects : [project]
-        ) {
-          loadPage(title, project2, watchList);
-        }
+      const {
+        project = scrapbox.Project.name,
+        title: encodedTitle,
+        hash = "",
+      } = isPageLink(link)
+        ? parseLink({
+          pathType: "root",
+          href: `${new URL(link.href).pathname}${new URL(link.href).hash}`,
+        })
+        : { project: scrapbox.Project.name, title: scrapbox.Page.title };
+      // [/project]の形のリンクは何もしない
+      if (project === "") return;
+      const title = decodeURIComponent(encodedTitle ?? "");
 
-        // delay以内にカーソルが離れるかクリックしたら何もしない
-        const waited = sleep(delay);
-        const cancel = () => waited.cancel();
-        try {
-          link.addEventListener("click", cancel);
-          link.addEventListener("pointerleave", cancel);
-          await waited;
-        } catch (e) {
-          if (e === "cancelled") continue;
-          throw e;
-        } finally {
-          link.removeEventListener("click", cancel);
-          link.removeEventListener("pointerleave", cancel);
-        }
+      // 必要なデータを読み込む
+      // white listにない外部プロジェクトリンクは、そのページだけを読み込む
+      prefetch(
+        title,
+        projects.includes(project) ? projects : [project],
+        watchList,
+      );
 
-        // スクロール先を設定する
-        const scrollTo = hash !== "" && scrollTargets.includes("lineId")
-          ? { type: "id", value: hash } as const
-          : link.dataset.linkedTo &&
-              isLiteralStrings(
-                link.dataset.linkedType,
-                "link",
-                "hashtag",
-                "title",
-              ) && scrollTargets.includes(link.dataset.linkedType)
-          ? { type: "link", value: link.dataset.linkedTo } as const
-          : undefined;
+      // delay以内にカーソルが離れるかクリックしたら何もしない
+      if (!await stayHovering(link, delay)) return;
 
-        // 表示位置を計算する
-        const { top, right, left, bottom } = link.getBoundingClientRect();
-        const root = editorDiv.getBoundingClientRect();
-        // linkが画面の右寄りにあったら、bubbleを左側に出す
-        const adjustRight = (left - root.left) / root.width > 0.5;
-        change(depth, {
-          project,
-          title,
-          scrollTo,
-          position: {
-            top: Math.round(bottom - root.top),
-            bottom: Math.round(root.bottom - top),
-            ...(adjustRight
-              ? { right: Math.round(root.right - right) }
-              : { left: Math.round(left - root.left) }),
-            maxWidth: adjustRight
-              ? right - 10
-              : document.documentElement.clientWidth - left - 10,
-          },
-          type: getLinkType(link),
-        });
-      }
-    })();
-    return () => finished = true;
-  }, [delay, change, whiteList, watchList]);
-  useEventListener(editorDiv, "pointerenter", handlePointerEnter, {
-    capture: true,
-  });
+      // スクロール先を設定する
+      const scrollTo = hash !== "" && scrollTargets.includes("lineId")
+        ? { type: "id", value: hash } as const
+        : link.dataset.linkedTo &&
+            isLiteralStrings(
+              link.dataset.linkedType,
+              "link",
+              "hashtag",
+              "title",
+            ) && scrollTargets.includes(link.dataset.linkedType)
+        ? { type: "link", value: link.dataset.linkedTo } as const
+        : undefined;
+
+      bubble({
+        project,
+        title,
+        scrollTo,
+        position: calcBubblePosition(link),
+        type: getLinkType(link),
+      });
+    };
+
+    editorDiv.addEventListener("pointerenter", handleEnter, { capture: true });
+
+    return () =>
+      editorDiv.removeEventListener("pointerenter", handleEnter, {
+        capture: true,
+      });
+  }, [delay, whiteList, watchList]);
   useEventListener(document, "click", (e) => {
     const target = e.target as HTMLElement;
     if (target.dataset.userscriptName === userscriptName) return;
-    change(0);
+    hide();
   }, { capture: true });
 
   useEffect(() => {
-    const callback = () => change(0);
-    scrapbox.addListener("page:changed", callback);
-    return () => scrapbox.removeListener("page:changed", callback);
+    scrapbox.addListener("page:changed", hide);
+    return () => scrapbox.removeListener("page:changed", hide);
   }, []);
 
   const url = useMemo(() => detectURL(style), [style]);
@@ -182,15 +149,8 @@ const App = (
       {url !== "" && (url instanceof URL
         ? <link rel="stylesheet" href={url.href} />
         : <style>{url}</style>)}
-      {bubbles.map((bubble, index) => (
-        <Bubble
-          key={toId(bubble.project, bubble.title)}
-          sources={bubbles}
-          projects={projects}
-          index={index + 1}
-          onPointerEnterCapture={handlePointerEnter}
-          onClick={() => change(index + 1)}
-        />
+      {bubbles.map((bubble) => (
+        <Bubble {...bubble} whiteList={whiteList} delay={delay} />
       ))}
     </>
   );
