@@ -1,5 +1,6 @@
 import { useLayoutEffect, useState } from "./deps/preact.tsx";
 import { Bubble, load, subscribe, unsubscribe } from "./bubble.ts";
+import { logger } from "./debug.ts";
 
 /** bubbleデータを取得するhooks
  *
@@ -19,12 +20,18 @@ export const useBubbleData = (
 
     // データ更新用listenerの登録
     let timer: number | undefined;
+    let skipCount = -1;
     /** ページデータを更新する */
     const updateData = () => {
       // 少し待ってからまとめて更新する
       clearTimeout(timer);
+      skipCount++;
       timer = setTimeout(() => {
+        logger.debug(
+          `%cUpdate "${title}"(${projects.length} projects), skip: ${skipCount}`,
+        );
         setBubble(load(title, projects) ?? { pages: [], cards: [] });
+        skipCount = -1;
       }, 10);
     };
 
