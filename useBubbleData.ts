@@ -1,4 +1,4 @@
-import { useEffect, useState } from "./deps/preact.tsx";
+import { useLayoutEffect, useState } from "./deps/preact.tsx";
 import { Bubble, load, subscribe, unsubscribe } from "./bubble.ts";
 
 /** bubbleデータを取得するhooks
@@ -13,7 +13,7 @@ export const useBubbleData = (
 ): Bubble => {
   const [bubble, setBubble] = useState<Bubble>({ pages: [], cards: [] });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // データの初期化
     {
       // 先に空にしてちらつきをなくす
