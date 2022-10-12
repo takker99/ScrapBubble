@@ -15,7 +15,7 @@ import {
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import { useTheme } from "./useTheme.ts";
 import { useBubbleData } from "./useBubbleData.ts";
-import { toId } from "./utils.ts";
+import { toId } from "./id.ts";
 import type { BubbleSource } from "./useBubbles.ts";
 import type { Position } from "./position.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";

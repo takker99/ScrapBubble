@@ -32,14 +32,13 @@ import {
   Table as TableType,
 } from "./deps/scrapbox-parser.ts";
 import { parseLink } from "./parseLink.ts";
-import { sleep } from "./sleep.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { BubbleOperators } from "./useBubbles.ts";
 import { calcBubblePosition } from "./position.ts";
 import { useParser } from "./useParser.ts";
 import { useBubbleData } from "./useBubbleData.ts";
 import type { ScrollTo } from "./types.ts";
-import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
+import { encodeTitleURI, sleep, toTitleLc } from "./deps/scrapbox-std.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 

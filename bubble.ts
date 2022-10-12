@@ -1,6 +1,6 @@
 import { fromResponse, toRequest } from "./page-api.ts";
 import { findCache, isExpiredResponse, putCache } from "./cache.ts";
-import { ID, toId } from "./utils.ts";
+import { ID, toId } from "./id.ts";
 import { Listener, makeEmitter } from "./eventEmitter.ts";
 import { logger } from "./debug.ts";
 import { toTitleLc } from "./deps/scrapbox-std.ts";
