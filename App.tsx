@@ -8,7 +8,6 @@ import { CSS } from "./app.min.css.ts";
 import {
   Fragment,
   h,
-  render,
   useCallback,
   useEffect,
   useMemo,
@@ -20,16 +19,14 @@ import { detectURL } from "./detectURL.ts";
 import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
 import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
-import { getWatchList } from "./watchList.ts";
 import { calcBubblePosition } from "./position.ts";
 import { prefetch as prefetch_ } from "./bubble.ts";
 import { editor } from "./deps/scrapbox-std.ts";
 import type { LinkType } from "./types.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
-export { setDebugMode } from "./debug.ts";
 
-const userscriptName = "scrap-bubble";
+export const userscriptName = "scrap-bubble";
 
 export interface AppProps {
   /** hoverしてからbubbleを表示するまでのタイムラグ */
@@ -56,7 +53,8 @@ export interface AppProps {
    */
   scrollTargets: ("title" | "link" | "hashtag" | "lineId")[];
 }
-const App = (
+
+export const App = (
   { delay, whiteList, scrollTargets, watchList, style }: AppProps,
 ) => {
   const [{ bubble, hide }, ...bubbles] = useBubbles();
@@ -169,33 +167,6 @@ const App = (
         />
       ))}
     </>
-  );
-};
-
-export const mount = (init?: Partial<AppProps>): void => {
-  const {
-    delay = 500,
-    whiteList = [],
-    watchList = getWatchList().slice(0, 100),
-    scrollTargets = ["link", "hashtag", "lineId", "title"],
-    style = "",
-  } = init ?? {};
-
-  const app = document.createElement("div");
-  app.dataset.userscriptName = userscriptName;
-  const editorDiv = editor();
-  ensureHTMLDivElement(editorDiv, "#editor");
-  editorDiv.append(app);
-  const shadowRoot = app.attachShadow({ mode: "open" });
-  render(
-    <App
-      delay={delay}
-      whiteList={whiteList}
-      watchList={watchList}
-      scrollTargets={scrollTargets}
-      style={style}
-    />,
-    shadowRoot,
   );
 };
 
