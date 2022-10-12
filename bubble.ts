@@ -21,7 +21,7 @@ export interface InternalCard extends BaseCard {
 export interface ExternalCard extends BaseCard {
   /** external linksを表す */
   type: "external";
-  projectName: string;
+  project: string;
 }
 export interface BaseCard {
   title: string;
@@ -74,9 +74,7 @@ export const load = (
       [project, bubble],
     ) =>
       bubble.cards.map((card) =>
-        card.type === "internal"
-          ? { project, ...card }
-          : { project: card.projectName, ...card }
+        card.type === "internal" ? { project, ...card } : card
       )
     ),
   };
@@ -295,10 +293,12 @@ const convert = (
     ),
     // external linksのうち、順リンクがないもののみ抽出する
     // 逆リンクがあるものも除かれてしまうが、判定方法がないので断念する
-    ...page.relatedPages.projectLinks1hop.flatMap((card) =>
-      projectLinksLc.includes(toTitleLc(`/${card.projectName}/${card.title}`))
+    ...page.relatedPages.projectLinks1hop.flatMap((
+      { projectName: project, ...card },
+    ) =>
+      projectLinksLc.includes(toTitleLc(`/${project}/${card.title}`))
         ? []
-        : [{ type: "external", ...card } as Card]
+        : [{ type: "external", project, ...card } as Card]
     ),
   ];
 
