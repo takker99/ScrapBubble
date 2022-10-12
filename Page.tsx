@@ -35,8 +35,8 @@ import { parseLink } from "./parseLink.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { BubbleOperators } from "./useBubbles.ts";
 import { calcBubblePosition } from "./position.ts";
-import { useParser } from "./useParser.ts";
 import { useBubbleData } from "./useBubbleData.ts";
+import { parse } from "./deps/scrapbox-parser.ts";
 import type { ScrollTo } from "./types.ts";
 import { encodeTitleURI, sleep, toTitleLc } from "./deps/scrapbox-std.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
@@ -83,14 +83,18 @@ const context = createContext<
 export const Page = (
   { lines, project, title, whiteList, noIndent, scrollTo, ...props }: PageProps,
 ): h.JSX.Element => {
-  const _blocks = useParser(lines, { hasTitle: true });
   const lineIds = useMemo(
     () => lines.flatMap((line) => typeof line === "string" ? [] : [line.id]),
     [lines],
   );
   const blocks = useMemo(() => {
     let counter = 0;
-    return _blocks.map((block) => {
+    return parse(
+      lines.map((line) => typeof line === "string" ? line : line.text).join(
+        "\n",
+      ),
+      { hasTitle: true },
+    ).map((block) => {
       switch (block.type) {
         case "title":
         case "line":
@@ -116,7 +120,7 @@ export const Page = (
         }
       }
     });
-  }, [_blocks, lineIds]);
+  }, [lines, lineIds]);
 
   const scrollId = useMemo(() => {
     if (!scrollTo) return;

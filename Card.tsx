@@ -3,7 +3,7 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { Fragment, h, useEffect, useRef } from "./deps/preact.tsx";
+import { Fragment, h, useEffect, useMemo, useRef } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import {
@@ -14,7 +14,7 @@ import {
   Node as NodeType,
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
-import { useParser } from "./useParser.ts";
+import { parse } from "./deps/scrapbox-parser.ts";
 import { useTheme } from "./useTheme.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { BubbleOperators } from "./useBubbles.ts";
@@ -47,10 +47,13 @@ export const Card = ({
   prefetch,
   ...props
 }: CardProps) => {
-  const blocks = useParser(thumbnail ? [] : descriptions, { hasTitle: false }, [
-    thumbnail,
-    descriptions,
-  ]);
+  const blocks = useMemo(
+    () => thumbnail ? [] : parse(descriptions.join("\n"), { hasTitle: false }),
+    [
+      thumbnail,
+      descriptions,
+    ],
+  );
   const theme = useTheme(project);
 
   const ref = useRef<HTMLAnchorElement>(null);
