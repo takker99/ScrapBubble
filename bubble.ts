@@ -85,14 +85,14 @@ export const subscribe = (
   title: string,
   project: string,
   listener: Listener<BubbleSchema>,
-) => emitter.on(toId(title, project), listener);
+): void => emitter.on(toId(title, project), listener);
 
 /** 特定のページの更新購読を解除する */
 export const unsubscribe = (
   title: string,
   project: string,
   listener: Listener<BubbleSchema>,
-) => emitter.off(toId(title, project), listener);
+): void => emitter.off(toId(title, project), listener);
 
 export interface PrefetchOptions {
   /** networkからデータを取得しないときは`true`を渡す*/
@@ -110,7 +110,7 @@ export const prefetch = (
   projects: string[],
   watchList: ProjectId[],
   options?: PrefetchOptions,
-) => {
+): void => {
   for (const project of projects) {
     const id = toId(project, title);
     const state = bubbleMap.get(id);
@@ -128,7 +128,7 @@ const interval = 250;
  *
  * 追加されたタスクは、同名projectのページから最後に追加された順に`interval`msごとに実行される
  */
-const addTask = (project: string, ...args: TaskArg) => {
+const addTask = (project: string, ...args: TaskArg): void => {
   // タスクの追加
   tasks.set(project, [...tasks.get(project) ?? [], args]);
 
@@ -156,7 +156,7 @@ const updateApiCache = async (
   title: string,
   watchList: ProjectId[],
   options?: PrefetchOptions,
-) => {
+): Promise<void> => {
   const id = toId(project, title);
   const state = bubbleMap.get(id);
   if (state?.loading === true) return;
@@ -235,7 +235,7 @@ const apply2HopCards = (
   project: string,
   cards2hop: Map<StringLc, Card[]>,
   updated: number,
-) => {
+): void => {
   // 2 hop linksから得られた情報を反映する
   // これは排他処理しなくてもいい
   for (const [linkLc, cards] of cards2hop.entries()) {
