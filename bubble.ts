@@ -4,7 +4,13 @@ import { ID, toId } from "./id.ts";
 import { Listener, makeEmitter } from "./eventEmitter.ts";
 import { logger } from "./debug.ts";
 import { toTitleLc } from "./deps/scrapbox-std.ts";
-import { Line, Page as RawPage, ProjectId, StringLc } from "./deps/scrapbox.ts";
+import {
+  Line,
+  Page as RawPage,
+  ProjectId,
+  StringLc,
+  UnixTime,
+} from "./deps/scrapbox.ts";
 
 export interface Page {
   title: string;
@@ -97,8 +103,8 @@ export const unsubscribe = (
 export interface PrefetchOptions {
   /** networkからデータを取得しないときは`true`を渡す*/
   ignoreFetch?: boolean;
-  /** cacheの有効期限 */
-  expired?: number;
+  /** cacheの有効期限 (単位は秒) */
+  maxAge?: UnixTime;
 }
 
 /** ページデータを取得し、cacheに格納する
@@ -198,7 +204,7 @@ const updateApiCache = async (
     // 2. 有効期限が切れているなら、新しくデータをnetworkから取ってくる
     if (options?.ignoreFetch === true) return;
     if (
-      cachedRes && !isExpiredResponse(cachedRes, options?.expired ?? 60)
+      cachedRes && !isExpiredResponse(cachedRes, options?.maxAge ?? 60)
     ) {
       return;
     }
