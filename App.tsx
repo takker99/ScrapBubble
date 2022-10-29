@@ -9,7 +9,7 @@ import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect, useMemo } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { useEventListener } from "./useEventListener.ts";
-import { detectURL, toId } from "./utils.ts";
+import { toId } from "./utils.ts";
 import { sleep } from "./sleep.ts";
 import { usePromiseSettledAnytimes } from "./usePromiseSettledAnytimes.ts";
 import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
