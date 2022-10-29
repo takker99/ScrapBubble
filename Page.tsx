@@ -511,9 +511,11 @@ type HashTagProps = { node: HashTagNode };
 const HashTag = ({ node: { href } }: HashTagProps) => {
   const { project } = useContext(context);
   const emptyLink = useEmptyLink(href);
+  const ref = useHover(project, href);
 
   return (
     <a
+      ref={ref}
       href={`/${project}/${encodeTitleURI(href)}`}
       className={`page-link${emptyLink ? " empty-page-link" : ""}`}
       type="hashTag"
@@ -572,34 +574,13 @@ type ScrapboxLinkProps = {
 const ScrapboxLink = (
   { pathType, href }: ScrapboxLinkProps,
 ) => {
-  const { project: _project, delay, bubble, prefetch } = useContext(context);
-  const { project = _project, title, hash = "" } = parseLink({
-    pathType,
-    href,
-  });
-  const ref = useRef<HTMLAnchorElement>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    if (!title) return;
-    const a = ref.current;
-
-    const handleEnter = async () => {
-      prefetch(project, title);
-
-      if (!await stayHovering(a, delay)) return;
-
-      bubble({
-        project,
-        title,
-        type: "link",
-        position: calcBubblePosition(a),
-      });
-    };
-    a.addEventListener("pointerenter", handleEnter);
-
-    return () => a.removeEventListener("pointerenter", handleEnter);
-  }, [project, title, delay]);
-
+  const { project = useContext(context).project, title, hash = "" } = parseLink(
+    {
+      pathType,
+      href,
+    },
+  );
+  const ref = useHover(project, title);
   const emptyLink = useEmptyLink(title ?? "");
 
   return (
@@ -767,6 +748,39 @@ const useEmptyLink = (link: string) => {
       )),
     [pages, cards],
   );
+};
+
+/** <a>にhover機能を付与する */
+const useHover = (
+  project: string,
+  title: string | undefined,
+) => {
+  const { delay, bubble, prefetch } = useContext(context);
+  const ref = useRef<HTMLAnchorElement>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    if (!title) return;
+    const a = ref.current;
+
+    const handleEnter = async () => {
+      prefetch(project, title);
+
+      if (!await stayHovering(a, delay)) return;
+
+      bubble({
+        project,
+        title,
+        type: "link",
+        position: calcBubblePosition(a),
+      });
+    };
+    a.addEventListener("pointerenter", handleEnter);
+
+    return () => a.removeEventListener("pointerenter", handleEnter);
+  }, [project, title, delay, prefetch, bubble]);
+
+  return ref;
 };
 
 const hasLink = (link: string, nodes: NodeType[]): boolean =>
