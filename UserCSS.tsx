@@ -1,0 +1,24 @@
+/** @jsx h */
+/** @jsxFrag Fragment */
+import { Fragment, h, useMemo } from "./deps/preact.tsx";
+import { detectURL } from "./detectURL.ts";
+
+export interface UserCSSProps {
+  /** CSSもしくはCSSへのURL */
+  style: string | URL;
+}
+
+/** UserCSSを挿入する */
+export const UserCSS = (props: UserCSSProps) => {
+  const url = useMemo(() => detectURL(props.style, location.href), [
+    props.style,
+  ]);
+
+  return (
+    <>
+      {url !== "" && (url instanceof URL
+        ? <link rel="stylesheet" href={url.href} />
+        : <style>{url}</style>)}
+    </>
+  );
+};

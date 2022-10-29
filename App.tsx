@@ -4,18 +4,12 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 import { Bubble } from "./Bubble.tsx";
+import { UserCSS } from "./UserCSS.tsx";
 import { CSS } from "./app.min.css.ts";
-import {
-  Fragment,
-  h,
-  useCallback,
-  useEffect,
-  useMemo,
-} from "./deps/preact.tsx";
+import { Fragment, h, useCallback, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { useEventListener } from "./useEventListener.ts";
-import { detectURL } from "./detectURL.ts";
 import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
 import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
@@ -146,8 +140,6 @@ export const App = (
     return () => scrapbox.removeListener("page:changed", hide);
   }, []);
 
-  const url = useMemo(() => detectURL(style, location.href), [style]);
-
   return (
     <>
       <link
@@ -155,9 +147,7 @@ export const App = (
         href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css"
       />
       <style>{CSS}</style>
-      {url !== "" && (url instanceof URL
-        ? <link rel="stylesheet" href={url.href} />
-        : <style>{url}</style>)}
+      <UserCSS style={style} />
       {bubbles.map((bubble) => (
         <Bubble
           {...bubble}
