@@ -18,9 +18,10 @@ export const useEventListener = <
   type: K,
   listener: Listener<E, K>,
   options?: boolean | AddEventListenerOptions,
+  deps?: unknown[],
 ): void => {
   useEffect(() => {
     element.addEventListener(type, listener, options);
     return () => element.removeEventListener(type, listener, options);
-  }, [element, type, options]);
+  }, [element, type, options, ...(deps ?? [])]);
 };

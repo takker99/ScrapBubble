@@ -5,144 +5,84 @@
 /// <reference lib="dom"/>
 import { Page } from "./Page.tsx";
 import { Card } from "./Card.tsx";
-import { Fragment, FunctionComponent, h, useMemo } from "./deps/preact.tsx";
-import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
+import {
+  Fragment,
+  FunctionComponent,
+  h,
+  useCallback,
+  useMemo,
+} from "./deps/preact.tsx";
+import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import { useTheme } from "./useTheme.ts";
-import { usePages } from "./usePages.ts";
-import { useBackCards } from "./useBackCards.ts";
-import { useEmptyLinks } from "./useEmptyLinks.ts";
-import { toId } from "./utils.ts";
-import type { BubbleSource, Position } from "./useBubbles.ts";
+import { useBubbleData } from "./useBubbleData.ts";
+import { toId } from "./id.ts";
+import type { BubbleSource } from "./useBubbles.ts";
+import type { Position } from "./position.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
-const makeStyle = (position: Position, type: "page" | "card") => ({
-  ...(type === "page"
-    ? { top: `${position.top}px` }
-    : { bottom: `${position.bottom}px` }),
-  maxWidth: `${position.maxWidth}px`,
-  ...("left" in position
-    ? {
-      left: `${position.left}px`,
-    }
-    : {
-      right: `${position.right}px`,
-    }),
-});
+export interface BubbleProps extends BubbleSource {
+  whiteList: string[];
+  delay: number;
+  prefetch: (project: string, title: string) => void;
+}
 
-export type BubbleProps = {
-  projects: string[];
-  sources: BubbleSource[];
-  index: number;
-  onPointerEnterCapture: h.JSX.PointerEventHandler<HTMLDivElement>;
-  onClick: h.JSX.MouseEventHandler<HTMLDivElement>;
-};
 export const Bubble = ({
-  projects: projects_,
-  sources,
-  index,
-  onPointerEnterCapture,
-  onClick,
+  source,
+  parentTitles,
+  whiteList,
+  ...props
 }: BubbleProps) => {
-  const source = useMemo(() => sources[index - 1], [sources, index]);
-
-  /** 親階層で表示しているページ
-   *
-   * これらは子階層で表示しないようにする
-   */
-  const parentSources = useMemo(
-    () =>
-      sources.slice(0, index - 1).map((source) => ({
-        titleLc: toTitleLc(source.title),
-        ...source,
-      })),
-    [
-      sources,
-      index,
-    ],
-  );
-  /** source.projectも含めたprojectのリスト */
+  /** 検索対象のproject list */
   const projects = useMemo(
-    () => [
-      source.project,
-      ...projects_.filter((project) => project !== source.project),
-    ],
-    [projects_, source.project],
+    () =>
+      whiteList.includes(source.project)
+        ? [
+          source.project,
+          ...whiteList.filter((project) => project !== source.project),
+        ]
+        // whitelist にないprojectの場合
+        : [source.project],
+    [whiteList, source.project],
   );
-  /** bubble発生源が`projects_`にあるprojectでなければ`true` */
-  const isUnlistedProject = useMemo(() => !projects_.includes(source.project), [
-    projects_,
-    source.project,
-  ]);
+
   const theme = useTheme(source.project);
-  const pages_ = usePages(
+  const { pages: _pages, cards: _cards } = useBubbleData(
     source.title,
-    isUnlistedProject ? [source.project] : projects,
+    projects,
   );
-  const pagesWithoutExternal = useMemo(
-    () =>
-      isUnlistedProject
-        // external linksだけ取得する
-        ? pages_.map((page) => {
-          page.persistent = false;
-          page.relatedPages.links1hop = [];
-          return page;
-        })
-        : pages_,
-    [isUnlistedProject, pages_],
-  );
-  /** 表示するページ */
-  const pages = useMemo(() => {
-    const titleLc = toTitleLc(source.title);
-    // 先に空ページとprojects_に無いページを除いておく
-    const existPages = pagesWithoutExternal.filter((page) => page.persistent);
 
-    if (scrapbox.Page.title) {
-      // 現在閲覧しているページと同じページしかないときは何も表示しない
-      if (
-        titleLc === toTitleLc(scrapbox.Page.title) &&
-        existPages.length === 1 &&
-        existPages[0].project === scrapbox.Project.name
-      ) {
-        return [];
-      }
-    }
-    // すでに表示しているページか空リンクの場合は表示しない
-    return parentSources.some((source) => source.titleLc === titleLc)
-      ? []
-      : existPages;
-  }, [
-    pagesWithoutExternal,
-    scrapbox.Page.title,
-    source.title,
-  ]);
-  const cards_ = useBackCards(source.title, pagesWithoutExternal);
-
-  /** 表示するカード */
+  // cardsからparentsを除いておく
   const cards = useMemo(
-    () =>
-      cards_.filter((card) =>
-        !parentSources.some((source) =>
-          card.titleLc === source.titleLc &&
-          card.projectName === source.project
-        )
-      ),
-    [cards_],
+    () => _cards.filter((card) => !parentTitles.includes(card.title)),
+    [_cards, parentTitles],
   );
-  const position = source.position;
-  /** 空リンクのリスト */
-  const emptyLinks = useEmptyLinks(pages, isUnlistedProject ? [] : projects);
+  // pagesからparentsとwhitelistにないページを除いておく
+  const pages = useMemo(
+    () =>
+      _pages.filter((page) =>
+        !parentTitles.includes(page.title) && whiteList.includes(page.project)
+      ),
+    [_cards, parentTitles, whiteList],
+  );
+
+  const handleClick = useCallback(() => props.hide(), [props.hide]);
+
+  const pageStyle = useMemo(() => makeStyle(source.position, "page"), [
+    source.position,
+  ]);
+  const cardStyle = useMemo(() => makeStyle(source.position, "card"), [
+    source.position,
+  ]);
 
   return (
     <>
       {pages.length > 0 && pages[0].lines.length > 0 && (
         <div
           className="text-bubble"
-          data-index={index}
           data-theme={theme}
-          onPointerEnterCapture={onPointerEnterCapture}
-          onClick={onClick}
-          style={makeStyle(position, "page")}
+          style={pageStyle}
+          onClick={handleClick}
         >
           <StatusBar>
             {pages[0].project !== scrapbox.Project.name && (
@@ -153,32 +93,32 @@ export const Bubble = ({
             lines={pages[0].lines}
             project={pages[0].project}
             title={pages[0].title}
-            emptyLinks={emptyLinks}
             scrollTo={source.scrollTo}
+            whiteList={whiteList}
+            {...props}
           />
         </div>
       )}
       <div
         className="card-bubble"
-        data-index={index}
         data-theme={theme}
-        onPointerEnterCapture={onPointerEnterCapture}
-        onClick={onClick}
-        style={makeStyle(position, "card")}
+        style={cardStyle}
+        onClick={handleClick}
       >
         <ul>
           {cards.map((
-            { projectName, title, descriptions, image },
+            { project, title, descriptions, image },
           ) => (
             <li>
               <Card
-                key={toId(projectName, title)}
-                project={projectName}
+                key={toId(project, title)}
+                project={project}
                 title={title}
                 linkedTo={source.title}
                 linkedType={source.type}
                 descriptions={descriptions}
                 thumbnail={image ?? ""}
+                {...props}
               />
             </li>
           ))}
@@ -205,3 +145,17 @@ const ProjectBadge = ({ project, title }: ProjectBadgeProps): h.JSX.Element => (
     {project}
   </a>
 );
+
+const makeStyle = (position: Position, type: "page" | "card") => ({
+  ...(type === "page"
+    ? { top: `${position.top}px` }
+    : { bottom: `${position.bottom}px` }),
+  maxWidth: `${position.maxWidth}px`,
+  ...("left" in position
+    ? {
+      left: `${position.left}px`,
+    }
+    : {
+      right: `${position.right}px`,
+    }),
+});

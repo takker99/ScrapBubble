@@ -3,7 +3,7 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { Fragment, h } from "./deps/preact.tsx";
+import { Fragment, h, useEffect, useMemo, useRef } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import {
@@ -14,20 +14,26 @@ import {
   Node as NodeType,
   StrongIconNode,
 } from "./deps/scrapbox-parser.ts";
-import { useParser } from "./useParser.ts";
+import { parse } from "./deps/scrapbox-parser.ts";
 import { useTheme } from "./useTheme.ts";
+import { stayHovering } from "./stayHovering.ts";
+import { BubbleOperators } from "./useBubbles.ts";
+import { calcBubblePosition } from "./position.ts";
 import type { LinkType } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
-export type CardProps = {
+export interface CardProps extends BubbleOperators {
   project: string;
   title: string;
   descriptions: string[];
   thumbnail: string;
   linkedTo: string;
+  delay: number;
   linkedType: LinkType;
-};
+  prefetch: (project: string, title: string) => void;
+}
+
 export const Card = ({
   project,
   title,
@@ -35,16 +41,46 @@ export const Card = ({
   thumbnail,
   linkedTo,
   linkedType,
+  bubble,
+  hide,
+  delay,
+  prefetch,
   ...props
 }: CardProps) => {
-  const blocks = useParser(thumbnail ? [] : descriptions, { hasTitle: false }, [
-    thumbnail,
-    descriptions,
-  ]);
+  const blocks = useMemo(
+    () => thumbnail ? [] : parse(descriptions.join("\n"), { hasTitle: false }),
+    [
+      thumbnail,
+      descriptions,
+    ],
+  );
   const theme = useTheme(project);
+
+  const ref = useRef<HTMLAnchorElement>(null);
+  useEffect(() => {
+    if (!ref.current) return;
+    const a = ref.current;
+
+    const handleEnter = async () => {
+      prefetch(project, title);
+
+      if (!await stayHovering(a, delay)) return;
+
+      bubble({
+        project,
+        title,
+        type: "link",
+        position: calcBubblePosition(a),
+      });
+    };
+    a.addEventListener("pointerenter", handleEnter);
+
+    return () => a.removeEventListener("pointerenter", handleEnter);
+  }, [project, title, delay]);
 
   return (
     <a
+      ref={ref}
       className="related-page-card page-link"
       type="link"
       data-theme={theme}

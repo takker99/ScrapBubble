@@ -1,15 +1,19 @@
-import { useCallback, useState } from "./deps/preact.tsx";
+import { useCallback, useEffect, useState } from "./deps/preact.tsx";
+import { Position } from "./position.ts";
 import type { LinkType, ScrollTo } from "./types.ts";
+import { Scrapbox } from "./deps/scrapbox.ts";
+declare const scrapbox: Scrapbox;
 
-export interface BubbleSource {
-  /** bubbleの表示位置 */
-  position: Position;
-
+/** bubble data */
+export interface BubbleData {
   /** bubble元(リンクなど)のproject name */
   project: string;
 
   /** bubble元(リンクなど)のtilte */
   title: string;
+
+  /** 発生源の種類 */
+  type: LinkType;
 
   /** スクロール先
    *
@@ -17,50 +21,74 @@ export interface BubbleSource {
    */
   scrollTo?: ScrollTo;
 
-  /** 発生源の種類 */
-  type: LinkType;
-}
-
-export type Position =
-  & {
-    top: number;
-    bottom: number;
-    maxWidth: number;
-  }
-  & ({
-    left: number;
-  } | {
-    right: number;
-  });
-export interface ShowInit {
+  /** bubbleの表示位置 */
   position: Position;
-  scrollTo?: ScrollTo;
-  type: LinkType;
 }
-export interface UseBubbleResult {
-  /** bubbleの発生源のリスト */
-  bubbles: BubbleSource[];
 
-  /** 指定した階層のbubble発生源を変更する
+export interface BubbleOperators {
+  /** 現在の階層の下に新しいbubbleを出す
    *
-   * @param depth 表示したい階層
-   * @param [source] bubbleの発生源のデータ。空のときは同階層以降の発生源を消す
+   * すでにbubbleされていた場合、それ以降のbubbleを含めて消してから新しいのを出す
    */
-  change: (depth: number, source?: BubbleSource) => void;
+  bubble: (source: BubbleData) => void;
+
+  /** 現在の階層より下のbubblesをすべて消す */
+  hide: () => void;
 }
-export const useBubbles = (): UseBubbleResult => {
-  const [bubbles, setBubbles] = useState<BubbleSource[]>([]);
+
+export interface BubbleSource extends BubbleOperators {
+  /** bubble data */
+  source: BubbleData;
+
+  /** 親階層のbubblesのページタイトル */
+  parentTitles: string[];
+}
+
+export const useBubbles = (): [
+  BubbleOperators,
+  ...BubbleSource[],
+] => {
+  const [sources, setSources] = useState<BubbleData[]>([]);
 
   const change = useCallback(
     (
       depth: number,
-      source?: BubbleSource,
+      source?: BubbleData,
     ) =>
-      setBubbles((old) =>
+      setSources((old) =>
         source ? [...old.slice(0, depth), source] : [...old.slice(0, depth)]
       ),
     [],
   );
 
-  return { bubbles, change };
+  const [bubbles, setBubbles] = useState<[
+    BubbleOperators,
+    ...BubbleSource[],
+  ]>([{
+    bubble: (source: BubbleData) => change(0, source),
+    hide: () => change(0),
+  }]);
+
+  // 操作函数や他のbubbleデータから計算される値を追加する
+  useEffect(() => {
+    // 更新されたbubble以外は、objectの参照を壊さずにそのまま返す
+    setBubbles((
+      [first, ...prev],
+    ) => [
+      first,
+      ...sources.map((source, i) =>
+        source === prev.at(i)?.source ? prev.at(i)! : ({
+          source,
+          parentTitles: [
+            scrapbox.Page.title ?? "",
+            ...sources.slice(0, i).map((source) => source.title),
+          ],
+          bubble: (source: BubbleData) => change(i + 1, source),
+          hide: () => change(i + 1),
+        })
+      ),
+    ]);
+  }, [sources]);
+
+  return bubbles;
 };
