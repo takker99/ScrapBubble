@@ -69,6 +69,7 @@ export const useBubbles = (): [
     hide: () => change(0),
   }]);
 
+  // 操作函数や他のbubbleデータから計算される値を追加する
   useEffect(() => {
     // 更新されたbubble以外は、objectの参照を壊さずにそのまま返す
     setBubbles((
