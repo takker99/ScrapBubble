@@ -100,14 +100,14 @@ export const subscribe = (
   title: string,
   project: string,
   listener: Listener<BubbleSchema>,
-): void => emitter.on(toId(title, project), listener);
+): void => emitter.on(toId(project, title), listener);
 
 /** 特定のページの更新購読を解除する */
 export const unsubscribe = (
   title: string,
   project: string,
   listener: Listener<BubbleSchema>,
-): void => emitter.off(toId(title, project), listener);
+): void => emitter.off(toId(project, title), listener);
 
 export interface PrefetchOptions {
   /** networkからデータを取得しないときは`true`を渡す*/
