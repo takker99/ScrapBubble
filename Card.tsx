@@ -169,6 +169,7 @@ type LinkProps = {
   node: LinkNode;
 };
 const Link = ({ node: { pathType, href, content } }: LinkProps) =>
-  pathType !== "absolute" ? <span class="page-link">{href}</span> : // contentが空のときはundefinedではなく''になるので、
-  // ??ではなく||でfallback処理をする必要がある
-    <span class="link">{content || href}</span>;
+  pathType !== "absolute"
+    ? <span class="page-link">{href}</span> // contentが空のときはundefinedではなく''になるので、
+    // ??ではなく||でfallback処理をする必要がある
+    : <span class="link">{content || href}</span>;
