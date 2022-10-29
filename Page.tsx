@@ -574,14 +574,16 @@ type ScrapboxLinkProps = {
 const ScrapboxLink = (
   { pathType, href }: ScrapboxLinkProps,
 ) => {
-  const { project = useContext(context).project, title, hash = "" } = parseLink(
+  const { project: project_, whiteList } = useContext(context);
+  const { project = project_, title, hash = "" } = parseLink(
     {
       pathType,
       href,
     },
   );
   const ref = useHover(project, title);
-  const emptyLink = useEmptyLink(title ?? "");
+  // whiteListにあるリンクのみ、空リンク判定する
+  const emptyLink = whiteList.includes(project) && useEmptyLink(title ?? "");
 
   return (
     <a
