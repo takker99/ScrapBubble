@@ -53,9 +53,22 @@ export const Bubble = ({
   );
 
   // cardsからparentsを除いておく
+  // ついでに並び替える
   const cards = useMemo(
-    () => _cards.filter((card) => !parentTitles.includes(card.title)),
-    [_cards, parentTitles],
+    () =>
+      _cards.filter((card) => !parentTitles.includes(card.title))
+        .sort((a, b) => {
+          // 1. projectの順
+          const ia = projects.indexOf(a.project);
+          const ib = projects.indexOf(b.project);
+          if (ia === ib) {
+            // 2. last updated
+            return b.updated - a.updated;
+          }
+          if (ia < 0) return 1;
+          return ia - ib;
+        }),
+    [_cards, parentTitles, projects],
   );
   // pagesからparentsとwhitelistにないページを除いておく
   const pages = useMemo(
