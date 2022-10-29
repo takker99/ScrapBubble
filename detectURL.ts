@@ -11,7 +11,7 @@ export const detectURL = (
     if (!base) return text;
     // 相対パスへの変換を試みる
     // ./や../や/で始まらない文字列は、相対パス扱いしない
-    if (!text.startsWith(".") && !text.startsWith("/")) return text;
+    if (!/^\.\/|\.\.\/|\//.test(text)) return text;
     try {
       return new URL(text, base);
     } catch (e: unknown) {
