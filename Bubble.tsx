@@ -47,7 +47,7 @@ export const Bubble = ({
   );
 
   const theme = useTheme(source.project);
-  const { pages, cards: _cards } = useBubbleData(
+  const { pages: _pages, cards: _cards } = useBubbleData(
     source.title,
     projects,
   );
@@ -56,6 +56,14 @@ export const Bubble = ({
   const cards = useMemo(
     () => _cards.filter((card) => !parentTitles.includes(card.title)),
     [_cards, parentTitles],
+  );
+  // pagesからparentsとwhitelistにないページを除いておく
+  const pages = useMemo(
+    () =>
+      _pages.filter((page) =>
+        !parentTitles.includes(page.title) && whiteList.includes(page.project)
+      ),
+    [_cards, parentTitles, whiteList],
   );
 
   const handleClick = useCallback(() => props.hide(), [props.hide]);
