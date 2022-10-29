@@ -10,7 +10,7 @@ export interface UserCSSProps {
 
 /** UserCSSを挿入する */
 export const UserCSS = (props: UserCSSProps) => {
-  const url = useMemo(() => detectURL(props.style, location.href), [
+  const url = useMemo(() => detectURL(props.style, import.meta.url), [
     props.style,
   ]);
 
