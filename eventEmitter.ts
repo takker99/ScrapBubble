@@ -1,4 +1,3 @@
-import { logger } from "./debug.ts";
 export type Listener<T> = (event: T) => void;
 
 export interface EventEmitter<T, U> {
@@ -19,8 +18,6 @@ export const makeEmitter = <T, U>(): EventEmitter<T, U> => {
     dispatch: (eventName, value) => {
       const listeners = listenersMap.get(eventName);
       if (!listeners) return;
-
-      logger.debug(`Dispatch ${listeners.size} listeners of "${eventName}"`);
       for (const listener of listeners) {
         listener(value);
       }
