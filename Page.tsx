@@ -510,7 +510,7 @@ const Image = ({ node: { link, src } }: ImageProps) => {
 type HashTagProps = { node: HashTagNode };
 const HashTag = ({ node: { href } }: HashTagProps) => {
   const { project } = useContext(context);
-  const emptyLink = useEmptyLink(href);
+  const emptyLink = useEmptyLink(project, href);
   const ref = useHover(project, href);
 
   return (
@@ -582,7 +582,7 @@ const ScrapboxLink = (
     },
   );
   const ref = useHover(project, title);
-  const emptyLink = useEmptyLink(title ?? "");
+  const emptyLink = useEmptyLink(project, title ?? "");
 
   return (
     <a
@@ -737,15 +737,20 @@ const Video = ({ href }: VideoProps) => (
   </div>
 );
 
-const useEmptyLink = (link: string) => {
-  const { project, title, whiteList } = useContext(context);
-  const { pages, cards } = useBubbleData(link, whiteList);
+const useEmptyLink = (project: string, link: string) => {
+  const { project: rootProject, title, whiteList } = useContext(context);
+  const projects = useMemo(
+    () => whiteList.includes(project) ? whiteList : [project, ...whiteList],
+    [whiteList, project],
+  );
+  const { pages, cards } = useBubbleData(link, projects);
 
   return useMemo(
     () =>
+      // ページの中身がなく、逆リンクがbubble元のカードしか存在しない場合に空リンクと判定する
       pages.length === 0 && cards.length < 2 && (cards.length === 0 || (
         toTitleLc(cards[0]?.title) === toTitleLc(title) &&
-        cards[0].project === project
+        cards[0].project === rootProject
       )),
     [pages, cards],
   );
