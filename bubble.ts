@@ -197,6 +197,7 @@ const updateApiCache = async (
       if (
         result.ok && (!oldResult || doesUpdate(oldResult, result.value))
       ) {
+        logger.debug(`%c[${i}]Update from cache`, "color: gray;", id);
         const [page, cards, cards2hop] = convert(
           toTitleLc(title),
           result.value,
@@ -227,6 +228,7 @@ const updateApiCache = async (
     if (
       result.ok && (!oldResult || doesUpdate(oldResult, result.value))
     ) {
+      logger.debug(`%c[${i}]Update from fetch`, "color: gray;", id);
       const [page, cards, cards2hop] = convert(toTitleLc(title), result.value);
       const newBubble = { page, cards, updated: page.updated };
       bubbleMap.set(id, { loading: true, value: newBubble });
