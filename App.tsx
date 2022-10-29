@@ -48,6 +48,9 @@ export interface AppProps {
   scrollTargets: ("title" | "link" | "hashtag" | "lineId")[];
 }
 
+const editorDiv = editor();
+ensureHTMLDivElement(editorDiv, "#editor");
+
 export const App = (
   { delay, whiteList, scrollTargets, watchList, style }: AppProps,
 ) => {
@@ -69,11 +72,11 @@ export const App = (
     );
   }, [whiteList, watchList]);
 
-  useEffect(() => {
-    const editorDiv = editor();
-    ensureHTMLDivElement(editorDiv, "#editor");
-
-    const handleEnter = async (event: PointerEvent) => {
+  // hover処理
+  useEventListener(
+    editorDiv,
+    "pointerenter",
+    async (event: PointerEvent) => {
       ensureHTMLDivElement(event.currentTarget, "event.currentTarget");
       const link = event.target as HTMLElement;
 
@@ -119,26 +122,32 @@ export const App = (
         position: calcBubblePosition(link),
         type: getLinkType(link),
       });
-    };
+    },
+    { capture: true },
+    [
+      delay,
+      whiteList,
+      watchList,
+    ],
+  );
 
-    editorDiv.addEventListener("pointerenter", handleEnter, { capture: true });
-
-    return () =>
-      editorDiv.removeEventListener("pointerenter", handleEnter, {
-        capture: true,
-      });
-  }, [delay, whiteList, watchList]);
-
-  useEventListener(document, "click", (e) => {
-    const target = e.target as HTMLElement;
-    if (target.dataset.userscriptName === userscriptName) return;
-    hide();
-  }, { capture: true });
+  // カード外クリックで全てのbubbleを隠す
+  useEventListener(
+    document,
+    "click",
+    (e) => {
+      const target = e.target as HTMLElement;
+      if (target.dataset.userscriptName === userscriptName) return;
+      hide();
+    },
+    { capture: true },
+    [hide],
+  );
 
   useEffect(() => {
     scrapbox.addListener("page:changed", hide);
     return () => scrapbox.removeListener("page:changed", hide);
-  }, []);
+  }, [hide]);
 
   return (
     <>
