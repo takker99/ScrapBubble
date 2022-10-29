@@ -7,18 +7,25 @@ import { ensureHTMLDivElement } from "./ensure.ts";
 import { getWatchList } from "./watchList.ts";
 import { editor } from "./deps/scrapbox-std.ts";
 import { App, AppProps, userscriptName } from "./App.tsx";
-export { setDebugMode } from "./debug.ts";
+import { setDebugMode } from "./debug.ts";
 export type { AppProps };
 
-export const mount = (init?: Partial<AppProps>): void => {
+export interface MountInit extends Partial<AppProps> {
+  /** debug用有効化フラグ */
+  debug?: boolean;
+}
+
+export const mount = (init?: MountInit): void => {
   const {
     delay = 500,
     whiteList = [],
     watchList = getWatchList().slice(0, 100),
     scrollTargets = ["link", "hashtag", "lineId", "title"],
     style = "",
+    debug = false,
   } = init ?? {};
 
+  setDebugMode(debug);
   const app = document.createElement("div");
   app.dataset.userscriptName = userscriptName;
   const editorDiv = editor();

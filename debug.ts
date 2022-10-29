@@ -7,14 +7,14 @@ export const setDebugMode = (enable: boolean): void => {
   debugMode = enable;
 };
 
+const tag = "[ScrapBubble]";
 /** debug modeのときだけ有効なconsole */
 export const logger = Object.fromEntries([...Object.entries(console)].map(
   ([key, value]: [string, unknown]) => {
     if (typeof value !== "function") return [key, value];
-    // deno-lint-ignore no-explicit-any
-    return [key, (...args: any) => {
+    return [key, (arg1: unknown, ...args: unknown[]) => {
       if (!debugMode) return;
-      value(...args);
+      value(typeof arg1 === "string" ? `${tag} ${arg1}` : arg1, ...args);
     }];
   },
 )) as unknown as Console;
