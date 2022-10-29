@@ -8,8 +8,10 @@ import { getWatchList } from "./watchList.ts";
 import { editor } from "./deps/scrapbox-std.ts";
 import { App, AppProps, userscriptName } from "./App.tsx";
 import { setDebugMode } from "./debug.ts";
-export type { AppProps };
+import type { Scrapbox } from "./deps/scrapbox.ts";
+declare const scrapbox: Scrapbox;
 
+export type { AppProps };
 export interface MountInit extends Partial<AppProps> {
   /** debug用有効化フラグ */
   debug?: boolean;
@@ -35,7 +37,7 @@ export const mount = (init?: MountInit): void => {
   render(
     <App
       delay={delay}
-      whiteList={whiteList}
+      whiteList={[scrapbox.Project.name, ...whiteList]}
       watchList={watchList}
       scrollTargets={scrollTargets}
       style={style}
