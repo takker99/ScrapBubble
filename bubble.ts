@@ -69,17 +69,8 @@ export const load = (
     const bubble = bubbleMap.get(toId(project, title));
     return bubble?.value ? [[project, bubble.value]] as const : [];
   });
-  logger.debug(`Start loading "${title}", the present storage is `, bubbleMap);
   // どのデータの未初期化のときのみ、未初期化と判定する
-  if (bubbles.length === 0) {
-    logger.debug(`No pages of "${title}" found`, bubbleMap);
-    return;
-  }
-  logger.debug(
-    `${
-      bubbles.filter(([, bubble]) => bubble.page.exists).length
-    } pages of "${title}" found`,
-  );
+  if (bubbles.length === 0) return;
 
   return {
     pages: bubbles.flatMap(([project, bubble]) =>
