@@ -145,16 +145,9 @@ export const App = (
   );
 
   useEffect(() => {
-<<<<<<< HEAD
     scrapbox.addListener("page:changed", hide);
     return () => scrapbox.removeListener("page:changed", hide);
   }, [hide]);
-=======
-    const callback = () => change(0);
-    scrapbox.addListener("page:changed", callback);
-    return () => scrapbox.removeListener("page:changed", callback);
-  }, []);
->>>>>>> main
 
   return (
     <>
@@ -164,11 +157,7 @@ export const App = (
       />
       <style>{CSS}</style>
       <UserCSS style={style} />
-<<<<<<< HEAD
       {bubbles.map((bubble) => (
-=======
-      {bubbles.map((bubble, index) => (
->>>>>>> main
         <Bubble
           {...bubble}
           whiteList={whiteList}
@@ -180,38 +169,6 @@ export const App = (
   );
 };
 
-<<<<<<< HEAD
-=======
-export const mount = (init?: Partial<AppProps & { debug: boolean }>): void => {
-  const {
-    delay = 500,
-    whiteList = [],
-    watchList = getWatchList().slice(0, 100),
-    scrollTargets = ["link", "hashtag", "lineId", "title"],
-    style = "",
-    debug = false,
-  } = init ?? {};
-
-  setDebugMode(debug);
-  const app = document.createElement("div");
-  app.dataset.userscriptName = userscriptName;
-  const editorDiv = editor();
-  ensureHTMLDivElement(editorDiv, "#editor");
-  editorDiv.append(app);
-  const shadowRoot = app.attachShadow({ mode: "open" });
-  render(
-    <App
-      delay={delay}
-      whiteList={whiteList}
-      watchList={watchList}
-      scrollTargets={scrollTargets}
-      style={style}
-    />,
-    shadowRoot,
-  );
-};
-
->>>>>>> main
 const getLinkType = (element: HTMLSpanElement | HTMLAnchorElement): LinkType =>
   isPageLink(element)
     ? (element.type === "link" ? "link" : "hashtag")
