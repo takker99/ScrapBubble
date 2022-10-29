@@ -194,7 +194,7 @@ const updateApiCache = async (
         );
         const newBubble = { page, cards: backCards, updated: page.updated };
         bubbleMap.set(id, { loading: true, value: newBubble });
-        applyCards(project, cards, cards2hop, page.updated);
+        applyCards(project, [...cards, ...backCards], cards2hop, page.updated);
 
         emitter.dispatch(id, newBubble);
         oldResult = newBubble;
@@ -224,7 +224,7 @@ const updateApiCache = async (
       );
       const newBubble = { page, cards: backCards, updated: page.updated };
       bubbleMap.set(id, { loading: true, value: newBubble });
-      applyCards(project, cards, cards2hop, page.updated);
+      applyCards(project, [...cards, ...backCards], cards2hop, page.updated);
 
       emitter.dispatch(id, newBubble);
     }
@@ -243,7 +243,7 @@ const updateApiCache = async (
 /** 関連ベージリストから、他のページのデータを取り出して反映する */
 const applyCards = (
   project: string,
-  cards: Card[],
+  cards1hop: Card[],
   cards2hop: Map<StringLc, Card[]>,
   updated: number,
 ): void => {
@@ -274,10 +274,13 @@ const applyCards = (
     emitter.dispatch(id, bubble2);
   }
 
-  // 順リンクから得られた情報を反映する
+  // 1 hop linksから得られた情報を反映する
   // これは排他処理しなくてもいい
-  for (const card of cards) {
-    const id = toId(project, toTitleLc(card.title));
+  for (const card of cards1hop) {
+    const id = toId(
+      "project" in card ? card.project : project,
+      toTitleLc(card.title),
+    );
     const {
       loading = false,
       value: bubble2 = {
@@ -287,7 +290,7 @@ const applyCards = (
           exists: false,
           lines: [],
         },
-        cards,
+        cards: [],
         updated,
       },
     } = bubbleMap.get(id) ?? {};
