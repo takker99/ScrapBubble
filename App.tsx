@@ -21,7 +21,7 @@ import { editor } from "./deps/scrapbox-std.ts";
 import type { LinkType } from "./types.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
-export { setDebugMode } from "./page.ts";
+import { setDebugMode } from "./debug.ts";
 
 const userscriptName = "scrap-bubble";
 
@@ -193,15 +193,17 @@ const App = (
   );
 };
 
-export const mount = (init?: Partial<AppProps>): void => {
+export const mount = (init?: Partial<AppProps & { debug: boolean }>): void => {
   const {
     delay = 500,
     whiteList = [],
     watchList = getWatchList().slice(0, 100),
     scrollTargets = ["link", "hashtag", "lineId", "title"],
     style = "",
+    debug = false,
   } = init ?? {};
 
+  setDebugMode(debug);
   const app = document.createElement("div");
   app.dataset.userscriptName = userscriptName;
   const editorDiv = editor();
