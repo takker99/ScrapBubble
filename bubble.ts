@@ -188,13 +188,13 @@ const updateApiCache = async (
       if (
         result.ok && (!oldResult || doesUpdate(oldResult, result.value))
       ) {
-        const [page, cards, cards2hop] = convert(
+        const [page, cards, backCards, cards2hop] = convert(
           toTitleLc(title),
           result.value,
         );
-        const newBubble = { page, cards, updated: page.updated };
+        const newBubble = { page, cards: backCards, updated: page.updated };
         bubbleMap.set(id, { loading: true, value: newBubble });
-        apply2HopCards(project, cards2hop, page.updated);
+        applyCards(project, cards, cards2hop, page.updated);
 
         emitter.dispatch(id, newBubble);
         oldResult = newBubble;
@@ -218,10 +218,13 @@ const updateApiCache = async (
     if (
       result.ok && (!oldResult || doesUpdate(oldResult, result.value))
     ) {
-      const [page, cards, cards2hop] = convert(toTitleLc(title), result.value);
-      const newBubble = { page, cards, updated: page.updated };
+      const [page, cards, backCards, cards2hop] = convert(
+        toTitleLc(title),
+        result.value,
+      );
+      const newBubble = { page, cards: backCards, updated: page.updated };
       bubbleMap.set(id, { loading: true, value: newBubble });
-      apply2HopCards(project, cards2hop, page.updated);
+      applyCards(project, cards, cards2hop, page.updated);
 
       emitter.dispatch(id, newBubble);
     }
@@ -237,8 +240,10 @@ const updateApiCache = async (
   }
 };
 
-const apply2HopCards = (
+/** 関連ベージリストから、他のページのデータを取り出して反映する */
+const applyCards = (
   project: string,
+  cards: Card[],
   cards2hop: Map<StringLc, Card[]>,
   updated: number,
 ): void => {
@@ -261,8 +266,49 @@ const apply2HopCards = (
     } = bubbleMap.get(id) ?? {};
     if (loading) continue;
     if (bubble2.updated > updated) continue;
+
     bubble2.cards = cards;
     bubble2.updated = updated;
+
+    bubbleMap.set(id, { loading: false, value: bubble2 });
+    emitter.dispatch(id, bubble2);
+  }
+
+  // 順リンクから得られた情報を反映する
+  // これは排他処理しなくてもいい
+  for (const card of cards) {
+    const id = toId(project, toTitleLc(card.title));
+    const {
+      loading = false,
+      value: bubble2 = {
+        page: {
+          title: card.title,
+          updated: 0,
+          exists: false,
+          lines: [],
+        },
+        cards,
+        updated,
+      },
+    } = bubbleMap.get(id) ?? {};
+    if (loading) continue;
+    if (bubble2.updated > updated) continue;
+
+    bubble2.page.title = card.title;
+    bubble2.page.updated = card.updated;
+    if (!bubble2.page.exists) {
+      // サムネイル本文から、適当にでっち上げておく
+      bubble2.page.lines = card.descriptions.map((line) => ({
+        text: line,
+        updated: card.updated,
+        created: card.updated,
+        id: "dummy",
+        userId: "dummy",
+      }));
+      bubble2.page.exists = true;
+    }
+    bubble2.updated = updated;
+
     bubbleMap.set(id, { loading: false, value: bubble2 });
     emitter.dispatch(id, bubble2);
   }
@@ -282,31 +328,39 @@ const doesUpdate = (schema: BubbleSchema, newPage: RawPage) =>
  *
  * @param titleLc ページのタイトル タイトル変更があると、page.titleから復元できないため、別途指定している
  * @param page 変換したいページデータ
- * @return 変換したデータ (1列目：ページデータ、2列目：titleLcの1 hop links、3列目：他のページの1 hop links)
+ * @return 変換したデータ (1列目：titleLcのページデータ、2列目：titleLcの順リンク、3列目：titleLcの逆リンク、4列目：他のページの1 hop links)
  */
 const convert = (
   titleLc: string,
   page: RawPage,
-): [Page, Card[], Map<StringLc, Card[]>] => {
+): [Page, Card[], Card[], Map<StringLc, Card[]>] => {
   const projectLinksLc = page.projectLinks.map((link) => toTitleLc(link));
 
-  const cards = [
-    // 1 hop linksのうち、titleにリンクしているページのみ抽出する
-    ...page.relatedPages.links1hop.flatMap((card) =>
-      card.linksLc.includes(titleLc)
-        ? [{ type: "internal", ...card } as Card]
-        : []
-    ),
-    // external linksのうち、順リンクがないもののみ抽出する
-    // 逆リンクがあるものも除かれてしまうが、判定方法がないので断念する
-    ...page.relatedPages.projectLinks1hop.flatMap((
-      { projectName: project, ...card },
-    ) =>
-      projectLinksLc.includes(toTitleLc(`/${project}/${card.title}`))
-        ? []
-        : [{ type: "external", project, ...card } as Card]
-    ),
-  ];
+  // 1 hop linksを仕分ける
+
+  const links: Card[] = [];
+  const backLinks: Card[] = [];
+  for (const card of page.relatedPages.links1hop) {
+    if (card.linksLc.includes(titleLc)) {
+      // 逆リンクもしくは双方向リンク
+      backLinks.push({ type: "internal", ...card });
+    } else {
+      // 順リンクのみ
+      links.push({ type: "internal", ...card });
+    }
+  }
+  for (
+    const { projectName: project, ...card } of page.relatedPages
+      .projectLinks1hop
+  ) {
+    if (projectLinksLc.includes(toTitleLc(`/${project}/${card.title}`))) {
+      // 順リンクもしくは双方向リンク
+      links.push({ type: "external", project, ...card });
+    } else {
+      // 逆リンクのみ
+      backLinks.push({ type: "external", project, ...card });
+    }
+  }
 
   // 2 hop linksから他のページの1 hop linksを取り出す
   // project nameは`project`と同一
@@ -327,7 +381,8 @@ const convert = (
       exists: page.persistent,
       updated: page.updated,
     },
-    cards,
+    links,
+    backLinks,
     links2hopMap,
   ];
 };
