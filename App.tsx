@@ -4,6 +4,7 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 import { Bubble } from "./Bubble.tsx";
+import { UserCSS } from "./UserCSS.tsx";
 import { CSS } from "./app.min.css.ts";
 import { Fragment, h, render, useEffect, useMemo } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
@@ -170,8 +171,6 @@ const App = (
     return () => scrapbox.removeListener("page:changed", callback);
   }, []);
 
-  const url = useMemo(() => detectURL(style), [style]);
-
   return (
     <>
       <link
@@ -179,9 +178,7 @@ const App = (
         href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css"
       />
       <style>{CSS}</style>
-      {url !== "" && (url instanceof URL
-        ? <link rel="stylesheet" href={url.href} />
-        : <style>{url}</style>)}
+      <UserCSS style={style} />
       {bubbles.map((bubble, index) => (
         <Bubble
           key={toId(bubble.project, bubble.title)}
