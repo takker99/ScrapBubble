@@ -15,7 +15,6 @@ import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
 import { calcBubblePosition } from "./position.ts";
 import { prefetch as prefetch_ } from "./bubble.ts";
-import { logger } from "./debug.ts";
 import { editor } from "./deps/scrapbox-std.ts";
 import type { LinkType } from "./types.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
@@ -84,8 +83,6 @@ export const App = (
       // 処理を<a>か.line-titleのときに限定する
       if (!isPageLink(link) && !isTitle(link)) return;
 
-      logger.debug("Detect a link on the root: ", link);
-
       const {
         project = scrapbox.Project.name,
         title: encodedTitle,
@@ -99,7 +96,6 @@ export const App = (
       // [/project]の形のリンクは何もしない
       if (project === "") return;
       const title = decodeURIComponent(encodedTitle ?? "");
-      logger.debug(`Stay for hovering "/${project}/${title}"...`);
 
       prefetch(project, title);
 
@@ -118,7 +114,6 @@ export const App = (
             ) && scrollTargets.includes(link.dataset.linkedType)
         ? { type: "link", value: link.dataset.linkedTo } as const
         : undefined;
-      logger.debug(`Bubble "/${project}/${title}"`);
 
       bubble({
         project,
