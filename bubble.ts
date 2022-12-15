@@ -18,18 +18,10 @@ export interface Page {
   exists: boolean;
   lines: Line[];
 }
-export type Card = InternalCard | ExternalCard;
-
-export interface InternalCard extends BaseCard {
-  /** project内リンクを表す */
-  type: "internal";
-}
-export interface ExternalCard extends BaseCard {
-  /** external linksを表す */
-  type: "external";
+export interface Card {
+  /** external linksなら`true` */
+  isExternal: boolean;
   project: string;
-}
-export interface BaseCard {
   title: string;
   image: string | null;
   descriptions: string[];
@@ -39,16 +31,17 @@ export interface BaseCard {
 }
 
 export interface Bubble {
-  cards: (Omit<Card, "projectName"> & { project: string })[];
+  cards: Card[];
   pages: (Page & { project: string })[];
 }
 
-type State<T> = { loading: boolean; value?: T };
-interface BubbleSchema {
+export interface BubbleSchema {
   cards: Card[];
   page: Page;
   updated: number;
 }
+
+type State<T> = { loading: boolean; value?: T };
 
 /** projectとtitleLcのペアをキーに、特定のページごとにデータを持つ */
 const bubbleMap = new Map<ID, State<BubbleSchema>>();
@@ -76,13 +69,7 @@ export const load = (
     pages: bubbles.flatMap(([project, bubble]) =>
       bubble.page.exists ? [{ project, ...bubble.page }] : []
     ),
-    cards: bubbles.flatMap((
-      [project, bubble],
-    ) =>
-      bubble.cards.map((card) =>
-        card.type === "internal" ? { project, ...card } : card
-      )
-    ),
+    cards: bubbles.flatMap(([, bubble]) => bubble.cards),
   };
 };
 
@@ -190,6 +177,7 @@ const updateApiCache = async (
       ) {
         const [page, cards, backCards, cards2hop] = convert(
           toTitleLc(title),
+          project,
           result.value,
         );
         const newBubble = { page, cards: backCards, updated: page.updated };
@@ -220,6 +208,7 @@ const updateApiCache = async (
     ) {
       const [page, cards, backCards, cards2hop] = convert(
         toTitleLc(title),
+        project,
         result.value,
       );
       const newBubble = { page, cards: backCards, updated: page.updated };
@@ -330,11 +319,13 @@ const doesUpdate = (schema: BubbleSchema, newPage: RawPage) =>
 /** APIから取得したページデータを、Bubble用に変換する
  *
  * @param titleLc ページのタイトル タイトル変更があると、page.titleから復元できないため、別途指定している
+ * @param project ページのproject
  * @param page 変換したいページデータ
  * @return 変換したデータ (1列目：titleLcのページデータ、2列目：titleLcの順リンク、3列目：titleLcの逆リンク、4列目：他のページの1 hop links)
  */
 const convert = (
   titleLc: string,
+  project: string,
   page: RawPage,
 ): [Page, Card[], Card[], Map<StringLc, Card[]>] => {
   const projectLinksLc = page.projectLinks.map((link) => toTitleLc(link));
@@ -343,25 +334,29 @@ const convert = (
 
   const links: Card[] = [];
   const backLinks: Card[] = [];
-  for (const card of page.relatedPages.links1hop) {
-    if (card.linksLc.includes(titleLc)) {
+  for (const rawCard of page.relatedPages.links1hop) {
+    const card = { isExternal: false, project, ...rawCard };
+    if (rawCard.linksLc.includes(titleLc)) {
       // 逆リンクもしくは双方向リンク
-      backLinks.push({ type: "internal", ...card });
+      backLinks.push(card);
     } else {
       // 順リンクのみ
-      links.push({ type: "internal", ...card });
+      links.push(card);
     }
   }
   for (
-    const { projectName: project, ...card } of page.relatedPages
+    const { projectName, ...rawCard } of page.relatedPages
       .projectLinks1hop
   ) {
-    if (projectLinksLc.includes(toTitleLc(`/${project}/${card.title}`))) {
+    const card = { isExternal: true, project: projectName, ...rawCard };
+    if (
+      projectLinksLc.includes(toTitleLc(`/${projectName}/${rawCard.title}`))
+    ) {
       // 順リンクもしくは双方向リンク
-      links.push({ type: "external", project, ...card });
+      links.push(card);
     } else {
       // 逆リンクのみ
-      backLinks.push({ type: "external", project, ...card });
+      backLinks.push(card);
     }
   }
 
@@ -372,7 +367,7 @@ const convert = (
     for (const linkLc of card.linksLc) {
       links2hopMap.set(linkLc, [
         ...(links2hopMap.get(linkLc) ?? []),
-        { type: "internal", ...card },
+        { isExternal: false, project, ...card },
       ]);
     }
   }
