@@ -667,11 +667,11 @@ const Youtube = ({ videoId, params }: YoutubeProps) => (
   </div>
 );
 const vimeoRegExp = /https?:\/\/vimeo\.com\/([0-9]+)/i;
-function parseVimeo(url: string) {
+const parseVimeo = (url: string) => {
   const matches = url.match(vimeoRegExp);
   if (!matches) return undefined;
   return { vimeoId: matches[1] };
-}
+};
 type VimeoProps = {
   vimeoId: string;
 };
@@ -685,9 +685,9 @@ const Vimeo = ({ vimeoId }: VimeoProps) => (
   </div>
 );
 type AudioURL = `${string}.${"mp3" | "ogg" | "wav" | "acc"}`;
-function isAudioURL(url: string): url is AudioURL {
-  return /\.(?:mp3|ogg|wav|aac)$/.test(url);
-}
+const isAudioURL = (url: string): url is AudioURL =>
+  /\.(?:mp3|ogg|wav|aac)$/.test(url);
+
 type AudioProps = {
   href: AudioURL;
   content: string;
@@ -719,9 +719,9 @@ const AudioLink = ({ href, content }: AudioProps) => {
 };
 
 type VideoURL = `${string}.${"mp4" | "webm"}`;
-function isVideoURL(url: string): url is VideoURL {
-  return /\.(?:mp4|webm)$/.test(url);
-}
+const isVideoURL = (url: string): url is VideoURL =>
+  /\.(?:mp4|webm)$/.test(url);
+
 type VideoProps = {
   href: VideoURL;
 };
