@@ -290,7 +290,7 @@ const applyCards = (
     bubble2.page.updated = card.updated;
     if (!bubble2.page.exists) {
       // サムネイル本文から、適当にでっち上げておく
-      bubble2.page.lines = card.descriptions.map((line) => ({
+      bubble2.page.lines = [card.title, ...card.descriptions].map((line) => ({
         text: line,
         updated: card.updated,
         created: card.updated,
