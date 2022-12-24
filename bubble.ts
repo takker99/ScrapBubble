@@ -1,9 +1,8 @@
-import { fromResponse, toRequest } from "./page-api.ts";
 import { findCache, isExpiredResponse, putCache } from "./cache.ts";
 import { ID, toId } from "./id.ts";
 import { Listener, makeEmitter } from "./eventEmitter.ts";
 import { logger } from "./debug.ts";
-import { toTitleLc } from "./deps/scrapbox-std.ts";
+import { getPage, toTitleLc } from "./deps/scrapbox-std.ts";
 import {
   Line,
   Page as RawPage,
@@ -162,14 +161,17 @@ const updateApiCache = async (
 
   logger.time(`[${i}] Check update ${id}`);
   try {
-    const req = toRequest(project, title, { followRename: true, watchList });
+    const req = getPage.toRequest(project, title, {
+      followRename: true,
+      projects: watchList,
+    });
     const url = new URL(req.url);
     const pureURL = `${url.origin}${url.pathname}`;
 
     // 1. cacheから取得する
     const cachedRes = await findCache(pureURL);
     if (cachedRes) {
-      const result = await fromResponse(cachedRes);
+      const result = await getPage.fromResponse(cachedRes);
 
       // 更新があればeventを発行する
       if (
@@ -199,7 +201,7 @@ const updateApiCache = async (
 
     const res = await fetch(req);
     logger.debug(`%c[${i}]Fetch`, "color: gray;", id);
-    const result = await fromResponse(res.clone());
+    const result = await getPage.fromResponse(res.clone());
     await putCache(pureURL, res);
 
     // 更新があればeventを発行する
