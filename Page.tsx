@@ -38,7 +38,19 @@ import { calcBubblePosition } from "./position.ts";
 import { useBubbleData } from "./useBubbleData.ts";
 import { parse } from "./deps/scrapbox-parser.ts";
 import type { ScrollTo } from "./types.ts";
-import { encodeTitleURI, sleep, toTitleLc } from "./deps/scrapbox-std.ts";
+import {
+  AnchorFMNode,
+  AudioNode,
+  encodeTitleURI,
+  parseAbsoluteLink,
+  sleep,
+  SpotifyNode,
+  toTitleLc,
+  VideoNode,
+  VimeoNode,
+  YoutubeListNode,
+  YoutubeNode,
+} from "./deps/scrapbox-std.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -528,41 +540,43 @@ const HashTag = ({ node: { href } }: HashTagProps) => {
 };
 type LinkProps = { node: LinkNode };
 const Link = (
-  { node: { pathType, href, content } }: LinkProps,
+  { node: { pathType, ...node } }: LinkProps,
 ) => {
   switch (pathType) {
     case "relative":
     case "root":
-      return <ScrapboxLink pathType={pathType} href={href} />;
+      return <ScrapboxLink pathType={pathType} href={node.href} />;
     case "absolute": {
-      const youtube = parseYoutube(href);
-      if (youtube) {
-        return <Youtube {...youtube} />;
+      const linkNode = parseAbsoluteLink({ pathType, ...node });
+      switch (linkNode.type) {
+        case "youtube":
+          return <Youtube {...linkNode} />;
+        case "vimeo":
+          return <Vimeo {...linkNode} />;
+        case "spotify":
+          return <Spotify {...linkNode} />;
+        case "anchor-fm":
+          return <AnchorFM {...linkNode} />;
+        case "audio":
+          return <Audio {...linkNode} />;
+        case "video":
+          return <Video {...linkNode} />;
+        case "absoluteLink":
+          return (
+            <a
+              className="link"
+              href={linkNode.href}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {
+                // contentが空のときはundefinedではなく''になるので、
+                // ??ではなく||でfallback処理をする必要がある
+                linkNode.content || linkNode.href
+              }
+            </a>
+          );
       }
-      const vimeo = parseVimeo(href);
-      if (vimeo) {
-        return <Vimeo {...vimeo} />;
-      }
-      if (isAudioURL(href)) {
-        return <Audio href={href} content={content} />;
-      }
-      if (isVideoURL(href)) {
-        return <Video href={href} />;
-      }
-      return (
-        <a
-          className="link"
-          href={href}
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          {
-            // contentが空のときはundefinedではなく''になるので、
-            // ??ではなく||でfallback処理をする必要がある
-            content || href
-          }
-        </a>
-      );
     }
   }
 };
@@ -604,99 +618,69 @@ const ScrapboxLink = (
   );
 };
 
-type YoutubeProps = {
-  params: URLSearchParams;
-  videoId: string;
-};
-const youtubeRegExp =
-  /https?:\/\/(?:www\.|)youtube\.com\/watch\?((?:[^\s]+&|)v=([a-zA-Z\d_-]+)(?:&[^\s]+|))/;
-const youtubeShortRegExp =
-  /https?:\/\/youtu\.be\/([a-zA-Z\d_-]+)(?:\?([^\s]{0,100})|)/;
-const youtubeListRegExp =
-  /https?:\/\/(?:www\.|)youtube\.com\/playlist\?((?:[^\s]+&|)list=([a-zA-Z\d_-]+)(?:&[^\s]+|))/;
-const parseYoutube = (url: string): YoutubeProps | undefined => {
-  {
-    const matches = url.match(youtubeRegExp);
-    if (matches) {
-      const [, params, videoId] = matches;
-      const _params = new URLSearchParams(params);
-      _params.delete("v");
-      _params.append("autoplay", "0");
-      return {
-        videoId,
-        params: _params,
-      };
-    }
-  }
-  {
-    const matches = url.match(youtubeShortRegExp);
-    if (matches) {
-      const [, videoId] = matches;
-      return {
-        videoId,
-        params: new URLSearchParams("autoplay=0"),
-      };
-    }
-  }
-  {
-    const matches = url.match(youtubeListRegExp);
-    if (matches) {
-      const [, params, listId] = matches;
+const Youtube = (props: YoutubeNode | YoutubeListNode) => {
+  props.params.append("autoplay", "0");
+  const src = props.pathType === "list"
+    ? `https://www.youtube.com/embed/?${props.params.toString()}&list=${props.listId}`
+    : `https://www.youtube.com/embed/${props.videoId}?${props.params.toString()}`;
 
-      const _params = new URLSearchParams(params);
-      const videoId = _params.get("v");
-      if (!videoId) return;
-      _params.delete("v");
-      _params.append("autoplay", "0");
-      _params.append("list", listId);
-      return {
-        videoId,
-        params: _params,
-      };
-    }
-  }
-  return undefined;
+  return (
+    <div className="iframe-video-player">
+      <iframe
+        src={src}
+        allowFullScreen
+        type="text/html"
+      />
+    </div>
+  );
 };
-const Youtube = ({ videoId, params }: YoutubeProps) => (
+
+const Vimeo = ({ videoId }: VimeoNode) => (
   <div className="iframe-video-player">
     <iframe
-      src={`https://www.youtube.com/embed/${videoId}?${params.toString()}`}
+      src={`https://player.vimeo.com/video/${videoId}`}
       allowFullScreen
       type="text/html"
     />
   </div>
 );
-const vimeoRegExp = /https?:\/\/vimeo\.com\/([0-9]+)/i;
-const parseVimeo = (url: string) => {
-  const matches = url.match(vimeoRegExp);
-  if (!matches) return undefined;
-  return { vimeoId: matches[1] };
-};
-type VimeoProps = {
-  vimeoId: string;
-};
-const Vimeo = ({ vimeoId }: VimeoProps) => (
+
+const Spotify = (props: SpotifyNode) => (
   <div className="iframe-video-player">
     <iframe
-      src={`https://player.vimeo.com/video/${vimeoId}`}
+      className={`spotify type-${props.pathType}`}
+      src={`https://open.spotify.com/embed/${props.pathType}/${props.videoId}`}
       allowFullScreen
       type="text/html"
+      scrolling="no"
     />
   </div>
 );
-type AudioURL = `${string}.${"mp3" | "ogg" | "wav" | "acc"}`;
-const isAudioURL = (url: string): url is AudioURL =>
-  /\.(?:mp3|ogg|wav|aac)$/.test(url);
 
-type AudioProps = {
-  href: AudioURL;
-  content: string;
-};
-const Audio = ({ href, content }: AudioProps) =>
-  content === ""
-    ? <audio className="audio-player" preload="none" controls src={href} />
-    : <AudioLink href={href} content={content} />;
-const AudioLink = ({ href, content }: AudioProps) => {
+const AnchorFM = (props: AnchorFMNode) => (
+  <div className="iframe-video-player">
+    <iframe
+      className="anchor-fm"
+      src={props.href.replace("/episodes/", "/embed/episodes/")}
+      allowFullScreen
+      type="text/html"
+      scrolling="no"
+    />
+  </div>
+);
+
+const Audio = (props: AudioNode) =>
+  props.content === ""
+    ? (
+      <audio
+        className="audio-player"
+        preload="none"
+        controls
+        src={props.href}
+      />
+    )
+    : <AudioLink {...props} />;
+const AudioLink = ({ href, content }: AudioNode) => {
   const ref = useRef<HTMLAudioElement>(null);
   const togglePlay = useCallback(() => {
     if (ref.current?.paused) {
@@ -718,14 +702,7 @@ const AudioLink = ({ href, content }: AudioProps) => {
   );
 };
 
-type VideoURL = `${string}.${"mp4" | "webm"}`;
-const isVideoURL = (url: string): url is VideoURL =>
-  /\.(?:mp4|webm)$/.test(url);
-
-type VideoProps = {
-  href: VideoURL;
-};
-const Video = ({ href }: VideoProps) => (
+const Video = ({ href }: VideoNode) => (
   <div className="video-player">
     <video
       class="video"
