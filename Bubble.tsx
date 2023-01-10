@@ -65,10 +65,7 @@ export const Bubble = ({
         for (const id of bubble.projectLinked ?? []) {
           externalLinked.add(id);
         }
-        if (
-          scrapbox.Project.name !== bubble.project ||
-          !whiteList.includes(bubble.project)
-        ) continue;
+        if (!whiteList.includes(bubble.project)) continue;
         for (const linkLc of bubble.linked ?? []) {
           if (parentsLc.includes(linkLc)) continue;
           linked.add(toId(bubble.project, linkLc));
