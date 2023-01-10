@@ -52,8 +52,7 @@ export const Bubble = ({
   );
   const bubbles = useBubbleData(pageIds);
 
-  // 逆リンクからparentsを除いておく
-  // またpagesからparentsとwhitelistにないページを除いておく
+  // 逆リンクおよびpagesから, parentsとwhitelistにないものを除いておく
   const [linked, externalLinked, pages] = useMemo(
     () => {
       const parentsLc = parentTitles.map((title) => toTitleLc(title));
@@ -63,12 +62,16 @@ export const Bubble = ({
       const pages: Pick<BubbleData, "project" | "lines">[] = [];
 
       for (const bubble of bubbles) {
+        for (const id of bubble.projectLinked ?? []) {
+          externalLinked.add(id);
+        }
+        if (
+          scrapbox.Project.name !== bubble.project &&
+          whiteList.includes(bubble.project)
+        ) continue;
         for (const linkLc of bubble.linked ?? []) {
           if (parentsLc.includes(linkLc)) continue;
           linked.add(toId(bubble.project, linkLc));
-        }
-        for (const id of bubble.projectLinked ?? []) {
-          externalLinked.add(id);
         }
         if (parentsLc.includes(bubble.titleLc)) continue;
         if (!bubble.exists) continue;
@@ -77,7 +80,7 @@ export const Bubble = ({
 
       return [[...linked], [...externalLinked], pages] as const;
     },
-    [...bubbles, ...parentTitles],
+    [...bubbles, ...parentTitles, whiteList],
   );
 
   const handleClick = useCallback(() => props.hide(), [props.hide]);
