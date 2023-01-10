@@ -6,6 +6,7 @@
 import { Card } from "./Card.tsx";
 import { h, useMemo } from "./deps/preact.tsx";
 import { useBubbleData } from "./useBubbleData.ts";
+import { Bubble } from "./storage.ts";
 import { ID, toId } from "./id.ts";
 import type { BubbleSource } from "./useBubbles.ts";
 import type { Position } from "./position.ts";
@@ -18,16 +19,39 @@ export interface CardListProps
   prefetch: (project: string, title: string) => void;
   linked: readonly ID[];
   externalLinked: readonly ID[];
+  projectsForSort: readonly string[];
 }
 
 export const CardList = ({
   source,
   linked,
   externalLinked,
+  projectsForSort,
   ...props
 }: CardListProps) => {
   const cards = useBubbleData(linked);
   const externalCards = useBubbleData(externalLinked);
+
+  /** 更新日時降順とproject昇順に並び替えた関連ページデータ
+   *
+   * externalCardsは分けない
+   */
+  const sortedCards = useMemo(
+    () => {
+      const compare = (a: Bubble, b: Bubble) => {
+        const aIndex = projectsForSort.indexOf(a.project);
+        const bIndex = projectsForSort.indexOf(b.project);
+
+        if (aIndex === bIndex) return b.updated - a.updated;
+        if (aIndex < 0) return 1;
+        if (bIndex < 0) return -1;
+        return aIndex - bIndex;
+      };
+
+      return [...cards, ...externalCards].sort(compare);
+    },
+    [cards, externalCards, projectsForSort],
+  );
 
   const cardStyle = useMemo(() => makeStyle(source.position, "card"), [
     source.position,
@@ -39,7 +63,7 @@ export const CardList = ({
       style={cardStyle}
       onClick={props.onClick}
     >
-      {[...cards, ...externalCards].map((
+      {sortedCards.map((
         { project, lines: [{ text: title }], descriptions, image },
       ) => (
         <li>

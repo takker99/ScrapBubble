@@ -119,6 +119,7 @@ export const Bubble = ({
         externalLinked={externalLinked}
         onClick={handleClick}
         source={source}
+        projectsForSort={projects}
         {...props}
       />
     </>
