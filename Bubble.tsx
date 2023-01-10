@@ -57,23 +57,30 @@ export const Bubble = ({
     () => {
       const parentsLc = parentTitles.map((title) => toTitleLc(title));
 
+      /** `source.title`を内部リンク記法で参照しているリンクのリスト */
       const linked = new Set<ID>();
+      /** `source.title`を外部リンク記法で参照しているリンクのリスト */
       const externalLinked = new Set<ID>();
+      /** ページ本文 */
       const pages: Pick<BubbleData, "project" | "lines">[] = [];
 
       for (const bubble of bubbles) {
         for (const id of bubble.projectLinked ?? []) {
           const { project, titleLc } = fromId(id);
+          // External Linksの内、projectがwhiteListに属するlinksも重複除去処理を施す
           if (parentsLc.includes(titleLc) && whiteList.includes(project)) {
             continue;
           }
           externalLinked.add(id);
         }
+        // whiteLitにないprojectのページは、External Links以外表示しない
         if (!whiteList.includes(bubble.project)) continue;
+        // 親と重複しない逆リンクのみ格納する
         for (const linkLc of bubble.linked ?? []) {
           if (parentsLc.includes(linkLc)) continue;
           linked.add(toId(bubble.project, linkLc));
         }
+        // 親と重複しないページ本文のみ格納する
         if (parentsLc.includes(bubble.titleLc)) continue;
         if (!bubble.exists) continue;
         pages.push({ project: bubble.project, lines: bubble.lines });
