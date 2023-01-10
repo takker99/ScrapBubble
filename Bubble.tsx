@@ -15,7 +15,7 @@ import {
 import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { useBubbleData } from "./useBubbleData.ts";
 import { useTheme } from "./useTheme.ts";
-import { ID, toId } from "./id.ts";
+import { fromId, ID, toId } from "./id.ts";
 import { Bubble as BubbleData } from "./storage.ts";
 import type { BubbleSource } from "./useBubbles.ts";
 import type { Position } from "./position.ts";
@@ -63,6 +63,10 @@ export const Bubble = ({
 
       for (const bubble of bubbles) {
         for (const id of bubble.projectLinked ?? []) {
+          const { project, titleLc } = fromId(id);
+          if (parentsLc.includes(titleLc) && whiteList.includes(project)) {
+            continue;
+          }
           externalLinked.add(id);
         }
         if (!whiteList.includes(bubble.project)) continue;
