@@ -1,90 +1,39 @@
 import { findCache, isExpiredResponse, putCache } from "./cache.ts";
 import { ID, toId } from "./id.ts";
 import { Listener, makeEmitter } from "./eventEmitter.ts";
+import { Bubble, BubbleStorage, update } from "./storage.ts";
+import { convert } from "./convert.ts";
 import { logger } from "./debug.ts";
-import { getPage, toTitleLc } from "./deps/scrapbox-std.ts";
-import {
-  Line,
-  Page as RawPage,
-  ProjectId,
-  StringLc,
-  UnixTime,
-} from "./deps/scrapbox.ts";
+import { getPage } from "./deps/scrapbox-std.ts";
+import { ProjectId, UnixTime } from "./deps/scrapbox.ts";
 
-export interface Page {
-  title: string;
-  updated: number;
-  exists: boolean;
-  lines: Line[];
-}
-export interface Card {
-  /** external linksなら`true` */
-  isExternal: boolean;
-  project: string;
-  title: string;
-  image: string | null;
-  descriptions: string[];
-  // 並び替えに使う情報
-  updated: number;
-  linked: number;
-}
+const storage: BubbleStorage = new Map();
+/** データを更新中のページのリスト */
+const loadingIds = new Set<ID>();
+const emitter = makeEmitter<ID, Bubble>();
 
-export interface Bubble {
-  cards: Card[];
-  pages: (Page & { project: string })[];
-}
-
-export interface BubbleSchema {
-  cards: Card[];
-  page: Page;
-  updated: number;
-}
-
-type State<T> = { loading: boolean; value?: T };
-
-/** projectとtitleLcのペアをキーに、特定のページごとにデータを持つ */
-const bubbleMap = new Map<ID, State<BubbleSchema>>();
-const emitter = makeEmitter<ID, BubbleSchema>();
-
-/** 特定のタイトルのbubble dataを読み込む
+/** bubble dataを読み込む
  *
  * データの更新は行わない
  *
- * @param title 取得したいページのタイトル
+ * @param pageIds 取得したいページのリスト
  * @return pageの情報。未初期化のときは`undefined`を返す
  */
-export const load = (
-  title: string,
-  projects: string[],
-): Bubble | undefined => {
-  const bubbles = projects.flatMap((project) => {
-    const bubble = bubbleMap.get(toId(project, title));
-    return bubble?.value ? [[project, bubble.value]] as const : [];
-  });
-  // どのデータの未初期化のときのみ、未初期化と判定する
-  if (bubbles.length === 0) return;
-
-  return {
-    pages: bubbles.flatMap(([project, bubble]) =>
-      bubble.page.exists ? [{ project, ...bubble.page }] : []
-    ),
-    cards: bubbles.flatMap(([, bubble]) => bubble.cards),
-  };
-};
+export function* load(
+  pageIds: Iterable<ID>,
+): Generator<Bubble | undefined, void, unknown> {
+  for (const pageId of pageIds) {
+    yield storage.get(pageId);
+  }
+}
 
 /** 特定のページの更新を購読する */
-export const subscribe = (
-  title: string,
-  project: string,
-  listener: Listener<BubbleSchema>,
-): void => emitter.on(toId(project, title), listener);
+export const subscribe = (pageId: ID, listener: Listener<Bubble>): void =>
+  emitter.on(pageId, listener);
 
 /** 特定のページの更新購読を解除する */
-export const unsubscribe = (
-  title: string,
-  project: string,
-  listener: Listener<BubbleSchema>,
-): void => emitter.off(toId(project, title), listener);
+export const unsubscribe = (pageId: ID, listener: Listener<Bubble>): void =>
+  emitter.off(pageId, listener);
 
 export interface PrefetchOptions {
   /** networkからデータを取得しないときは`true`を渡す*/
@@ -105,8 +54,7 @@ export const prefetch = (
 ): void => {
   for (const project of projects) {
     const id = toId(project, title);
-    const state = bubbleMap.get(id);
-    if (state?.loading === true) continue;
+    if (loadingIds.has(id)) continue;
     addTask(project, title, watchList, options);
   }
 };
@@ -150,13 +98,11 @@ const updateApiCache = async (
   options?: PrefetchOptions,
 ): Promise<void> => {
   const id = toId(project, title);
-  const state = bubbleMap.get(id);
-  if (state?.loading === true) return;
-  let oldResult = state?.value;
+  if (loadingIds.has(id)) return;
 
   // 排他ロックをかける
   // これで同時に同じページの更新が走らないようにする
-  bubbleMap.set(id, { loading: true, value: oldResult });
+  loadingIds.add(id);
   const i = counter++;
 
   logger.time(`[${i}] Check update ${id}`);
@@ -174,20 +120,15 @@ const updateApiCache = async (
       const result = await getPage.fromResponse(cachedRes);
 
       // 更新があればeventを発行する
-      if (
-        result.ok && (!oldResult || doesUpdate(oldResult, result.value))
-      ) {
-        const [page, cards, backCards, cards2hop] = convert(
-          toTitleLc(title),
-          project,
-          result.value,
-        );
-        const newBubble = { page, cards: backCards, updated: page.updated };
-        bubbleMap.set(id, { loading: true, value: newBubble });
-        applyCards(project, [...cards, ...backCards], cards2hop, page.updated);
-
-        emitter.dispatch(id, newBubble);
-        oldResult = newBubble;
+      if (result.ok) {
+        const converted = convert(project, result.value);
+        for (const [bubbleId, bubble] of converted) {
+          const prev = storage.get(bubbleId);
+          const updatedBubble = update(prev, bubble);
+          if (prev === updatedBubble) continue;
+          storage.set(bubbleId, updatedBubble);
+          emitter.dispatch(bubbleId, bubble);
+        }
       }
     }
 
@@ -205,184 +146,23 @@ const updateApiCache = async (
     await putCache(pureURL, res);
 
     // 更新があればeventを発行する
-    if (
-      result.ok && (!oldResult || doesUpdate(oldResult, result.value))
-    ) {
-      const [page, cards, backCards, cards2hop] = convert(
-        toTitleLc(title),
-        project,
-        result.value,
-      );
-      const newBubble = { page, cards: backCards, updated: page.updated };
-      bubbleMap.set(id, { loading: true, value: newBubble });
-      applyCards(project, [...cards, ...backCards], cards2hop, page.updated);
-
-      emitter.dispatch(id, newBubble);
+    if (result.ok) {
+      const converted = convert(project, result.value);
+      for (const [bubbleId, bubble] of converted) {
+        const prev = storage.get(bubbleId);
+        const updatedBubble = update(prev, bubble);
+        if (prev === updatedBubble) continue;
+        storage.set(bubbleId, updatedBubble);
+        emitter.dispatch(bubbleId, bubble);
+      }
     }
   } catch (e: unknown) {
     // 想定外のエラーはログに出す
     console.error(e);
   } finally {
     // ロック解除
-    const result = bubbleMap.get(id);
-    bubbleMap.set(id, { loading: false, value: result?.value });
+    loadingIds.delete(id);
     logger.timeEnd(`[${i}] Check update ${id}`);
     counter--;
   }
-};
-
-/** 関連ベージリストから、他のページのデータを取り出して反映する */
-const applyCards = (
-  project: string,
-  cards1hop: Card[],
-  cards2hop: Map<StringLc, Card[]>,
-  updated: number,
-): void => {
-  // 2 hop linksから得られた情報を反映する
-  // これは排他処理しなくてもいい
-  for (const [linkLc, cards] of cards2hop.entries()) {
-    const id = toId(project, linkLc);
-    const {
-      loading = false,
-      value: bubble2 = {
-        page: {
-          title: linkLc,
-          updated: 0,
-          exists: false,
-          lines: [],
-        },
-        cards,
-        updated,
-      },
-    } = bubbleMap.get(id) ?? {};
-    if (loading) continue;
-    if (bubble2.updated > updated) continue;
-
-    bubble2.cards = cards;
-    bubble2.updated = updated;
-
-    bubbleMap.set(id, { loading: false, value: bubble2 });
-    emitter.dispatch(id, bubble2);
-  }
-
-  // 1 hop linksから得られた情報を反映する
-  // これは排他処理しなくてもいい
-  for (const card of cards1hop) {
-    const id = toId(
-      "project" in card ? card.project : project,
-      toTitleLc(card.title),
-    );
-    const {
-      loading = false,
-      value: bubble2 = {
-        page: {
-          title: card.title,
-          updated: 0,
-          exists: false,
-          lines: [],
-        },
-        cards: [],
-        updated,
-      },
-    } = bubbleMap.get(id) ?? {};
-    if (loading) continue;
-    if (bubble2.updated > updated) continue;
-
-    bubble2.page.title = card.title;
-    bubble2.page.updated = card.updated;
-    if (!bubble2.page.exists) {
-      // サムネイル本文から、適当にでっち上げておく
-      bubble2.page.lines = [card.title, ...card.descriptions].map((line) => ({
-        text: line,
-        updated: card.updated,
-        created: card.updated,
-        id: "dummy",
-        userId: "dummy",
-      }));
-      bubble2.page.exists = true;
-    }
-    bubble2.updated = updated;
-
-    bubbleMap.set(id, { loading: false, value: bubble2 });
-    emitter.dispatch(id, bubble2);
-  }
-};
-
-/** ページデータが更新されているか判定する
- *
- * 空ページの場合は、逆リンクの個数で簡易的に判定する
- */
-const doesUpdate = (schema: BubbleSchema, newPage: RawPage) =>
-  schema.page.exists !== newPage.persistent ||
-  (schema.page.exists
-    ? schema.page.updated <= newPage.updated
-    : schema.cards.length !== newPage.linked);
-
-/** APIから取得したページデータを、Bubble用に変換する
- *
- * @param titleLc ページのタイトル タイトル変更があると、page.titleから復元できないため、別途指定している
- * @param project ページのproject
- * @param page 変換したいページデータ
- * @return 変換したデータ (1列目：titleLcのページデータ、2列目：titleLcの順リンク、3列目：titleLcの逆リンク、4列目：他のページの1 hop links)
- */
-const convert = (
-  titleLc: string,
-  project: string,
-  page: RawPage,
-): [Page, Card[], Card[], Map<StringLc, Card[]>] => {
-  const projectLinksLc = page.projectLinks.map((link) => toTitleLc(link));
-
-  // 1 hop linksを仕分ける
-
-  const links: Card[] = [];
-  const backLinks: Card[] = [];
-  for (const rawCard of page.relatedPages.links1hop) {
-    const card = { isExternal: false, project, ...rawCard };
-    if (rawCard.linksLc.includes(titleLc)) {
-      // 逆リンクもしくは双方向リンク
-      backLinks.push(card);
-    } else {
-      // 順リンクのみ
-      links.push(card);
-    }
-  }
-  for (
-    const { projectName, ...rawCard } of page.relatedPages
-      .projectLinks1hop
-  ) {
-    const card = { isExternal: true, project: projectName, ...rawCard };
-    if (
-      projectLinksLc.includes(toTitleLc(`/${projectName}/${rawCard.title}`))
-    ) {
-      // 順リンクもしくは双方向リンク
-      links.push(card);
-    } else {
-      // 逆リンクのみ
-      backLinks.push(card);
-    }
-  }
-
-  // 2 hop linksから他のページの1 hop linksを取り出す
-  // project nameは`project`と同一
-  const links2hopMap = new Map<StringLc, Card[]>();
-  for (const card of page.relatedPages.links2hop) {
-    for (const linkLc of card.linksLc) {
-      links2hopMap.set(linkLc, [
-        ...(links2hopMap.get(linkLc) ?? []),
-        { isExternal: false, project, ...card },
-      ]);
-    }
-  }
-
-  return [
-    {
-      title: page.title,
-      lines: page.lines,
-      exists: page.persistent,
-      updated: page.updated,
-    },
-    links,
-    backLinks,
-    links2hopMap,
-  ];
 };

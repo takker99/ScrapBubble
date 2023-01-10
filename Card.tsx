@@ -23,7 +23,7 @@ import type { LinkType } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
-export interface CardProps extends BubbleOperators {
+export interface CardProps {
   project: string;
   title: string;
   descriptions: string[];
@@ -32,6 +32,7 @@ export interface CardProps extends BubbleOperators {
   delay: number;
   linkedType: LinkType;
   prefetch: (project: string, title: string) => void;
+  bubble: BubbleOperators["bubble"];
 }
 
 export const Card = ({
@@ -42,10 +43,8 @@ export const Card = ({
   linkedTo,
   linkedType,
   bubble,
-  hide,
   delay,
   prefetch,
-  ...props
 }: CardProps) => {
   const blocks = useMemo(
     () => thumbnail ? [] : parse(descriptions.join("\n"), { hasTitle: false }),
@@ -89,7 +88,6 @@ export const Card = ({
       href={`/${project}/${encodeTitleURI(title)}`}
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}
-      {...props}
     >
       <div class="hover" />
       <div class="content">

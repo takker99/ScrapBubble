@@ -4,7 +4,7 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 import { Page } from "./Page.tsx";
-import { Card } from "./Card.tsx";
+import { CardList } from "./CardList.tsx";
 import {
   Fragment,
   FunctionComponent,
@@ -12,10 +12,11 @@ import {
   useCallback,
   useMemo,
 } from "./deps/preact.tsx";
-import { encodeTitleURI } from "./deps/scrapbox-std.ts";
-import { useTheme } from "./useTheme.ts";
+import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { useBubbleData } from "./useBubbleData.ts";
-import { toId } from "./id.ts";
+import { useTheme } from "./useTheme.ts";
+import { ID, toId } from "./id.ts";
+import { Bubble as BubbleData } from "./storage.ts";
 import type { BubbleSource } from "./useBubbles.ts";
 import type { Position } from "./position.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
@@ -45,85 +46,81 @@ export const Bubble = ({
         : [source.project],
     [whiteList, source.project],
   );
-
-  const theme = useTheme(source.project);
-  const { pages: _pages, cards: _cards } = useBubbleData(
-    source.title,
-    projects,
+  const pageIds = useMemo(
+    () => projects.map((project) => toId(project, source.title)),
+    [projects, source.title],
   );
+  const bubbles = useBubbleData(pageIds);
 
-  // cardsからparentsを除いておく
-  const cards = useMemo(
-    () => _cards.filter((card) => !parentTitles.includes(card.title)),
-    [_cards, parentTitles],
-  );
-  // pagesからparentsとwhitelistにないページを除いておく
-  const pages = useMemo(
-    () =>
-      _pages.filter((page) =>
-        !parentTitles.includes(page.title) && whiteList.includes(page.project)
-      ),
-    [_cards, parentTitles, whiteList],
+  // 逆リンクからparentsを除いておく
+  // またpagesからparentsとwhitelistにないページを除いておく
+  const [linked, externalLinked, pages] = useMemo(
+    () => {
+      const parentsLc = parentTitles.map((title) => toTitleLc(title));
+
+      const linked = new Set<ID>();
+      const externalLinked = new Set<ID>();
+      const pages: Pick<BubbleData, "project" | "lines">[] = [];
+
+      for (const bubble of bubbles) {
+        for (const linkLc of bubble.linked ?? []) {
+          if (parentsLc.includes(linkLc)) continue;
+          linked.add(toId(bubble.project, linkLc));
+        }
+        for (const id of bubble.projectLinked ?? []) {
+          externalLinked.add(id);
+        }
+        if (parentsLc.includes(bubble.titleLc)) continue;
+        if (!bubble.exists) continue;
+        pages.push({ project: bubble.project, lines: bubble.lines });
+      }
+
+      return [[...linked], [...externalLinked], pages] as const;
+    },
+    [...bubbles, ...parentTitles],
   );
 
   const handleClick = useCallback(() => props.hide(), [props.hide]);
 
+  const theme = useTheme(pages[0]?.project ?? source.project);
   const pageStyle = useMemo(() => makeStyle(source.position, "page"), [
-    source.position,
-  ]);
-  const cardStyle = useMemo(() => makeStyle(source.position, "card"), [
     source.position,
   ]);
 
   return (
     <>
-      {pages.length > 0 && pages[0].lines.length > 0 && (
+      {pages.length > 0 && (
         <div
           className="text-bubble"
-          data-theme={theme}
           style={pageStyle}
+          data-theme={theme}
           onClick={handleClick}
         >
           <StatusBar>
             {pages[0].project !== scrapbox.Project.name && (
-              <ProjectBadge project={pages[0].project} title={pages[0].title} />
+              <ProjectBadge
+                project={pages[0].project}
+                title={pages[0].lines[0].text}
+              />
             )}
           </StatusBar>
           <Page
             lines={pages[0].lines}
             project={pages[0].project}
-            title={pages[0].title}
+            title={pages[0].lines[0].text}
             scrollTo={source.scrollTo}
             whiteList={whiteList}
             {...props}
           />
         </div>
       )}
-      <div
-        className="card-bubble"
-        data-theme={theme}
-        style={cardStyle}
+      <CardList
+        linked={linked}
+        externalLinked={externalLinked}
         onClick={handleClick}
-      >
-        <ul>
-          {cards.map((
-            { project, title, descriptions, image },
-          ) => (
-            <li>
-              <Card
-                key={toId(project, title)}
-                project={project}
-                title={title}
-                linkedTo={source.title}
-                linkedType={source.type}
-                descriptions={descriptions}
-                thumbnail={image ?? ""}
-                {...props}
-              />
-            </li>
-          ))}
-        </ul>
-      </div>
+        source={source}
+        {...props}
+      />
     </>
   );
 };

@@ -32,10 +32,13 @@ import {
   Table as TableType,
 } from "./deps/scrapbox-parser.ts";
 import { parseLink } from "./parseLink.ts";
+import { hasLink } from "./hasLink.ts";
+import { toId } from "./id.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { BubbleOperators } from "./useBubbles.ts";
-import { calcBubblePosition } from "./position.ts";
 import { useBubbleData } from "./useBubbleData.ts";
+import { isEmptyLink } from "./storage.ts";
+import { calcBubblePosition } from "./position.ts";
 import { parse } from "./deps/scrapbox-parser.ts";
 import type { ScrollTo } from "./types.ts";
 import {
@@ -715,22 +718,19 @@ const Video = ({ href }: VideoNode) => (
 );
 
 const useEmptyLink = (project: string, link: string) => {
-  const { project: rootProject, title, whiteList } = useContext(context);
-  const projects = useMemo(
-    () => whiteList.includes(project) ? whiteList : [project, ...whiteList],
+  const { whiteList } = useContext(
+    context,
+  );
+  const pageIds = useMemo(
+    () =>
+      (whiteList.includes(project) ? whiteList : [project, ...whiteList]).map(
+        (project) => toId(project, link),
+      ),
     [whiteList, project],
   );
-  const { pages, cards } = useBubbleData(link, projects);
+  const bubbles = useBubbleData(pageIds);
 
-  return useMemo(
-    () =>
-      // ページの中身がなく、逆リンクがbubble元のカードしか存在しない場合に空リンクと判定する
-      pages.length === 0 && cards.length < 2 && (cards.length === 0 || (
-        toTitleLc(cards[0]?.title) === toTitleLc(title) &&
-        cards[0].project === rootProject
-      )),
-    [pages, cards],
-  );
+  return useMemo(() => isEmptyLink(bubbles), bubbles);
 };
 
 /** <a>にhover機能を付与する */
@@ -765,23 +765,3 @@ const useHover = (
 
   return ref;
 };
-
-const hasLink = (link: string, nodes: NodeType[]): boolean =>
-  nodes.some((node) => {
-    switch (node.type) {
-      case "hashTag":
-        return toTitleLc(node.href) === toTitleLc(link);
-      case "link": {
-        if (node.pathType !== "relative") return false;
-        const { title = "" } = parseLink({
-          pathType: "relative",
-          href: node.href,
-        });
-        return toTitleLc(title) === toTitleLc(link);
-      }
-      case "quote":
-      case "strong":
-      case "decoration":
-        return hasLink(link, node.nodes);
-    }
-  });

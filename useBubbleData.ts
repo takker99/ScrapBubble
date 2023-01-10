@@ -1,6 +1,8 @@
 import { useLayoutEffect, useState } from "./deps/preact.tsx";
-import { Bubble, load, subscribe, unsubscribe } from "./bubble.ts";
+import { load, subscribe, unsubscribe } from "./bubble.ts";
 import { logger } from "./debug.ts";
+import { ID } from "./id.ts";
+import { Bubble } from "./storage.ts";
 
 /** bubbleデータを取得するhooks
  *
@@ -9,14 +11,13 @@ import { logger } from "./debug.ts";
  * @return bubble
  */
 export const useBubbleData = (
-  title: string,
-  projects: string[],
-): Bubble => {
-  const [bubble, setBubble] = useState<Bubble>({ pages: [], cards: [] });
+  pageIds: readonly ID[],
+): readonly Bubble[] => {
+  const [bubbles, setBubbles] = useState<readonly Bubble[]>([]);
 
   useLayoutEffect(() => {
     // データの初期化
-    setBubble(load(title, projects) ?? { pages: [], cards: [] });
+    setBubbles([...load(pageIds)].flatMap((bubble) => bubble ? [bubble] : []));
 
     // データ更新用listenerの登録
     let timer: number | undefined;
@@ -26,18 +27,19 @@ export const useBubbleData = (
       clearTimeout(timer);
       timer = setTimeout(() => {
         logger.debug(
-          `%cUpdate "${title}"(${projects.length} projects)`,
+          `%cUpdate ${pageIds.length} pages`,
           "color: gray;",
         );
-        setBubble(load(title, projects) ?? { pages: [], cards: [] });
+        setBubbles(
+          [...load(pageIds)].flatMap((bubble) => bubble ? [bubble] : []),
+        );
       }, 10);
     };
 
     // 更新を購読する
-    projects.forEach((project) => subscribe(title, project, updateData));
-    return () =>
-      projects.forEach((project) => unsubscribe(title, project, updateData));
-  }, [title, projects]);
+    pageIds.forEach((id) => subscribe(id, updateData));
+    return () => pageIds.forEach((id) => unsubscribe(id, updateData));
+  }, pageIds);
 
-  return bubble;
+  return bubbles;
 };

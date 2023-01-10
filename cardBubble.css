@@ -9,8 +9,7 @@
   z-index: 9000;
   font-size: 11px;
   line-height: 1.42857;
-}
-.card-bubble > ul {
+
   display: flex;
   padding: 0px;
   margin: 0px;
@@ -18,7 +17,7 @@
   overflow-x: auto;
   overflow-y: visible;
 }
-.card-bubble > ul > li {
+.card-bubble li {
   display: block;
   position: relative;
   float: none;
