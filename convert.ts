@@ -17,29 +17,15 @@ export const convert = (
   checked?: Date,
 ): BubbleStorage => {
   const storage: BubbleStorage = new Map();
+  checked ??= new Date();
 
   // pageが参照しているリンクの逆リンクにpageを入れる
   // これにより、2 hop linksのハブとなるcardは、全ての逆リンクが格納されていると保証され、linkedとprojectLinkedはundefinedでなくなる
   const titleLc = toTitleLc(page.title);
   for (const link of page.links) {
-    const linkLc = toTitleLc(link);
-    storage.set(toId(project, linkLc), {
-      project,
-      titleLc: linkLc,
-      lines: [{
-        text: link,
-        id: "dummy",
-        userId: "dummy",
-        updated: 0,
-        created: 0,
-      }],
-      exists: false,
-      image: null,
-      descriptions: [],
-      updated: 0,
-      checked: getUnixTime(checked ?? new Date()),
-      linked: [titleLc],
-    });
+    const bubble: Bubble = makeDummy(project, link, checked);
+    bubble.linked = [titleLc];
+    storage.set(toId(project, link), bubble);
   }
   const pageId = toId(project, titleLc);
   const projectLinksLc: ID[] = [];
@@ -48,29 +34,15 @@ export const convert = (
     const link = fromId(id as ID);
     const cardId = toId(link.project, link.titleLc);
     projectLinksLc.push(cardId);
-    storage.set(cardId, {
-      project: link.project,
-      // 中身はtitle形式となる
-      titleLc: link.titleLc,
-      lines: [{
-        text: link.titleLc,
-        id: "dummy",
-        userId: "dummy",
-        updated: 0,
-        created: 0,
-      }],
-      exists: false,
-      image: null,
-      descriptions: [],
-      updated: 0,
-      checked: getUnixTime(checked ?? new Date()),
-      projectLinked: [pageId],
-    });
+    // `link.titleLc`はtitle形式となる
+    const bubble: Bubble = makeDummy(link.project, link.titleLc, checked);
+    bubble.projectLinked = [pageId];
+    storage.set(cardId, bubble);
   }
 
   // ページ本文を入れる
   const pageBubble: Required<Bubble> = {
-    ...toBubble(project, page),
+    ...toBubble(project, page, checked),
     linked: [],
     projectLinked: [],
   };
@@ -88,7 +60,7 @@ export const convert = (
     }
     // cardを入れる
     const cardId = toId(project, card.titleLc);
-    const bubble = toBubble(project, card);
+    const bubble = toBubble(project, card, checked);
     // external linksでなければ`projectLinked`は存在しない
     const linked = storage.get(cardId)?.linked;
     if (linked) bubble.linked = linked;
@@ -108,7 +80,7 @@ export const convert = (
       pageBubble.projectLinked.push(cardId);
     }
     // cardを入れる
-    const bubble = toBubble(card.projectName, card);
+    const bubble = toBubble(card.projectName, card, checked);
     const projectLinked = storage.get(cardId)?.projectLinked;
     if (projectLinked) bubble.projectLinked = projectLinked;
     storage.set(cardId, bubble);
@@ -130,7 +102,7 @@ export const convert = (
     }
     // cardを入れる
     const cardId = toId(project, card.titleLc);
-    const bubble = toBubble(project, card);
+    const bubble = toBubble(project, card, checked);
     // external linksでなければ`projectLinked`は存在しない
     const linked = storage.get(cardId)?.linked;
     if (linked) bubble.linked = linked;
@@ -144,11 +116,13 @@ export const convert = (
  *
  * @param project 与えたデータのproject name
  * @param page bubbleに変換したいデータ
+ * @param checked データを確認した日時
  * @return 変換後のデータ
  */
 const toBubble = (
   project: string,
   page: Page | Omit<RelatedPage, "linksLc">,
+  checked: Date,
 ): Bubble => ({
   project,
   titleLc: "titleLc" in page ? page.titleLc : toTitleLc(page.title),
@@ -167,5 +141,33 @@ const toBubble = (
       created: page.updated,
     })),
   updated: page.updated,
-  checked: page.updated,
+  checked: getUnixTime(checked),
+});
+
+/** ページタイトルだけからBubbleを作る
+ *
+ * @param project 与えたデータのproject name
+ * @param title ページタイトル
+ * @param checked データを確認した日時
+ * @return 変換後のデータ
+ */
+const makeDummy = (
+  project: string,
+  title: string,
+  checked: Date,
+): Bubble => ({
+  project,
+  titleLc: toTitleLc(title),
+  exists: false,
+  descriptions: [],
+  image: null,
+  lines: [{
+    text: title,
+    id: "dummy",
+    userId: "dummy",
+    updated: 0,
+    created: 0,
+  }],
+  updated: 0,
+  checked: getUnixTime(checked),
 });
