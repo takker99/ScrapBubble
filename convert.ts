@@ -28,17 +28,12 @@ export const convert = (
     storage.set(toId(project, link), bubble);
   }
   const pageId = toId(project, titleLc);
-  const projectLinksLc: ID[] = [];
-  for (const id of page.projectLinks) {
-    // idは/:project/:title という形式だと保証していい
+  const projectLinksLc = page.projectLinks.map((id) => {
     const link = fromId(id as ID);
-    const cardId = toId(link.project, link.titleLc);
-    projectLinksLc.push(cardId);
-    // `link.titleLc`はtitle形式となる
-    const bubble: Bubble = makeDummy(link.project, link.titleLc, checked);
-    bubble.projectLinked = [pageId];
-    storage.set(cardId, bubble);
-  }
+    return toId(link.project, link.titleLc);
+  });
+  // projectLinksおよびprojectLinks1hopにあるページカードの外部リンク記法経由の逆リンクは正確に取得できないので無視する
+  // 外部リンク記法経由の逆リンクはpage.titleのみ考慮する
 
   // ページ本文を入れる
   const pageBubble: Required<Bubble> = {

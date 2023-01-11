@@ -409,9 +409,6 @@ Map {
         },
       ],
       project: "takker-dist2",
-      projectLinked: [
-        "/takker-dist/f",
-      ],
       titleLc: "b",
       updated: 1673336514,
     },
@@ -439,33 +436,8 @@ Map {
         },
       ],
       project: "takker-dist2",
-      projectLinked: [
-        "/takker-dist/f",
-      ],
       titleLc: "c",
       updated: 1673336584,
-    },
-  "/takker-dist2/g" => {
-      checked: 1672173548,
-      descriptions: [
-      ],
-      exists: false,
-      image: null,
-      lines: [
-        {
-          created: 0,
-          id: "dummy",
-          text: "G",
-          updated: 0,
-          userId: "dummy",
-        },
-      ],
-      project: "takker-dist2",
-      projectLinked: [
-        "/takker-dist/f",
-      ],
-      titleLc: "g",
-      updated: 0,
     },
 }
 `;
