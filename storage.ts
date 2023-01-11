@@ -58,9 +58,9 @@ export const isEmptyLink = (
     linked += (bubble.linked?.length ?? 0) +
       (bubble.projectLinked?.length ?? 0);
     // 2つ以上のページから参照されているなら空リンクでない
-    if (linked > 1) return true;
+    if (linked > 1) return false;
   }
-  return linked > 1;
+  return linked < 2;
 };
 
 /** bubbleを更新する
