@@ -3,6 +3,7 @@ import { ID, toId } from "./id.ts";
 import { Listener, makeEmitter } from "./eventEmitter.ts";
 import { Bubble, BubbleStorage, update } from "./storage.ts";
 import { convert } from "./convert.ts";
+import { makeThrottle } from "./throttle.ts";
 import { logger } from "./debug.ts";
 import { getPage } from "./deps/scrapbox-std.ts";
 import { ProjectId, UnixTime } from "./deps/scrapbox.ts";
@@ -55,38 +56,16 @@ export const prefetch = (
   for (const project of projects) {
     const id = toId(project, title);
     if (loadingIds.has(id)) continue;
-    addTask(project, title, watchList, options);
+    updateApiCache(project, title, watchList, options);
   }
-};
-
-type TaskArg = [string, ProjectId[], PrefetchOptions | undefined];
-const tasks = new Map<string, TaskArg[]>();
-let timer: number | undefined;
-const interval = 250;
-
-/** ページデータ更新タスクを追加する
- *
- * 追加されたタスクは、同名projectのページから最後に追加された順に`interval`msごとに実行される
- */
-const addTask = (project: string, ...args: TaskArg): void => {
-  // タスクの追加
-  tasks.set(project, [...tasks.get(project) ?? [], args]);
-
-  // task runner
-  // `interval`msごとに1つずつデータを更新する
-  timer ??= setInterval(() => {
-    const task = [...tasks.entries()].find(([, argList]) => argList.length > 0);
-    if (!task) {
-      clearInterval(timer);
-      timer = undefined;
-      return;
-    }
-    updateApiCache(task[0], ...task[1].pop()!);
-  }, interval);
 };
 
 /** debug用カウンタ */
 let counter = 0;
+
+/** 同時に3つまでfetchできるようにする函数 */
+const throttle = makeThrottle<Response>(3);
+
 /** cacheおよびnetworkから新しいページデータを取得する
  *
  * もし更新があれば、更新通知も発行する
@@ -140,7 +119,7 @@ const updateApiCache = async (
       return;
     }
 
-    const res = await fetch(req);
+    const res = await throttle(() => fetch(req));
     logger.debug(`%c[${i}]Fetch`, "color: gray;", id);
     const result = await getPage.fromResponse(res.clone());
     await putCache(pureURL, res);
