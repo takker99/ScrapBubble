@@ -15,7 +15,7 @@ import {
 import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { useBubbleData } from "./useBubbleData.ts";
 import { useTheme } from "./useTheme.ts";
-import { ID, toId } from "./id.ts";
+import { fromId, ID, toId } from "./id.ts";
 import { Bubble as BubbleData } from "./storage.ts";
 import type { BubbleSource } from "./useBubbles.ts";
 import type { Position } from "./position.ts";
@@ -57,22 +57,30 @@ export const Bubble = ({
     () => {
       const parentsLc = parentTitles.map((title) => toTitleLc(title));
 
+      /** `source.title`を内部リンク記法で参照しているリンクのリスト */
       const linked = new Set<ID>();
+      /** `source.title`を外部リンク記法で参照しているリンクのリスト */
       const externalLinked = new Set<ID>();
+      /** ページ本文 */
       const pages: Pick<BubbleData, "project" | "lines">[] = [];
 
       for (const bubble of bubbles) {
         for (const id of bubble.projectLinked ?? []) {
+          const { project, titleLc } = fromId(id);
+          // External Linksの内、projectがwhiteListに属するlinksも重複除去処理を施す
+          if (parentsLc.includes(titleLc) && whiteList.includes(project)) {
+            continue;
+          }
           externalLinked.add(id);
         }
-        if (
-          scrapbox.Project.name !== bubble.project ||
-          !whiteList.includes(bubble.project)
-        ) continue;
+        // whiteLitにないprojectのページは、External Links以外表示しない
+        if (!whiteList.includes(bubble.project)) continue;
+        // 親と重複しない逆リンクのみ格納する
         for (const linkLc of bubble.linked ?? []) {
           if (parentsLc.includes(linkLc)) continue;
           linked.add(toId(bubble.project, linkLc));
         }
+        // 親と重複しないページ本文のみ格納する
         if (parentsLc.includes(bubble.titleLc)) continue;
         if (!bubble.exists) continue;
         pages.push({ project: bubble.project, lines: bubble.lines });
