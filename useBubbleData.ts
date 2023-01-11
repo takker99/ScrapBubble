@@ -20,6 +20,7 @@ export const useBubbleData = (
     setBubbles([...load(pageIds)].flatMap((bubble) => bubble ? [bubble] : []));
 
     // データ更新用listenerの登録
+
     let timer: number | undefined;
     /** ページデータを更新する */
     const updateData = () => {
@@ -39,7 +40,7 @@ export const useBubbleData = (
     // 更新を購読する
     pageIds.forEach((id) => subscribe(id, updateData));
     return () => pageIds.forEach((id) => unsubscribe(id, updateData));
-  }, pageIds);
+  }, [pageIds]);
 
   return bubbles;
 };

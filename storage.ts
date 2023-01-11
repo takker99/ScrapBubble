@@ -73,32 +73,72 @@ export const isEmptyLink = (
  *
  * 更新がなければ以前のobjectをそのまま返し、更新があれば新しいobjectで返す
  */
-export const update = (prev: Bubble | undefined, current: Bubble): Bubble => {
+export const update = (
+  prev: Bubble | undefined,
+  current: Readonly<Bubble>,
+): Bubble => {
   if (!prev) return current;
   if (prev.updated < current.updated) {
+    // 更新日時が新しければ、そちらを採用する
+    // linked, projectLinked, linesのみ別途判定する
     const { lines, ...rest } = current;
     const bubble: Bubble = {
       ...rest,
       lines: isDummy(current) ? prev.lines : lines,
     };
-    bubble.linked ??= prev.linked;
-    bubble.projectLinked ??= prev.projectLinked;
+    if (prev.linked) bubble.linked ??= prev.linked;
+    if (prev.projectLinked) bubble.projectLinked ??= prev.projectLinked;
 
     return bubble;
   }
 
+  // `updated`が変化していない場合、変更されている可能性のあるpropertiesは
+  // - `lines`
+  // - `linked`
+  // - `projectLinked`
+  // - `checked`
+  // に限られる
+  let hasChange = false;
+  const bubble = { ...prev };
+
+  // 本物の本文がやってきたら、そちらを採用する
+  if (isDummy(bubble) && !isDummy(current)) {
+    bubble.lines = current.lines;
+    hasChange = true;
+  }
   if (
-    (isDummy(prev) && !isDummy(current)) || (!prev.linked && current.linked) ||
-    (!prev.projectLinked && current.projectLinked)
+    current.linked &&
+    // まずリンク数で大雑把に比較し、長さが変わらなければ一つづつ比較して更新の有無を調べる
+    (bubble.linked?.length !== current.linked?.length ||
+      bubble.linked?.some?.((linkLc, i) => linkLc !== current.linked?.[i]))
   ) {
-    const bubble = { ...prev };
-    if (isDummy(prev) && !isDummy(current)) bubble.lines = current.lines;
-    bubble.linked ??= current.linked;
-    bubble.projectLinked ??= current.projectLinked;
-
-    return bubble;
+    bubble.linked = current.linked;
+    hasChange = true;
   }
-  return prev;
+  if (
+    current.projectLinked &&
+    // まずリンク数で大雑把に比較し、長さが変わらなければ一つづつ比較して更新の有無を調べる
+    (bubble.projectLinked?.length !== current.projectLinked?.length ||
+      bubble.projectLinked?.some?.((linkLc, i) =>
+        linkLc !== current.projectLinked?.[i]
+      ))
+  ) {
+    bubble.projectLinked = current.projectLinked;
+    hasChange = true;
+  }
+
+  // データ確認日時のみの変更は、object参照を維持する
+  if (bubble.checked !== current.checked) {
+    const checked = Math.max(bubble.checked, current.checked);
+    if (!hasChange) {
+      prev.checked = checked;
+      return prev;
+    }
+    bubble.checked = checked;
+    hasChange = true;
+  }
+
+  return hasChange ? bubble : prev;
 };
 
 /** linesがdescriptionからでっち上げられたデータかどうか判定する */

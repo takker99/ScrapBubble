@@ -10,7 +10,10 @@ import {
   FunctionComponent,
   h,
   useCallback,
+  useEffect,
+  useLayoutEffect,
   useMemo,
+  useState,
 } from "./deps/preact.tsx";
 import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { useBubbleData } from "./useBubbleData.ts";
@@ -51,19 +54,28 @@ export const Bubble = ({
     [projects, source.title],
   );
   const bubbles = useBubbleData(pageIds);
+  const parentsLc = useMemo(
+    () => parentTitles.map((title) => toTitleLc(title)),
+    [parentTitles],
+  );
 
-  // 逆リンクおよびpagesから, parentsとwhitelistにないものを除いておく
-  const [linked, externalLinked, pages] = useMemo(
+  const [[linked, externalLinked, pages], setBubbleData] = useState<
+    [ID[], ID[], BubbleData[]]
+  >([[], [], []]);
+
+  useLayoutEffect(
     () => {
-      const parentsLc = parentTitles.map((title) => toTitleLc(title));
-
       /** `source.title`を内部リンク記法で参照しているリンクのリスト */
       const linked = new Set<ID>();
       /** `source.title`を外部リンク記法で参照しているリンクのリスト */
       const externalLinked = new Set<ID>();
-      /** ページ本文 */
-      const pages: Pick<BubbleData, "project" | "lines">[] = [];
+      /** ページ本文
+       *
+       * bubbleをそのまま保つことで、参照の違いのみで更新の有無を判断できる
+       */
+      const pages: BubbleData[] = [];
 
+      // 逆リンクおよびpagesから, parentsとwhitelistにないものを除いておく
       for (const bubble of bubbles) {
         for (const id of bubble.projectLinked ?? []) {
           const { project, titleLc } = fromId(id);
@@ -83,12 +95,38 @@ export const Bubble = ({
         // 親と重複しないページ本文のみ格納する
         if (parentsLc.includes(bubble.titleLc)) continue;
         if (!bubble.exists) continue;
-        pages.push({ project: bubble.project, lines: bubble.lines });
+        pages.push(bubble);
       }
 
-      return [[...linked], [...externalLinked], pages] as const;
+      // 再レンダリングを抑制するために、必要なものだけ更新する
+      setBubbleData((prev) => {
+        let [prevLinked, prevExternalLinked, prevPages] = prev;
+        let hasChange = false;
+        if (
+          prevLinked.length !== linked.size ||
+          prevLinked.some((id) => !linked.has(id))
+        ) {
+          prevLinked = [...linked];
+          hasChange = true;
+        }
+        if (
+          prevExternalLinked.length !== externalLinked.size ||
+          prevExternalLinked.some((id) => !externalLinked.has(id))
+        ) {
+          prevExternalLinked = [...externalLinked];
+          hasChange = true;
+        }
+        if (
+          prevPages.length !== pages.length ||
+          prevPages.some((bubble, i) => pages[i] !== bubble)
+        ) {
+          prevPages = pages;
+          hasChange = true;
+        }
+        return hasChange ? [prevLinked, prevExternalLinked, prevPages] : prev;
+      });
     },
-    [...bubbles, ...parentTitles, whiteList],
+    [bubbles, whiteList, parentsLc],
   );
 
   const handleClick = useCallback(() => props.hide(), [props.hide]);
