@@ -3,7 +3,7 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { Fragment, h, useEffect, useMemo, useRef } from "./deps/preact.tsx";
+import { Fragment, h, useCallback, useMemo } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import {
@@ -55,31 +55,21 @@ export const Card = ({
   );
   const theme = useTheme(project);
 
-  const ref = useRef<HTMLAnchorElement>(null);
-  useEffect(() => {
-    if (!ref.current) return;
-    const a = ref.current;
-
-    const handleEnter = async () => {
+  const handleEnter = useCallback(
+    async (
+      { currentTarget: a }: h.JSX.TargetedMouseEvent<HTMLAnchorElement>,
+    ) => {
       prefetch(project, title);
 
       if (!await stayHovering(a, delay)) return;
 
-      bubble({
-        project,
-        title,
-        type: "link",
-        position: calcBubblePosition(a),
-      });
-    };
-    a.addEventListener("pointerenter", handleEnter);
-
-    return () => a.removeEventListener("pointerenter", handleEnter);
-  }, [project, title, delay]);
+      bubble({ project, title, type: "link", position: calcBubblePosition(a) });
+    },
+    [project, title, delay],
+  );
 
   return (
     <a
-      ref={ref}
       className="related-page-card page-link"
       type="link"
       data-theme={theme}
@@ -88,6 +78,7 @@ export const Card = ({
       href={`/${project}/${encodeTitleURI(title)}`}
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}
+      onPointerEnter={handleEnter}
     >
       <div class="hover" />
       <div class="content">
