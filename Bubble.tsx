@@ -48,6 +48,69 @@ export const Bubble = ({
         : [source.project],
     [whiteList, source.project],
   );
+
+  const [linked, externalLinked, pages] = useBubbleFilter(
+    source,
+    projects,
+    whiteList,
+    parentTitles,
+  );
+
+  const handleClick = useCallback(() => props.hide(), [props.hide]);
+  const theme = useTheme(pages[0]?.project ?? source.project);
+  const pageStyle = useMemo(() => makeStyle(source.position, "page"), [
+    source.position,
+  ]);
+
+  return (
+    <>
+      {pages.length > 0 && (
+        <div
+          className="text-bubble"
+          style={pageStyle}
+          data-theme={theme}
+          onClick={handleClick}
+        >
+          <StatusBar>
+            {pages[0].project !== scrapbox.Project.name && (
+              <ProjectBadge
+                project={pages[0].project}
+                title={pages[0].lines[0].text}
+              />
+            )}
+          </StatusBar>
+          <Page
+            lines={pages[0].lines}
+            project={pages[0].project}
+            title={pages[0].lines[0].text}
+            scrollTo={source.scrollTo}
+            whiteList={whiteList}
+            {...props}
+          />
+        </div>
+      )}
+      <CardList
+        linked={linked}
+        externalLinked={externalLinked}
+        onClick={handleClick}
+        source={source}
+        projectsForSort={projects}
+        {...props}
+      />
+    </>
+  );
+};
+
+/** 指定したsourceからbubblesするページ本文とページカードを、親bubblesやwhiteListを使って絞り込む
+ *
+ * <Bubble />でやっている処理の一部を切り出して見通しをよくしただけ
+ */
+const useBubbleFilter = (
+  source: { project: string; title: string },
+  projects: string[],
+  whiteList: string[],
+  parentTitles: string[],
+) => {
   const pageIds = useMemo(
     () => projects.map((project) => toId(project, source.title)),
     [projects, source.title],
@@ -128,50 +191,7 @@ export const Bubble = ({
     [bubbles, whiteList, parentsLc],
   );
 
-  const handleClick = useCallback(() => props.hide(), [props.hide]);
-
-  const theme = useTheme(pages[0]?.project ?? source.project);
-  const pageStyle = useMemo(() => makeStyle(source.position, "page"), [
-    source.position,
-  ]);
-
-  return (
-    <>
-      {pages.length > 0 && (
-        <div
-          className="text-bubble"
-          style={pageStyle}
-          data-theme={theme}
-          onClick={handleClick}
-        >
-          <StatusBar>
-            {pages[0].project !== scrapbox.Project.name && (
-              <ProjectBadge
-                project={pages[0].project}
-                title={pages[0].lines[0].text}
-              />
-            )}
-          </StatusBar>
-          <Page
-            lines={pages[0].lines}
-            project={pages[0].project}
-            title={pages[0].lines[0].text}
-            scrollTo={source.scrollTo}
-            whiteList={whiteList}
-            {...props}
-          />
-        </div>
-      )}
-      <CardList
-        linked={linked}
-        externalLinked={externalLinked}
-        onClick={handleClick}
-        source={source}
-        projectsForSort={projects}
-        {...props}
-      />
-    </>
-  );
+  return [linked, externalLinked, pages] as const;
 };
 
 const StatusBar: FunctionComponent = ({ children }) => (
