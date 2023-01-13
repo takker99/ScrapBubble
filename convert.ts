@@ -45,6 +45,7 @@ export const convert = (
 
   // 1 hop linksからカードを取り出す
   // 同時に`emptyPageIds`を作る
+  const linksLc = page.links.map((link) => toTitleLc(link));
   for (const card of page.relatedPages.links1hop) {
     if (card.linksLc.includes(titleLc)) {
       // 双方向リンク or 逆リンク
@@ -52,6 +53,19 @@ export const convert = (
       // 逆リンクを作る
       // 重複はありえないので配列でいい
       pageBubble.linked.push(card.titleLc);
+    }
+    // `page`→`card`→`linkLc`←`page`というリンク関係にあるときは、`card`を`linkLc`の逆リンクとして登録する
+    for (
+      const linkLc of card.linksLc.filter((linkLc) => linksLc.includes(linkLc))
+    ) {
+      const cardId = toId(project, linkLc);
+      const bubble = storage.get(cardId);
+      if (!bubble) throw Error(`storage already must have "${cardId}"`);
+      if (!bubble.linked) {
+        bubble.linked = [card.titleLc];
+        continue;
+      }
+      bubble.linked.push(card.titleLc);
     }
     // cardを入れる
     const cardId = toId(project, card.titleLc);
