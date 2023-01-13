@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`convert > one project > たぶん全パターン入り 1`] = `
+snapshot[`convert > one project > 逆・順・双方向・空リンク+中身あり・空headword+複数パス2 hop links 1`] = `
 Map {
   "/takker-dist/a" => {
       checked: 1672173549,
@@ -289,6 +289,296 @@ Map {
       project: "takker-dist",
       titleLc: "e",
       updated: 1673081909,
+    },
+}
+`;
+
+snapshot[`convert > one project > (逆リンク|順リンク|双方向リンク)+2 hop links 1`] = `
+Map {
+  "/takker-dist/b" => {
+      checked: 1672173549,
+      descriptions: [
+        "[B1], [B2], [B3]",
+        "[A1]",
+        "https://scrapbox.io/api/pages/takker-dist/B",
+      ],
+      exists: true,
+      image: null,
+      lines: [
+        {
+          created: 1673081924,
+          id: "dummy",
+          text: "B",
+          updated: 1673081924,
+          userId: "dummy",
+        },
+        {
+          created: 1673081924,
+          id: "dummy",
+          text: "[B1], [B2], [B3]",
+          updated: 1673081924,
+          userId: "dummy",
+        },
+        {
+          created: 1673081924,
+          id: "dummy",
+          text: "[A1]",
+          updated: 1673081924,
+          userId: "dummy",
+        },
+        {
+          created: 1673081924,
+          id: "dummy",
+          text: "https://scrapbox.io/api/pages/takker-dist/B",
+          updated: 1673081924,
+          userId: "dummy",
+        },
+      ],
+      linked: [
+        "i",
+        "b1",
+      ],
+      project: "takker-dist",
+      titleLc: "b",
+      updated: 1673081924,
+    },
+  "/takker-dist/b1" => {
+      checked: 1672173549,
+      descriptions: [
+        "[B]",
+      ],
+      exists: true,
+      image: null,
+      lines: [
+        {
+          created: 1673081852,
+          id: "dummy",
+          text: "B1",
+          updated: 1673081852,
+          userId: "dummy",
+        },
+        {
+          created: 1673081852,
+          id: "dummy",
+          text: "[B]",
+          updated: 1673081852,
+          userId: "dummy",
+        },
+      ],
+      linked: [
+        "i",
+        "j",
+        "k",
+        "b",
+        "c",
+        "d",
+        "e",
+      ],
+      project: "takker-dist",
+      titleLc: "b1",
+      updated: 1673081852,
+    },
+  "/takker-dist/c" => {
+      checked: 1672173549,
+      descriptions: [
+        "[C1], [C2], [C3]",
+        "[A2], [A3]",
+        "[B1]",
+      ],
+      exists: true,
+      image: null,
+      lines: [
+        {
+          created: 1673081866,
+          id: "dummy",
+          text: "C",
+          updated: 1673081866,
+          userId: "dummy",
+        },
+        {
+          created: 1673081866,
+          id: "dummy",
+          text: "[C1], [C2], [C3]",
+          updated: 1673081866,
+          userId: "dummy",
+        },
+        {
+          created: 1673081866,
+          id: "dummy",
+          text: "[A2], [A3]",
+          updated: 1673081866,
+          userId: "dummy",
+        },
+        {
+          created: 1673081866,
+          id: "dummy",
+          text: "[B1]",
+          updated: 1673081866,
+          userId: "dummy",
+        },
+      ],
+      project: "takker-dist",
+      titleLc: "c",
+      updated: 1673081866,
+    },
+  "/takker-dist/d" => {
+      checked: 1672173549,
+      descriptions: [
+        "[B1]",
+      ],
+      exists: true,
+      image: null,
+      lines: [
+        {
+          created: 1673081879,
+          id: "dummy",
+          text: "D",
+          updated: 1673081879,
+          userId: "dummy",
+        },
+        {
+          created: 1673081879,
+          id: "dummy",
+          text: "[B1]",
+          updated: 1673081879,
+          userId: "dummy",
+        },
+      ],
+      project: "takker-dist",
+      titleLc: "d",
+      updated: 1673081879,
+    },
+  "/takker-dist/e" => {
+      checked: 1672173549,
+      descriptions: [
+        "[B1], [B2]",
+      ],
+      exists: true,
+      image: null,
+      lines: [
+        {
+          created: 1673081909,
+          id: "dummy",
+          text: "E",
+          updated: 1673081909,
+          userId: "dummy",
+        },
+        {
+          created: 1673081909,
+          id: "dummy",
+          text: "[B1], [B2]",
+          updated: 1673081909,
+          userId: "dummy",
+        },
+      ],
+      project: "takker-dist",
+      titleLc: "e",
+      updated: 1673081909,
+    },
+  "/takker-dist/i" => {
+      checked: 1672173549,
+      descriptions: [
+        "[B] [B1] [K]",
+        "https://scrapbox.io/api/pages/takker-dist/I",
+      ],
+      exists: true,
+      image: null,
+      lines: [
+        {
+          created: 1673572279,
+          id: "63c0afb552e241001d99bfac",
+          text: "I",
+          updated: 1673572279,
+          userId: "5ef2bdebb60650001e1280f0",
+        },
+        {
+          created: 1673572279,
+          id: "63c0afb71280f00000e9bae0",
+          text: "[B] [B1] [K]",
+          updated: 1673572397,
+          userId: "5ef2bdebb60650001e1280f0",
+        },
+        {
+          created: 1673572279,
+          id: "63c0afb81280f00000e9bae1",
+          text: "https://scrapbox.io/api/pages/takker-dist/I",
+          updated: 1673572411,
+          userId: "5ef2bdebb60650001e1280f0",
+        },
+        {
+          created: 1673572411,
+          id: "63c0b03c1280f00000e9bae6",
+          text: "",
+          updated: 1673572411,
+          userId: "5ef2bdebb60650001e1280f0",
+        },
+      ],
+      linked: [
+        "j",
+        "k",
+      ],
+      project: "takker-dist",
+      projectLinked: [
+      ],
+      titleLc: "i",
+      updated: 1673572411,
+    },
+  "/takker-dist/j" => {
+      checked: 1672173549,
+      descriptions: [
+        "[I] [B1]",
+      ],
+      exists: true,
+      image: null,
+      lines: [
+        {
+          created: 1673572354,
+          id: "dummy",
+          text: "J",
+          updated: 1673572354,
+          userId: "dummy",
+        },
+        {
+          created: 1673572354,
+          id: "dummy",
+          text: "[I] [B1]",
+          updated: 1673572354,
+          userId: "dummy",
+        },
+      ],
+      project: "takker-dist",
+      titleLc: "j",
+      updated: 1673572354,
+    },
+  "/takker-dist/k" => {
+      checked: 1672173549,
+      descriptions: [
+        "[I] [B1]",
+      ],
+      exists: true,
+      image: null,
+      lines: [
+        {
+          created: 1673572392,
+          id: "dummy",
+          text: "K",
+          updated: 1673572392,
+          userId: "dummy",
+        },
+        {
+          created: 1673572392,
+          id: "dummy",
+          text: "[I] [B1]",
+          updated: 1673572392,
+          userId: "dummy",
+        },
+      ],
+      linked: [
+        "i",
+      ],
+      project: "takker-dist",
+      titleLc: "k",
+      updated: 1673572392,
     },
 }
 `;
