@@ -10,7 +10,6 @@ import {
   FunctionComponent,
   h,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useState,
