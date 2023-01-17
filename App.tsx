@@ -30,7 +30,7 @@ export interface AppProps {
   whiteList: Set<string>;
 
   /** watch list */
-  watchList: ProjectId[];
+  watchList: Set<ProjectId>;
 
   /** カスタムCSS
    *
