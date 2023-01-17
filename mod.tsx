@@ -12,9 +12,12 @@ import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 export type { AppProps };
-export interface MountInit extends Partial<AppProps> {
+export interface MountInit extends Partial<Omit<AppProps, "whiteList">> {
   /** debug用有効化フラグ */
   debug?: boolean;
+
+  /** 透過的に扱うprojectのリスト */
+  whiteList?: Iterable<string>;
 }
 
 export const mount = (init?: MountInit): void => {
@@ -37,7 +40,7 @@ export const mount = (init?: MountInit): void => {
   render(
     <App
       delay={delay}
-      whiteList={[scrapbox.Project.name, ...whiteList]}
+      whiteList={new Set([scrapbox.Project.name, ...whiteList])}
       watchList={watchList}
       scrollTargets={scrollTargets}
       style={style}

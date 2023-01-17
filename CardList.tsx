@@ -19,18 +19,21 @@ export interface CardListProps
   prefetch: (project: string, title: string) => void;
   linked: readonly ID[];
   externalLinked: readonly ID[];
-  projectsForSort: readonly string[];
+  projectsForSort: Set<string>;
 }
 
 export const CardList = ({
   source,
   linked,
   externalLinked,
-  projectsForSort,
+  projectsForSort: projectsForSort_,
   ...props
 }: CardListProps) => {
   const cards = useBubbleData(linked);
   const externalCards = useBubbleData(externalLinked);
+  const projectsForSort = useMemo(() => [...projectsForSort_], [
+    projectsForSort_,
+  ]);
 
   /** 更新日時降順とproject昇順に並び替えた関連ページデータ
    *

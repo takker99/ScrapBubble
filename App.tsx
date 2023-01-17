@@ -27,7 +27,7 @@ export interface AppProps {
   delay: number;
 
   /** 透過的に扱うprojectのリスト */
-  whiteList: string[];
+  whiteList: Set<string>;
 
   /** watch list */
   watchList: ProjectId[];
@@ -61,13 +61,10 @@ export const App = (
    * white listにない外部プロジェクトリンクは、そのページだけを読み込む
    */
   const prefetch = useCallback((project: string, title: string) => {
-    const projects = [
-      scrapbox.Project.name,
-      ...whiteList.filter((project) => project !== scrapbox.Project.name),
-    ];
+    const projects = new Set([scrapbox.Project.name, ...whiteList]);
     prefetch_(
       title,
-      projects.includes(project) ? projects : [project],
+      projects.has(project) ? projects : new Set([project]),
       watchList,
     );
   }, [whiteList, watchList]);

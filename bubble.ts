@@ -49,7 +49,7 @@ export interface PrefetchOptions {
  */
 export const prefetch = (
   title: string,
-  projects: string[],
+  projects: Set<string>,
   watchList: ProjectId[],
   options?: PrefetchOptions,
 ): void => {
