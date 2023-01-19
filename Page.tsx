@@ -48,7 +48,6 @@ import {
   parseAbsoluteLink,
   sleep,
   SpotifyNode,
-  toTitleLc,
   VideoNode,
   VimeoNode,
   YoutubeListNode,
@@ -67,7 +66,7 @@ declare global {
 export interface PageProps extends BubbleOperators {
   title: string;
   project: string;
-  whiteList: string[];
+  whiteList: Set<string>;
   delay: number;
   lines: { text: string; id: string }[] | string[];
   noIndent?: boolean;
@@ -80,7 +79,7 @@ const context = createContext<
   & {
     title: string;
     project: string;
-    whiteList: string[];
+    whiteList: Set<string>;
     delay: number;
     prefetch: (project: string, title: string) => void;
   }
@@ -88,7 +87,7 @@ const context = createContext<
 >({
   title: "",
   project: "",
-  whiteList: [],
+  whiteList: new Set(),
   bubble: () => {},
   hide: () => {},
   delay: 0,
@@ -723,7 +722,7 @@ const useEmptyLink = (project: string, link: string) => {
   );
   const pageIds = useMemo(
     () =>
-      (whiteList.includes(project) ? whiteList : [project, ...whiteList]).map(
+      (whiteList.has(project) ? [...whiteList] : [project, ...whiteList]).map(
         (project) => toId(project, link),
       ),
     [whiteList, project],

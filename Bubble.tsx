@@ -25,7 +25,7 @@ import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 export interface BubbleProps extends BubbleSource {
-  whiteList: string[];
+  whiteList: Set<string>;
   delay: number;
   prefetch: (project: string, title: string) => void;
 }
@@ -39,13 +39,10 @@ export const Bubble = ({
   /** 検索対象のproject list */
   const projects = useMemo(
     () =>
-      whiteList.includes(source.project)
-        ? [
-          source.project,
-          ...whiteList.filter((project) => project !== source.project),
-        ]
-        // whitelist にないprojectの場合
-        : [source.project],
+      whiteList.has(source.project)
+        // source.projectを一番先頭にする
+        ? new Set([source.project, ...whiteList])
+        : new Set([source.project]),
     [whiteList, source.project],
   );
 
@@ -107,12 +104,12 @@ export const Bubble = ({
  */
 const useBubbleFilter = (
   source: { project: string; title: string },
-  projects: string[],
-  whiteList: string[],
+  projects: Set<string>,
+  whiteList: Set<string>,
   parentTitles: string[],
 ) => {
   const pageIds = useMemo(
-    () => projects.map((project) => toId(project, source.title)),
+    () => [...projects].map((project) => toId(project, source.title)),
     [projects, source.title],
   );
   const bubbles = useBubbleData(pageIds);
@@ -142,13 +139,13 @@ const useBubbleFilter = (
         for (const id of bubble.projectLinked ?? []) {
           const { project, titleLc } = fromId(id);
           // External Linksの内、projectがwhiteListに属するlinksも重複除去処理を施す
-          if (parentsLc.includes(titleLc) && whiteList.includes(project)) {
+          if (parentsLc.includes(titleLc) && whiteList.has(project)) {
             continue;
           }
           externalLinked.add(id);
         }
         // whiteLitにないprojectのページは、External Links以外表示しない
-        if (!whiteList.includes(bubble.project)) continue;
+        if (!whiteList.has(bubble.project)) continue;
         // 親と重複しない逆リンクのみ格納する
         for (const linkLc of bubble.linked ?? []) {
           if (parentsLc.includes(linkLc)) continue;

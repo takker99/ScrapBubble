@@ -49,8 +49,8 @@ export interface PrefetchOptions {
  */
 export const prefetch = (
   title: string,
-  projects: string[],
-  watchList: ProjectId[],
+  projects: Set<string>,
+  watchList: Set<ProjectId>,
   options?: PrefetchOptions,
 ): void => {
   for (const project of projects) {
@@ -73,7 +73,7 @@ const throttle = makeThrottle<Response>(3);
 const updateApiCache = async (
   project: string,
   title: string,
-  watchList: ProjectId[],
+  watchList: Set<ProjectId>,
   options?: PrefetchOptions,
 ): Promise<void> => {
   const id = toId(project, title);
@@ -88,7 +88,7 @@ const updateApiCache = async (
   try {
     const req = getPage.toRequest(project, title, {
       followRename: true,
-      projects: watchList,
+      projects: [...watchList],
     });
     const url = new URL(req.url);
     const pureURL = `${url.origin}${url.pathname}`;
