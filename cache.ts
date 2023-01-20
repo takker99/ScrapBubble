@@ -3,6 +3,8 @@
 /// <reference lib="dom"/>
 
 import type { UnixTime } from "./deps/scrapbox.ts";
+import { findLatestCache, sleep } from "./deps/scrapbox-std.ts";
+import { makeThrottle } from "./throttle.ts";
 
 const cacheVersion = "0.3.0"; // release前に更新する
 const cacheName = `ScrapBubble-${cacheVersion}`;
@@ -19,56 +21,73 @@ const cache = await globalThis.caches.open(cacheName);
   }
 })();
 
-type FetchOption = {
-  /** cacheの有効期限 (単位は秒) */
-  maxAge?: UnixTime;
-} & CacheQueryOptions;
+/** 同時に3つまでfetchできるようにする函数 */
+const throttle = makeThrottle<Response>(3);
 
-/** cache機能つきfetch */
-export const fetch = async (
-  path: string | Request,
-  options?: FetchOption,
-): Promise<Response> => {
-  const { maxAge = 60 /* defaultは1分 */ } = options ?? {};
+export interface CacheFirstFetchOptions extends CacheQueryOptions {
+  /** 失敗したresponseをcacheに保存するかどうか
+   *
+   * @default `false` (保存しない)
+   */
+  saveFailedResponse?: boolean;
+}
 
-  const req = new Request(path);
-  const cachedRes = await findCache(req, options);
-
-  if (!cachedRes || isExpiredResponse(cachedRes, maxAge)) {
-    // 有効期限切れかcacheがなければ、fetchし直す
-    const res = await globalThis.fetch(path);
-
-    await cache.put(req, res.clone());
-
-    return res;
-  } else {
-    // cacheを返す
-    return cachedRes;
+/** cacheとnetworkから順番にresponseをとってくる
+ *
+ * networkからとってこなくていいときは、途中でiteratorをbreakすればfetchしない
+ *
+ * fetchは同時に5回までしかできないよう制限する
+ *
+ * @param req 要求
+ * @param options cacheを探すときの設定
+ */
+export async function* cacheFirstFetch(
+  req: Request,
+  options?: CacheFirstFetchOptions,
+): AsyncGenerator<readonly ["cache" | "network", Response], void, unknown> {
+  // cacheから返す
+  // まず自前のcache storageから失敗したresponseを取得し、なければscrapbox.ioのcacheから正常なresponseを探す
+  const cachePromise =
+    ((options?.saveFailedResponse ? cache.match(req) : undefined) ??
+      findLatestCache(req, options)).then((res) => ["cache", res] as const);
+  {
+    const timer = sleep(1000).then(() => "timeout" as const);
+    const first = await Promise.race([cachePromise, timer]);
+    if (first !== "timeout") {
+      // 1秒以内にcacheを読み込めたら、cache→networkの順に返す
+      if (first[1]) {
+        yield ["cache", first[1]];
+      }
+      // networkから返す
+      const res = await throttle(() => fetch(req));
+      if (!res.ok && options?.saveFailedResponse) {
+        // scrapbox.ioは失敗したresponseをcacheしないので、自前のcacheに格納しておく
+        await cache.put(req, res.clone());
+      }
+      yield ["network", res];
+    }
   }
-};
 
-/** cacheからデータを取得する */
-export const findCache = async (
-  req: string | Request,
-  options?: CacheQueryOptions,
-): Promise<Response | undefined> => {
-  return await cache.match(req, options);
-};
+  // 1秒経ってもcacheの読み込みが終わらないときは、fetchを走らせ始める
+  const networkPromise = throttle(() => fetch(req))
+    .then((res) => ["network", res] as const);
+  const [type, res] = await Promise.race([cachePromise, networkPromise]);
 
-/** cacheに格納する */
-export const putCache = async (
-  req: string | Request,
-  res: Response,
-): Promise<void> => {
-  await cache.put(req, res);
-};
+  if (type === "network") {
+    yield [type, res];
+    // networkPromiseが先にresolveしたら、cachePromiseはyieldせずに捨てる
+    return;
+  }
+  if (res) yield [type, res];
+  yield await networkPromise;
+}
 
 /** 有効期限切れのresponseかどうか調べる
  *
  * @param response 調べるresponse
  * @param maxAge 寿命(単位はs)
  */
-export const isExpiredResponse = (
+export const isExpired = (
   response: Response,
   maxAge: UnixTime,
 ): boolean => {

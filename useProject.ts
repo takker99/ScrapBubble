@@ -1,6 +1,6 @@
 import { useEffect, useState } from "./deps/preact.tsx";
 import { getProject, Result } from "./deps/scrapbox-std.ts";
-import { fetch } from "./cache.ts";
+import { cacheFirstFetch } from "./cache.ts";
 import { makeEmitter } from "./eventEmitter.ts";
 import {
   MemberProject,
@@ -9,6 +9,7 @@ import {
   NotMemberError,
   NotMemberProject,
 } from "./deps/scrapbox.ts";
+import { createDebug } from "./debug.ts";
 
 type ProjectResult = Result<
   | NotMemberProject
@@ -21,6 +22,8 @@ type State<T> = { loading: true } | { loading: false; value: T };
 const emitter = makeEmitter<string, ProjectResult>();
 
 const projectMap = new Map<string, State<ProjectResult>>();
+
+const logger = createDebug("ScrapBubble:useProject.ts");
 
 /** /api/projects/:projectの結果を返すhook
  *
@@ -43,12 +46,17 @@ export const useProject = (project: string): ProjectResult | undefined => {
       // projectの情報を取得する
       (async () => {
         try {
-          const res = await getProject(project, { fetch: (req) => fetch(req) });
-          projectMap.set(project, { loading: false, value: res });
-          emitter.dispatch(project, res);
+          const req = getProject.toRequest(project);
+          for await (const [, res] of cacheFirstFetch(req)) {
+            const result = await getProject.fromResponse(res);
+            projectMap.set(project, { loading: false, value: result });
+            emitter.dispatch(project, result);
+            // networkからcacheを更新する必要はないので、1 loopで処理を終える
+            break;
+          }
         } catch (e: unknown) {
           // 想定外のエラーはログに出す
-          console.error(e);
+          logger.error(e);
           // 未初期化状態に戻す
           projectMap.delete(project);
         }
