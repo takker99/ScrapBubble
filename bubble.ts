@@ -1,9 +1,8 @@
-import { findCache, isExpiredResponse, putCache } from "./cache.ts";
+import { cacheFirstFetch, isExpired } from "./cache.ts";
 import { ID, toId } from "./id.ts";
 import { Listener, makeEmitter } from "./eventEmitter.ts";
 import { Bubble, BubbleStorage, update } from "./storage.ts";
 import { convert } from "./convert.ts";
-import { makeThrottle } from "./throttle.ts";
 import { createDebug } from "./debug.ts";
 import { getPage } from "./deps/scrapbox-std.ts";
 import { ProjectId, UnixTime } from "./deps/scrapbox.ts";
@@ -65,9 +64,6 @@ export const prefetch = (
 /** debug用カウンタ */
 let counter = 0;
 
-/** 同時に3つまでfetchできるようにする函数 */
-const throttle = makeThrottle<Response>(3);
-
 /** cacheおよびnetworkから新しいページデータを取得する
  *
  * もし更新があれば、更新通知も発行する
@@ -93,14 +89,15 @@ const updateApiCache = async (
       followRename: true,
       projects: [...watchList],
     });
-    const url = new URL(req.url);
-    const pureURL = `${url.origin}${url.pathname}`;
 
-    // 1. cacheから取得する
-    const cachedRes = await findCache(pureURL);
-    if (cachedRes) {
-      const result = await getPage.fromResponse(cachedRes);
-
+    for await (
+      const [type, res] of cacheFirstFetch(req, {
+        ignoreSearch: true,
+        saveFailedResponse: true,
+      })
+    ) {
+      logger.debug(`[${i}]${type} ${id}`);
+      const result = await getPage.fromResponse(res);
       // 更新があればeventを発行する
       if (result.ok) {
         const converted = convert(project, result.value);
@@ -112,30 +109,11 @@ const updateApiCache = async (
           emitter.dispatch(bubbleId, bubble);
         }
       }
-    }
 
-    // 2. 有効期限が切れているなら、新しくデータをnetworkから取ってくる
-    if (options?.ignoreFetch === true) return;
-    if (
-      cachedRes && !isExpiredResponse(cachedRes, options?.maxAge ?? 60)
-    ) {
-      return;
-    }
-
-    const res = await throttle(() => fetch(req));
-    logger.debug(`[${i}]Fetch ${id}`);
-    const result = await getPage.fromResponse(res.clone());
-    await putCache(pureURL, res);
-
-    // 更新があればeventを発行する
-    if (result.ok) {
-      const converted = convert(project, result.value);
-      for (const [bubbleId, bubble] of converted) {
-        const prev = storage.get(bubbleId);
-        const updatedBubble = update(prev, bubble);
-        if (prev === updatedBubble) continue;
-        storage.set(bubbleId, updatedBubble);
-        emitter.dispatch(bubbleId, bubble);
+      // 有効期限が切れているなら、新しくデータをnetworkから取ってくる
+      if (options?.ignoreFetch === true) break;
+      if (type === "cache" && !isExpired(res, options?.maxAge ?? 60)) {
+        break;
       }
     }
   } catch (e: unknown) {
