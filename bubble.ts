@@ -4,9 +4,11 @@ import { Listener, makeEmitter } from "./eventEmitter.ts";
 import { Bubble, BubbleStorage, update } from "./storage.ts";
 import { convert } from "./convert.ts";
 import { makeThrottle } from "./throttle.ts";
-import { logger } from "./debug.ts";
+import { createDebug } from "./debug.ts";
 import { getPage } from "./deps/scrapbox-std.ts";
 import { ProjectId, UnixTime } from "./deps/scrapbox.ts";
+
+const logger = createDebug("ScrapBubble:bubble.ts");
 
 const storage: BubbleStorage = new Map();
 /** データを更新中のページのリスト */
@@ -84,7 +86,8 @@ const updateApiCache = async (
   loadingIds.add(id);
   const i = counter++;
 
-  logger.time(`[${i}] Check update ${id}`);
+  const timeTag = `[${i}] Check update ${id}`;
+  logger.time(timeTag);
   try {
     const req = getPage.toRequest(project, title, {
       followRename: true,
@@ -120,7 +123,7 @@ const updateApiCache = async (
     }
 
     const res = await throttle(() => fetch(req));
-    logger.debug(`%c[${i}]Fetch`, "color: gray;", id);
+    logger.debug(`[${i}]Fetch ${id}`);
     const result = await getPage.fromResponse(res.clone());
     await putCache(pureURL, res);
 
@@ -141,7 +144,7 @@ const updateApiCache = async (
   } finally {
     // ロック解除
     loadingIds.delete(id);
-    logger.timeEnd(`[${i}] Check update ${id}`);
+    logger.timeEnd(timeTag);
     counter--;
   }
 };
