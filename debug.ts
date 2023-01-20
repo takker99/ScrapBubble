@@ -17,9 +17,14 @@ export const createDebug = (filename: string): Console =>
     ([key, value]: [string, unknown]) => {
       if (typeof value !== "function") return [key, value];
       switch (key as keyof Console) {
-        case "log":
         case "warn":
         case "error":
+          return [
+            key,
+            (...args: unknown[]) =>
+              value(`%c${filename}`, "color: gray", ...args),
+          ];
+        case "log":
         case "info":
         case "debug":
           return [key, (...args: unknown[]) => {
