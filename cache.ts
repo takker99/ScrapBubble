@@ -9,12 +9,15 @@ const cacheName = `ScrapBubble-${cacheVersion}`;
 const cache = await globalThis.caches.open(cacheName);
 
 // 古いcacheがあったら削除しておく
-for (const name of await globalThis.caches.keys()) {
-  if (name.startsWith("ScrapBubble-") && name !== cacheName) {
-    await globalThis.caches.delete(name);
-    console.log(`[ScrapBubble] deleted old cache :"${name}"`);
+// 他の操作をブロックする必要はない
+(async () => {
+  for (const name of await globalThis.caches.keys()) {
+    if (name.startsWith("ScrapBubble-") && name !== cacheName) {
+      await globalThis.caches.delete(name);
+      console.log(`[ScrapBubble] deleted old cache :"${name}"`);
+    }
   }
-}
+})();
 
 type FetchOption = {
   /** cacheの有効期限 (単位は秒) */
