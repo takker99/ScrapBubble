@@ -1,20 +1,62 @@
-let debugMode = false;
+let debugMode: boolean | Set<string> = false;
+
 /** cache周りのdebug出力の有効・無効の切り替えを行う
  *
- * defaultで`false`
+ * @param mode `true`：全てのdebug出力を有効にする, `false`：全てのdebug出力を無効にする, それ以外：指定したファイル中のdebug出力のみ有効にする
  */
-export const setDebugMode = (enable: boolean): void => {
-  debugMode = enable;
+export const setDebugMode = (mode: boolean | Iterable<string>): void => {
+  debugMode = typeof mode === "boolean" ? mode : new Set(mode);
 };
 
-const tag = "[ScrapBubble]";
-/** debug modeのときだけ有効なconsole */
-export const logger = Object.fromEntries([...Object.entries(console)].map(
-  ([key, value]: [string, unknown]) => {
-    if (typeof value !== "function") return [key, value];
-    return [key, (arg1: unknown, ...args: unknown[]) => {
-      if (!debugMode) return;
-      value(typeof arg1 === "string" ? `${tag} ${arg1}` : arg1, ...args);
-    }];
-  },
-)) as unknown as Console;
+/** debug modeのときだけ有効なconsoleをファイルごとに作る
+ *
+ * @param filename コンソール出力を呼び出したファイル名
+ */
+export const createDebug = (filename: string): Console =>
+  Object.fromEntries([...Object.entries(console)].map(
+    ([key, value]: [string, unknown]) => {
+      if (typeof value !== "function") return [key, value];
+      switch (key as keyof Console) {
+        case "log":
+        case "warn":
+        case "error":
+        case "info":
+        case "debug":
+          return [key, (...args: unknown[]) => {
+            if (
+              debugMode !== true && (!debugMode || !debugMode.has(filename))
+            ) {
+              return;
+            }
+            value(`%c${filename}`, "color: gray", ...args);
+          }];
+        case "assert":
+          return [key, (assertion: boolean, ...args: unknown[]) => {
+            if (
+              debugMode !== true && (!debugMode || !debugMode.has(filename))
+            ) {
+              return;
+            }
+            value(assertion, `%c${filename}`, "color: gray", ...args);
+          }];
+        case "time":
+          return [key, (label: string) => {
+            if (
+              debugMode !== true && (!debugMode || !debugMode.has(filename))
+            ) {
+              return;
+            }
+            value(`${filename} ${label}`);
+          }];
+        default:
+          return [key, (...args: unknown[]) => {
+            if (
+              debugMode !== true && (!debugMode || !debugMode.has(filename))
+            ) {
+              return;
+            }
+            return value(...args);
+          }];
+      }
+    },
+  )) as unknown as Console;

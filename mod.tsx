@@ -15,7 +15,7 @@ export type { AppProps };
 export interface MountInit
   extends Partial<Omit<AppProps, "whiteList" | "watchList">> {
   /** debug用有効化フラグ */
-  debug?: boolean;
+  debug?: boolean | Iterable<string>;
 
   /** 透過的に扱うprojectのリスト */
   whiteList?: Iterable<string>;

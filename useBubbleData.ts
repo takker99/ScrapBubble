@@ -1,8 +1,10 @@
 import { useLayoutEffect, useState } from "./deps/preact.tsx";
 import { load, subscribe, unsubscribe } from "./bubble.ts";
-import { logger } from "./debug.ts";
+import { createDebug } from "./debug.ts";
 import { ID } from "./id.ts";
 import { Bubble } from "./storage.ts";
+
+const logger = createDebug("ScrapBubble:useBubbleData.ts");
 
 /** bubbleデータを取得するhooks
  *
@@ -27,10 +29,7 @@ export const useBubbleData = (
       // 少し待ってからまとめて更新する
       clearTimeout(timer);
       timer = setTimeout(() => {
-        logger.debug(
-          `%cUpdate ${pageIds.length} pages`,
-          "color: gray;",
-        );
+        logger.debug(`Update ${pageIds.length} pages`);
         setBubbles(
           [...load(pageIds)].flatMap((bubble) => bubble ? [bubble] : []),
         );
