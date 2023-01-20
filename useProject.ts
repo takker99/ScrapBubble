@@ -9,6 +9,7 @@ import {
   NotMemberError,
   NotMemberProject,
 } from "./deps/scrapbox.ts";
+import { createDebug } from "./debug.ts";
 
 type ProjectResult = Result<
   | NotMemberProject
@@ -21,6 +22,8 @@ type State<T> = { loading: true } | { loading: false; value: T };
 const emitter = makeEmitter<string, ProjectResult>();
 
 const projectMap = new Map<string, State<ProjectResult>>();
+
+const logger = createDebug("ScrapBubble:useProject.ts");
 
 /** /api/projects/:projectの結果を返すhook
  *
@@ -53,7 +56,7 @@ export const useProject = (project: string): ProjectResult | undefined => {
           }
         } catch (e: unknown) {
           // 想定外のエラーはログに出す
-          console.error(e);
+          logger.error(e);
           // 未初期化状態に戻す
           projectMap.delete(project);
         }

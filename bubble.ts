@@ -110,15 +110,15 @@ const updateApiCache = async (
         }
       }
 
-      // 有効期限が切れているなら、新しくデータをnetworkから取ってくる
       if (options?.ignoreFetch === true) break;
+      // 有効期限が切れているなら、新しくデータをnetworkから取ってくる
       if (type === "cache" && !isExpired(res, options?.maxAge ?? 60)) {
         break;
       }
     }
   } catch (e: unknown) {
     // 想定外のエラーはログに出す
-    console.error(e);
+    logger.error(e);
   } finally {
     // ロック解除
     loadingIds.delete(id);
