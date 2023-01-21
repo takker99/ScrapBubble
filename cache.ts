@@ -6,7 +6,7 @@ import type { UnixTime } from "./deps/scrapbox.ts";
 import { findLatestCache, sleep } from "./deps/scrapbox-std.ts";
 import { makeThrottle } from "./throttle.ts";
 
-const cacheVersion = "0.3.0"; // release前に更新する
+const cacheVersion = "0.6.5"; // release前に更新する
 const cacheName = `ScrapBubble-${cacheVersion}`;
 const cache = await globalThis.caches.open(cacheName);
 
