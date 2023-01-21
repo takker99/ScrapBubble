@@ -45,6 +45,7 @@ export const createDebug = (filename: string): Console =>
             value(assertion, `%c${filename}`, "color: gray", ...args);
           }];
         case "time":
+        case "timeEnd":
           return [key, (label: string) => {
             if (
               debugMode !== true && (!debugMode || !debugMode.has(filename))
