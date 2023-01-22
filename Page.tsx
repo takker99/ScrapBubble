@@ -525,16 +525,16 @@ type HashTagProps = { node: HashTagNode };
 const HashTag = ({ node: { href } }: HashTagProps) => {
   const { project } = useContext(context);
   const emptyLink = useEmptyLink(project, href);
-  const ref = useHover(project, href);
+  const handleHover = useHover(project, href);
 
   return (
     <a
-      ref={ref}
       href={`/${project}/${encodeTitleURI(href)}`}
       className={`page-link${emptyLink ? " empty-page-link" : ""}`}
       type="hashTag"
       rel={project === scrapbox.Project.name ? "route" : "noopener noreferrer"}
       target={project === scrapbox.Project.name ? "" : "_blank"}
+      onPointerEnter={handleHover}
     >
       #{href}
     </a>
@@ -597,12 +597,11 @@ const ScrapboxLink = (
       href,
     },
   );
-  const ref = useHover(project, title);
+  const handleHover = useHover(project, title);
   const emptyLink = useEmptyLink(project, title ?? "");
 
   return (
     <a
-      ref={title ? ref : undefined}
       className={`page-link${
         title !== undefined && emptyLink ? " empty-page-link" : ""
       }`}
@@ -614,6 +613,7 @@ const ScrapboxLink = (
       }`}
       rel={project === scrapbox.Project.name ? "route" : "noopener noreferrer"}
       target={project === scrapbox.Project.name ? "" : "_blank"}
+      onPointerEnter={handleHover}
     >
       {href}
     </a>
@@ -738,14 +738,13 @@ const useHover = (
   title: string | undefined,
 ) => {
   const { delay, bubble, prefetch } = useContext(context);
-  const ref = useRef<HTMLAnchorElement>(null);
 
-  useEffect(() => {
-    if (!ref.current) return;
-    if (!title) return;
-    const a = ref.current;
+  return useCallback(
+    async (
+      { currentTarget: a }: h.JSX.TargetedMouseEvent<HTMLAnchorElement>,
+    ) => {
+      if (!title) return;
 
-    const handleEnter = async () => {
       prefetch(project, title);
 
       if (!await stayHovering(a, delay)) return;
@@ -756,11 +755,7 @@ const useHover = (
         type: "link",
         position: calcBubblePosition(a),
       });
-    };
-    a.addEventListener("pointerenter", handleEnter);
-
-    return () => a.removeEventListener("pointerenter", handleEnter);
-  }, [project, title, delay, prefetch, bubble]);
-
-  return ref;
+    },
+    [project, title, delay, prefetch, bubble],
+  );
 };
