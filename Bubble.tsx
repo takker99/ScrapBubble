@@ -20,7 +20,6 @@ import { useTheme } from "./useTheme.ts";
 import { fromId, ID, toId } from "./id.ts";
 import { Bubble as BubbleData } from "./storage.ts";
 import type { BubbleSource } from "./useBubbles.ts";
-import type { Position } from "./position.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -55,7 +54,17 @@ export const Bubble = ({
 
   const handleClick = useCallback(() => props.hide(), [props.hide]);
   const theme = useTheme(pages[0]?.project ?? source.project);
-  const pageStyle = useMemo(() => makeStyle(source.position, "page"), [
+  const pageStyle = useMemo(() => ({
+    top: `${source.position.top}px`,
+    maxWidth: `${source.position.maxWidth}px`,
+    ...("left" in source.position
+      ? {
+        left: `${source.position.left}px`,
+      }
+      : {
+        right: `${source.position.right}px`,
+      }),
+  }), [
     source.position,
   ]);
 
@@ -208,17 +217,3 @@ const ProjectBadge = ({ project, title }: ProjectBadgeProps): h.JSX.Element => (
     {project}
   </a>
 );
-
-const makeStyle = (position: Position, type: "page" | "card") => ({
-  ...(type === "page"
-    ? { top: `${position.top}px` }
-    : { bottom: `${position.bottom}px` }),
-  maxWidth: `${position.maxWidth}px`,
-  ...("left" in position
-    ? {
-      left: `${position.left}px`,
-    }
-    : {
-      right: `${position.right}px`,
-    }),
-});
