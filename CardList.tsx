@@ -9,7 +9,6 @@ import { useBubbleData } from "./useBubbleData.ts";
 import { Bubble } from "./storage.ts";
 import { ID, toId } from "./id.ts";
 import type { BubbleSource } from "./useBubbles.ts";
-import type { Position } from "./position.ts";
 
 export interface CardListProps
   extends
@@ -56,7 +55,17 @@ export const CardList = ({
     [cards, externalCards, projectsForSort],
   );
 
-  const cardStyle = useMemo(() => makeStyle(source.position, "card"), [
+  const cardStyle = useMemo(() => ({
+    bottom: `${source.position.bottom}px`,
+    maxWidth: `${source.position.maxWidth}px`,
+    ...("left" in source.position
+      ? {
+        left: `${source.position.left}px`,
+      }
+      : {
+        right: `${source.position.right}px`,
+      }),
+  }), [
     source.position,
   ]);
 
@@ -85,17 +94,3 @@ export const CardList = ({
     </ul>
   );
 };
-
-const makeStyle = (position: Position, type: "page" | "card") => ({
-  ...(type === "page"
-    ? { top: `${position.top}px` }
-    : { bottom: `${position.bottom}px` }),
-  maxWidth: `${position.maxWidth}px`,
-  ...("left" in position
-    ? {
-      left: `${position.left}px`,
-    }
-    : {
-      right: `${position.right}px`,
-    }),
-});
