@@ -109,6 +109,7 @@ const updateApiCache = async (
         for (const [bubbleId, bubble] of converted) {
           const prev = storage.get(bubbleId);
           const updatedBubble = update(prev, bubble);
+          if (!updatedBubble) continue;
           if (prev === updatedBubble) continue;
           storage.set(bubbleId, updatedBubble);
           emitter.dispatch(bubbleId, bubble);

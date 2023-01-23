@@ -27,7 +27,7 @@ export interface CardProps {
   title: string;
   descriptions: string[];
   thumbnail: string;
-  linkTo: {
+  linkTo?: {
     project?: string;
     titleLc: string;
   };
@@ -71,16 +71,19 @@ export const Card = ({
         position: calcBubblePosition(a),
       });
     },
-    [project, title, delay, linkTo.project, linkTo.titleLc],
+    [project, title, delay, linkTo?.project, linkTo?.titleLc],
   );
 
-  const handleClick = useCallback(() => {
-    pushPageTransition({
-      type: "page",
-      from: { project: linkTo.project ?? project, title: linkTo.titleLc },
-      to: { project, title },
-    });
-  }, [project, title, linkTo.project, linkTo.titleLc]);
+  const handleClick = useMemo(() =>
+    linkTo
+      ? () => {
+        pushPageTransition({
+          type: "page",
+          from: { project: linkTo.project ?? project, title: linkTo.titleLc },
+          to: { project, title },
+        });
+      }
+      : () => {}, [project, title, linkTo?.project, linkTo?.titleLc]);
 
   return (
     <a

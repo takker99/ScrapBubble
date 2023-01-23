@@ -131,7 +131,7 @@ Deno.test("convert", async (t) => {
               "hasBackLinksOrIcons": true,
             },
             "collaborators": [],
-          }, new Date(1672173549000)),
+          }),
         );
       },
     );
@@ -278,7 +278,7 @@ Deno.test("convert", async (t) => {
               "hasBackLinksOrIcons": true,
             },
             "collaborators": [],
-          }, new Date(1672173549000)),
+          }),
         );
       },
     );
@@ -398,7 +398,7 @@ Deno.test("convert", async (t) => {
             "hasBackLinksOrIcons": false,
           },
           "collaborators": [],
-        }, new Date(1672173548000)),
+        }),
       );
     });
   });

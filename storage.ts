@@ -1,5 +1,6 @@
 import { Line, StringLc } from "./deps/scrapbox.ts";
 import { ID } from "./id.ts";
+import { produce } from "./deps/immer.ts";
 
 export interface Bubble {
   /** project name */
@@ -26,14 +27,14 @@ export interface Bubble {
   /** ページの更新日時 */
   updated: number;
 
-  /** ページの更新状況を最後に確認した日時 */
-  checked: number;
-
   /** 内部リンク記法による逆リンクのリスト
    *
    * 未計算のときは`undefined`になる
    */
   linked?: StringLc[];
+
+  /** `linked`が不正確な可能性がある場合は`true` */
+  isLinkedCorrect: boolean;
 
   /** 外部リンク記法による逆リンクのリスト
    *
@@ -76,70 +77,46 @@ export const isEmptyLink = (
 export const update = (
   prev: Bubble | undefined,
   current: Readonly<Bubble>,
-): Bubble => {
-  if (!prev) return current;
-  if (prev.updated < current.updated) {
-    // 更新日時が新しければ、そちらを採用する
-    // linked, projectLinked, linesのみ別途判定する
-    const { lines, ...rest } = current;
-    const bubble: Bubble = {
-      ...rest,
-      lines: isDummy(current) ? prev.lines : lines,
-    };
-    if (prev.linked) bubble.linked ??= prev.linked;
-    if (prev.projectLinked) bubble.projectLinked ??= prev.projectLinked;
+): Bubble | undefined =>
+  produce<Bubble | undefined>(prev, (draft) => {
+    if (!draft) return current;
 
-    return bubble;
-  }
+    if (draft.updated < current.updated) {
+      // 更新日時が新しければ、そちらを採用する
+      // linked, projectLinked, linesのみ別途判定する
+      const { lines, linked, projectLinked, ...rest } = current;
 
-  // `updated`が変化していない場合、変更されている可能性のあるpropertiesは
-  // - `lines`
-  // - `linked`
-  // - `projectLinked`
-  // - `checked`
-  // に限られる
-  let hasChange = false;
-  const bubble = { ...prev };
+      Object.assign(draft, rest);
+      if (!isDummy(current)) draft.lines = lines;
+      if (linked) draft.linked ??= linked;
+      if (projectLinked) draft.projectLinked ??= projectLinked;
 
-  // 本物の本文がやってきたら、そちらを採用する
-  if (isDummy(bubble) && !isDummy(current)) {
-    bubble.lines = current.lines;
-    hasChange = true;
-  }
-  if (
-    current.linked &&
-    // まずリンク数で大雑把に比較し、長さが変わらなければ一つづつ比較して更新の有無を調べる
-    (bubble.linked?.length !== current.linked?.length ||
-      bubble.linked?.some?.((linkLc, i) => linkLc !== current.linked?.[i]))
-  ) {
-    bubble.linked = current.linked;
-    hasChange = true;
-  }
-  if (
-    current.projectLinked &&
-    // まずリンク数で大雑把に比較し、長さが変わらなければ一つづつ比較して更新の有無を調べる
-    (bubble.projectLinked?.length !== current.projectLinked?.length ||
-      bubble.projectLinked?.some?.((linkLc, i) =>
-        linkLc !== current.projectLinked?.[i]
-      ))
-  ) {
-    bubble.projectLinked = current.projectLinked;
-    hasChange = true;
-  }
-
-  // データ確認日時のみの変更は、object参照を維持する
-  if (bubble.checked !== current.checked) {
-    const checked = Math.max(bubble.checked, current.checked);
-    if (!hasChange) {
-      prev.checked = checked;
-      return prev;
+      return;
     }
-    bubble.checked = checked;
-    hasChange = true;
-  }
 
-  return hasChange ? bubble : prev;
-};
+    // `updated`が変化していない場合、変更されている可能性のあるpropertiesは
+    // - `lines`
+    // - `linked`
+    // - `projectLinked`
+    // に限られる
+
+    // 本物の本文がやってきたら、そちらを採用する
+    if (isDummy(draft) && !isDummy(current)) {
+      draft.lines = current.lines;
+    }
+    // linkedは正確に取得したデータを優先する
+    if (current.linked) {
+      if (current.isLinkedCorrect) {
+        draft.linked = current.linked;
+      } else if (
+        !draft.isLinkedCorrect &&
+        (draft.linked?.length ?? 0) <= current.linked.length
+      ) {
+        draft.linked = current.linked;
+      }
+    }
+    if (current.projectLinked) draft.projectLinked = current.projectLinked;
+  });
 
 /** linesがdescriptionからでっち上げられたデータかどうか判定する */
 const isDummy = (bubble: Bubble): boolean => bubble.lines[0].id === "dummy";

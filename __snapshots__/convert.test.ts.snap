@@ -3,13 +3,13 @@ export const snapshot = {};
 snapshot[`convert > one project > 逆・順・双方向・空リンク+中身あり・空headword+複数パス2 hop links 1`] = `
 Map {
   "/takker-dist/a" => {
-      checked: 1672173549,
       descriptions: [
         "[A1],[A2],[A3]",
         "https://scrapbox.io/api/pages/takker-dist/A",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1672173548,
@@ -38,11 +38,11 @@ Map {
       updated: 1672173548,
     },
   "/takker-dist/a1" => {
-      checked: 1672173549,
       descriptions: [
       ],
       exists: false,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 0,
@@ -61,7 +61,6 @@ Map {
       updated: 0,
     },
   "/takker-dist/b" => {
-      checked: 1672173549,
       descriptions: [
         "[B1], [B2], [B3]",
         "[A1]",
@@ -69,6 +68,7 @@ Map {
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: true,
       lines: [
         {
           created: 1672173349,
@@ -116,12 +116,12 @@ Map {
       updated: 1673081924,
     },
   "/takker-dist/b1" => {
-      checked: 1672173549,
       descriptions: [
         "[B]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673081852,
@@ -149,11 +149,11 @@ Map {
       updated: 1673081852,
     },
   "/takker-dist/b2" => {
-      checked: 1672173549,
       descriptions: [
       ],
       exists: false,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 0,
@@ -172,11 +172,11 @@ Map {
       updated: 0,
     },
   "/takker-dist/b3" => {
-      checked: 1672173549,
       descriptions: [
       ],
       exists: false,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 0,
@@ -194,7 +194,6 @@ Map {
       updated: 0,
     },
   "/takker-dist/c" => {
-      checked: 1672173549,
       descriptions: [
         "[C1], [C2], [C3]",
         "[A2], [A3]",
@@ -202,6 +201,7 @@ Map {
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673081866,
@@ -237,12 +237,12 @@ Map {
       updated: 1673081866,
     },
   "/takker-dist/d" => {
-      checked: 1672173549,
       descriptions: [
         "[B1]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673081879,
@@ -264,12 +264,12 @@ Map {
       updated: 1673081879,
     },
   "/takker-dist/e" => {
-      checked: 1672173549,
       descriptions: [
         "[B1], [B2]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673081909,
@@ -296,7 +296,6 @@ Map {
 snapshot[`convert > one project > (逆リンク|順リンク|双方向リンク)+2 hop links 1`] = `
 Map {
   "/takker-dist/b" => {
-      checked: 1672173549,
       descriptions: [
         "[B1], [B2], [B3]",
         "[A1]",
@@ -304,6 +303,7 @@ Map {
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673081924,
@@ -343,12 +343,12 @@ Map {
       updated: 1673081924,
     },
   "/takker-dist/b1" => {
-      checked: 1672173549,
       descriptions: [
         "[B]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673081852,
@@ -379,7 +379,6 @@ Map {
       updated: 1673081852,
     },
   "/takker-dist/c" => {
-      checked: 1672173549,
       descriptions: [
         "[C1], [C2], [C3]",
         "[A2], [A3]",
@@ -387,6 +386,7 @@ Map {
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673081866,
@@ -422,12 +422,12 @@ Map {
       updated: 1673081866,
     },
   "/takker-dist/d" => {
-      checked: 1672173549,
       descriptions: [
         "[B1]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673081879,
@@ -449,12 +449,12 @@ Map {
       updated: 1673081879,
     },
   "/takker-dist/e" => {
-      checked: 1672173549,
       descriptions: [
         "[B1], [B2]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673081909,
@@ -476,13 +476,13 @@ Map {
       updated: 1673081909,
     },
   "/takker-dist/i" => {
-      checked: 1672173549,
       descriptions: [
         "[B] [B1] [K]",
         "https://scrapbox.io/api/pages/takker-dist/I",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: true,
       lines: [
         {
           created: 1673572279,
@@ -524,12 +524,12 @@ Map {
       updated: 1673572411,
     },
   "/takker-dist/j" => {
-      checked: 1672173549,
       descriptions: [
         "[I] [B1]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673572354,
@@ -551,12 +551,12 @@ Map {
       updated: 1673572354,
     },
   "/takker-dist/k" => {
-      checked: 1672173549,
       descriptions: [
         "[I] [B1]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673572392,
@@ -586,7 +586,6 @@ Map {
 snapshot[`convert > two projects > 逆・順・双方向External links 1`] = `
 Map {
   "/takker-dist/f" => {
-      checked: 1672173548,
       descriptions: [
         "[/takker-dist2/B]",
         "[/takker-dist2/C]",
@@ -595,6 +594,7 @@ Map {
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: true,
       lines: [
         {
           created: 1673336497,
@@ -649,12 +649,12 @@ Map {
       updated: 1673336640,
     },
   "/takker-dist2/a" => {
-      checked: 1672173548,
       descriptions: [
         "[/takker-dist/F]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673336561,
@@ -676,12 +676,12 @@ Map {
       updated: 1673336561,
     },
   "/takker-dist2/b" => {
-      checked: 1672173548,
       descriptions: [
         "[B1] [B2]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673336514,
@@ -703,12 +703,12 @@ Map {
       updated: 1673336514,
     },
   "/takker-dist2/c" => {
-      checked: 1672173548,
       descriptions: [
         "[/takker-dist/F]",
       ],
       exists: true,
       image: null,
+      isLinkedCorrect: false,
       lines: [
         {
           created: 1673336584,

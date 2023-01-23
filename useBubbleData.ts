@@ -18,8 +18,23 @@ export const useBubbleData = (
   const [bubbles, setBubbles] = useState<readonly Bubble[]>([]);
 
   useLayoutEffect(() => {
+    const update = () => {
+      setBubbles(() => {
+        const bubbles = [...load(pageIds)].flatMap((bubble) =>
+          bubble ? [bubble] : []
+        );
+
+        // debug用
+        logger.debug(
+          `Required: ${pageIds.length} pages, ${bubbles.length} found`,
+          bubbles,
+        );
+        return bubbles;
+      });
+    };
+
     // データの初期化
-    setBubbles([...load(pageIds)].flatMap((bubble) => bubble ? [bubble] : []));
+    update();
 
     // データ更新用listenerの登録
 
@@ -30,16 +45,16 @@ export const useBubbleData = (
       clearTimeout(timer);
       timer = setTimeout(() => {
         logger.debug(`Update ${pageIds.length} pages`);
-        setBubbles(
-          [...load(pageIds)].flatMap((bubble) => bubble ? [bubble] : []),
-        );
+        update();
       }, 10);
     };
 
     // 更新を購読する
     pageIds.forEach((id) => subscribe(id, updateData));
     return () => pageIds.forEach((id) => unsubscribe(id, updateData));
-  }, [pageIds]);
+  }, pageIds);
+
+  // debug用
 
   return bubbles;
 };
