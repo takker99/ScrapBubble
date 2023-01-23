@@ -29,7 +29,6 @@ export const mount = (init?: MountInit): void => {
     delay = 500,
     whiteList = [],
     watchList = getWatchList().slice(0, 100),
-    scrollTargets = ["link", "hashtag", "lineId", "title"],
     style = "",
     debug = false,
   } = init ?? {};
@@ -46,7 +45,6 @@ export const mount = (init?: MountInit): void => {
       delay={delay}
       whiteList={new Set([scrapbox.Project.name, ...whiteList])}
       watchList={new Set(watchList)}
-      scrollTargets={scrollTargets}
       style={style}
     />,
     shadowRoot,

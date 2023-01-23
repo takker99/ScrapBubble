@@ -10,7 +10,7 @@ import { Fragment, h, useCallback, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { useEventListener } from "./useEventListener.ts";
-import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
+import { isPageLink, isTitle } from "./is.ts";
 import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
 import { toId } from "./id.ts";
@@ -39,21 +39,13 @@ export interface AppProps {
    * それ以外の場合は、インラインCSSとして<style />で読み込む
    */
   style: URL | string;
-
-  /** リンク先へスクロールする機能を有効にする対象
-   *
-   * `link`: []で囲まれたリンク
-   * `hashtag`: ハッシュタグ
-   * `lineId`: 行リンク
-   */
-  scrollTargets: ("title" | "link" | "hashtag" | "lineId")[];
 }
 
 const editorDiv = editor();
 ensureHTMLDivElement(editorDiv, "#editor");
 
 export const App = (
-  { delay, whiteList, scrollTargets, watchList, style }: AppProps,
+  { delay, whiteList, watchList, style }: AppProps,
 ) => {
   const [{ bubble, hide }, ...bubbles] = useBubbles();
 
@@ -98,23 +90,10 @@ export const App = (
       // delay以内にカーソルが離れるかクリックしたら何もしない
       if (!await stayHovering(link, delay)) return;
 
-      // スクロール先を設定する
-      const scrollTo = hash !== "" && scrollTargets.includes("lineId")
-        ? { type: "id", value: hash } as const
-        : link.dataset.linkedTo &&
-            isLiteralStrings(
-              link.dataset.linkedType,
-              "link",
-              "hashtag",
-              "title",
-            ) && scrollTargets.includes(link.dataset.linkedType)
-        ? { type: "link", value: link.dataset.linkedTo } as const
-        : undefined;
-
       bubble({
         project,
         title,
-        scrollTo,
+        hash,
         position: calcBubblePosition(link),
         type: getLinkType(link),
       });
@@ -140,6 +119,7 @@ export const App = (
     [hide],
   );
 
+  // ページ遷移でカードを消す
   useEffect(() => {
     scrapbox.addListener("page:changed", hide);
     return () => scrapbox.removeListener("page:changed", hide);

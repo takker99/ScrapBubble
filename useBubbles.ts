@@ -1,25 +1,31 @@
 import { useCallback, useEffect, useState } from "./deps/preact.tsx";
 import { Position } from "./position.ts";
-import type { LinkType, ScrollTo } from "./types.ts";
+import { LinkType } from "./types.ts";
 import { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 /** bubble data */
-export interface BubbleData {
+export interface Source {
   /** bubble元(リンクなど)のproject name */
   project: string;
 
   /** bubble元(リンクなど)のtilte */
   title: string;
 
+  /** bubble元(リンクなど)のline ID */
+  hash?: string;
+
+  /** スクロール先リンク
+   *
+   * 内部リンク記法へスクロールするときは、`project`を削る
+   */
+  linkTo?: {
+    project?: string;
+    titleLc: string;
+  };
+
   /** 発生源の種類 */
   type: LinkType;
-
-  /** スクロール先
-   *
-   * リンク先へスクロールする機能を使う場合に設定する
-   */
-  scrollTo?: ScrollTo;
 
   /** bubbleの表示位置 */
   position: Position;
@@ -30,7 +36,7 @@ export interface BubbleOperators {
    *
    * すでにbubbleされていた場合、それ以降のbubbleを含めて消してから新しいのを出す
    */
-  bubble: (source: BubbleData) => void;
+  bubble: (source: Source) => void;
 
   /** 現在の階層より下のbubblesをすべて消す */
   hide: () => void;
@@ -38,7 +44,7 @@ export interface BubbleOperators {
 
 export interface BubbleSource extends BubbleOperators {
   /** bubble data */
-  source: BubbleData;
+  source: Source;
 
   /** 親階層のbubblesのページタイトル */
   parentTitles: string[];
@@ -48,12 +54,12 @@ export const useBubbles = (): [
   BubbleOperators,
   ...BubbleSource[],
 ] => {
-  const [sources, setSources] = useState<BubbleData[]>([]);
+  const [sources, setSources] = useState<Source[]>([]);
 
   const change = useCallback(
     (
       depth: number,
-      source?: BubbleData,
+      source?: Source,
     ) =>
       setSources((old) =>
         source ? [...old.slice(0, depth), source] : [...old.slice(0, depth)]
@@ -65,7 +71,7 @@ export const useBubbles = (): [
     BubbleOperators,
     ...BubbleSource[],
   ]>([{
-    bubble: (source: BubbleData) => change(0, source),
+    bubble: (source: Source) => change(0, source),
     hide: () => change(0),
   }]);
 
@@ -83,7 +89,7 @@ export const useBubbles = (): [
             scrapbox.Page.title ?? "",
             ...sources.slice(0, i).map((source) => source.title),
           ],
-          bubble: (source: BubbleData) => change(i + 1, source),
+          bubble: (source: Source) => change(i + 1, source),
           hide: () => change(i + 1),
         })
       ),

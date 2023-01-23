@@ -10,13 +10,12 @@ import {
   FunctionComponent,
   h,
   useCallback,
-  useLayoutEffect,
   useMemo,
-  useState,
 } from "./deps/preact.tsx";
 import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { useBubbleData } from "./useBubbleData.ts";
 import { useTheme } from "./useTheme.ts";
+import { LinkTo } from "./types.ts";
 import { fromId, ID, toId } from "./id.ts";
 import { Bubble as BubbleData } from "./storage.ts";
 import type { BubbleSource } from "./useBubbles.ts";
@@ -89,7 +88,8 @@ export const Bubble = ({
             lines={pages[0].lines}
             project={pages[0].project}
             title={pages[0].lines[0].text}
-            scrollTo={source.scrollTo}
+            hash={source.hash}
+            linkTo={source.linkTo}
             whiteList={whiteList}
             {...props}
           />
@@ -127,16 +127,12 @@ const useBubbleFilter = (
     [parentTitles],
   );
 
-  const [[linked, externalLinked, pages], setBubbleData] = useState<
-    [ID[], ID[], BubbleData[]]
-  >([[], [], []]);
-
-  useLayoutEffect(
+  return useMemo(
     () => {
       /** `source.title`を内部リンク記法で参照しているリンクのリスト */
-      const linked = new Set<ID>();
+      const linked = new Map<ID, LinkTo>();
       /** `source.title`を外部リンク記法で参照しているリンクのリスト */
-      const externalLinked = new Set<ID>();
+      const externalLinked = new Map<ID, LinkTo>();
       /** ページ本文
        *
        * bubbleをそのまま保つことで、参照の違いのみで更新の有無を判断できる
@@ -145,59 +141,35 @@ const useBubbleFilter = (
 
       // 逆リンクおよびpagesから, parentsとwhitelistにないものを除いておく
       for (const bubble of bubbles) {
+        const eLinkTo = { project: bubble.project, titleLc: bubble.titleLc };
+        const linkTo = { titleLc: bubble.titleLc };
         for (const id of bubble.projectLinked ?? []) {
           const { project, titleLc } = fromId(id);
           // External Linksの内、projectがwhiteListに属するlinksも重複除去処理を施す
           if (parentsLc.includes(titleLc) && whiteList.has(project)) {
             continue;
           }
-          externalLinked.add(id);
+          if (externalLinked.has(id)) continue;
+          externalLinked.set(id, eLinkTo);
         }
         // whiteLitにないprojectのページは、External Links以外表示しない
         if (!whiteList.has(bubble.project)) continue;
         // 親と重複しない逆リンクのみ格納する
         for (const linkLc of bubble.linked ?? []) {
           if (parentsLc.includes(linkLc)) continue;
-          linked.add(toId(bubble.project, linkLc));
+          const id = toId(bubble.project, linkLc);
+          if (linked.has(id)) continue;
+          linked.set(id, linkTo);
         }
         // 親と重複しないページ本文のみ格納する
         if (parentsLc.includes(bubble.titleLc)) continue;
         if (!bubble.exists) continue;
         pages.push(bubble);
       }
-
-      // 再レンダリングを抑制するために、必要なものだけ更新する
-      setBubbleData((prev) => {
-        let [prevLinked, prevExternalLinked, prevPages] = prev;
-        let hasChange = false;
-        if (
-          prevLinked.length !== linked.size ||
-          prevLinked.some((id) => !linked.has(id))
-        ) {
-          prevLinked = [...linked];
-          hasChange = true;
-        }
-        if (
-          prevExternalLinked.length !== externalLinked.size ||
-          prevExternalLinked.some((id) => !externalLinked.has(id))
-        ) {
-          prevExternalLinked = [...externalLinked];
-          hasChange = true;
-        }
-        if (
-          prevPages.length !== pages.length ||
-          prevPages.some((bubble, i) => pages[i] !== bubble)
-        ) {
-          prevPages = pages;
-          hasChange = true;
-        }
-        return hasChange ? [prevLinked, prevExternalLinked, prevPages] : prev;
-      });
+      return [linked, externalLinked, pages] as const;
     },
     [bubbles, whiteList, parentsLc],
   );
-
-  return [linked, externalLinked, pages] as const;
 };
 
 const StatusBar: FunctionComponent = ({ children }) => (

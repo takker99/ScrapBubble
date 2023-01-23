@@ -19,7 +19,6 @@ import { useTheme } from "./useTheme.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { BubbleOperators } from "./useBubbles.ts";
 import { calcBubblePosition } from "./position.ts";
-import type { LinkType } from "./types.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
@@ -28,9 +27,11 @@ export interface CardProps {
   title: string;
   descriptions: string[];
   thumbnail: string;
-  linkedTo: string;
+  linkTo: {
+    project?: string;
+    titleLc: string;
+  };
   delay: number;
-  linkedType: LinkType;
   prefetch: (project: string, title: string) => void;
   bubble: BubbleOperators["bubble"];
 }
@@ -40,8 +41,7 @@ export const Card = ({
   title,
   descriptions,
   thumbnail,
-  linkedTo,
-  linkedType,
+  linkTo,
   bubble,
   delay,
   prefetch,
@@ -63,9 +63,15 @@ export const Card = ({
 
       if (!await stayHovering(a, delay)) return;
 
-      bubble({ project, title, type: "link", position: calcBubblePosition(a) });
+      bubble({
+        project,
+        title,
+        linkTo,
+        type: "link",
+        position: calcBubblePosition(a),
+      });
     },
-    [project, title, delay],
+    [project, title, delay, linkTo.project, linkTo.titleLc],
   );
 
   return (
@@ -73,8 +79,6 @@ export const Card = ({
       className="related-page-card page-link"
       type="link"
       data-theme={theme}
-      data-linked-to={linkedTo}
-      data-linked-type={linkedType}
       href={`/${project}/${encodeTitleURI(title)}`}
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}
