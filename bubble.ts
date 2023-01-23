@@ -48,17 +48,22 @@ export interface PrefetchOptions {
  *
  * cacheは一定間隔ごとに更新される
  */
-export const prefetch = (
+export const prefetch = async (
   title: string,
   projects: Set<string>,
   watchList: Set<ProjectId>,
   options?: PrefetchOptions,
-): void => {
+): Promise<void> => {
+  const promises: Promise<void>[] = [];
   for (const project of projects) {
     const id = toId(project, title);
     if (loadingIds.has(id)) continue;
-    updateApiCache(project, title, watchList, options);
+    promises.push(
+      updateApiCache(project, title, watchList, options),
+    );
   }
+
+  await Promise.all(promises);
 };
 
 /** debug用カウンタ */

@@ -60,14 +60,12 @@ export const App = (
    *
    * white listにない外部プロジェクトリンクは、そのページだけを読み込む
    */
-  const prefetch = useCallback((project: string, title: string) => {
-    const projects = new Set([scrapbox.Project.name, ...whiteList]);
+  const prefetch = useCallback((project: string, title: string) =>
     prefetch_(
       title,
-      projects.has(project) ? projects : new Set([project]),
+      whiteList.has(project) ? whiteList : new Set([project]),
       watchList,
-    );
-  }, [whiteList, watchList]);
+    ), [whiteList, watchList]);
 
   // hover処理
   useEventListener(
