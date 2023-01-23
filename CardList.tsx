@@ -35,16 +35,6 @@ export const CardList = ({
     externalLinked,
   ]);
   const cards = useBubbleData(ids);
-  const cardsForRender = useMemo(
-    () =>
-      cards.map((card) => {
-        const key = toId(card.project, card.titleLc);
-        const linkTo = linked.get(key) ?? externalLinked.get(key);
-        if (!linkTo) throw Error(`Could not found "linkTo" of ${key}`);
-        return { key, linkTo, ...card };
-      }),
-    [cards, linked, externalLinked],
-  );
 
   const projectsForSort = useMemo(() => [...projectsForSort_], [
     projectsForSort_,
@@ -65,9 +55,9 @@ export const CardList = ({
         return aIndex - bIndex;
       };
 
-      return [...cardsForRender].sort(compare);
+      return [...cards].sort(compare);
     },
-    [cardsForRender, projectsForSort],
+    [cards, projectsForSort],
   );
 
   const cardStyle = useMemo(() => ({
@@ -91,19 +81,31 @@ export const CardList = ({
       onClick={props.onClick}
     >
       {sortedCards.map((
-        { key, project, lines: [{ text: title }], descriptions, image, linkTo },
-      ) => (
-        <li key={key}>
-          <Card
-            project={project}
-            title={title}
-            linkTo={linkTo}
-            descriptions={descriptions}
-            thumbnail={image ?? ""}
-            {...props}
-          />
-        </li>
-      ))}
+        {
+          project,
+          titleLc,
+          lines: [{ text: title }],
+          descriptions,
+          image,
+        },
+      ) => {
+        const key = toId(project, titleLc);
+        // hookの計算にラグがあり、linkToが見つからない場合がある
+        const linkTo = linked.get(key) ?? externalLinked.get(key);
+
+        return (
+          <li key={key}>
+            <Card
+              project={project}
+              title={title}
+              linkTo={linkTo}
+              descriptions={descriptions}
+              thumbnail={image ?? ""}
+              {...props}
+            />
+          </li>
+        );
+      })}
     </ul>
   );
 };

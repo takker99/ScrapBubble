@@ -1,7 +1,6 @@
 import { toTitleLc } from "./deps/scrapbox-std.ts";
 import { Bubble, BubbleStorage } from "./storage.ts";
 import { fromId, ID, toId } from "./id.ts";
-import { getUnixTime } from "./time.ts";
 import { Page, RelatedPage } from "./deps/scrapbox.ts";
 
 /** APIから取得したページデータを、Bubble用に変換する
@@ -14,16 +13,14 @@ import { Page, RelatedPage } from "./deps/scrapbox.ts";
 export const convert = (
   project: string,
   page: Page,
-  checked?: Date,
 ): BubbleStorage => {
   const storage: BubbleStorage = new Map();
-  checked ??= new Date();
 
   // pageが参照しているリンクの逆リンクにpageを入れる
   // これにより、2 hop linksのハブとなるcardは、全ての逆リンクが格納されていると保証され、linkedとprojectLinkedはundefinedでなくなる
   const titleLc = toTitleLc(page.title);
   for (const link of page.links) {
-    const bubble: Bubble = makeDummy(project, link, checked);
+    const bubble: Bubble = makeDummy(project, link);
     bubble.linked = [titleLc];
     storage.set(toId(project, link), bubble);
   }
@@ -37,7 +34,7 @@ export const convert = (
 
   // ページ本文を入れる
   const pageBubble: Required<Bubble> = {
-    ...toBubble(project, page, checked),
+    ...toBubble(project, page),
     linked: [],
     projectLinked: [],
   };
@@ -69,7 +66,7 @@ export const convert = (
     }
     // cardを入れる
     const cardId = toId(project, card.titleLc);
-    const bubble = toBubble(project, card, checked);
+    const bubble = toBubble(project, card);
     // external linksでなければ`projectLinked`は存在しない
     const linked = storage.get(cardId)?.linked;
     if (linked) bubble.linked = linked;
@@ -89,11 +86,12 @@ export const convert = (
       pageBubble.projectLinked.push(cardId);
     }
     // cardを入れる
-    const bubble = toBubble(card.projectName, card, checked);
+    const bubble = toBubble(card.projectName, card);
     const projectLinked = storage.get(cardId)?.projectLinked;
     if (projectLinked) bubble.projectLinked = projectLinked;
     storage.set(cardId, bubble);
   }
+  pageBubble.isLinkedCorrect = true;
 
   // 2 hop linksからカードを取り出す
   for (const card of page.relatedPages.links2hop) {
@@ -111,7 +109,7 @@ export const convert = (
     }
     // cardを入れる
     const cardId = toId(project, card.titleLc);
-    const bubble = toBubble(project, card, checked);
+    const bubble = toBubble(project, card);
     // external linksでなければ`projectLinked`は存在しない
     const linked = storage.get(cardId)?.linked;
     if (linked) bubble.linked = linked;
@@ -131,7 +129,6 @@ export const convert = (
 const toBubble = (
   project: string,
   page: Page | Omit<RelatedPage, "linksLc">,
-  checked: Date,
 ): Bubble => ({
   project,
   titleLc: "titleLc" in page ? page.titleLc : toTitleLc(page.title),
@@ -150,7 +147,7 @@ const toBubble = (
       created: page.updated,
     })),
   updated: page.updated,
-  checked: getUnixTime(checked),
+  isLinkedCorrect: false,
 });
 
 /** ページタイトルだけからBubbleを作る
@@ -163,7 +160,6 @@ const toBubble = (
 const makeDummy = (
   project: string,
   title: string,
-  checked: Date,
 ): Bubble => ({
   project,
   titleLc: toTitleLc(title),
@@ -178,5 +174,5 @@ const makeDummy = (
     created: 0,
   }],
   updated: 0,
-  checked: getUnixTime(checked),
+  isLinkedCorrect: false,
 });

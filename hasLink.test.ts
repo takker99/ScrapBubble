@@ -1,5 +1,6 @@
 import { parse } from "./deps/scrapbox-parser.ts";
 import { hasLink } from "./hasLink.ts";
+import { LinkTo } from "./types.ts";
 import { assertEquals } from "./deps/testing.ts";
 
 Deno.test("hasLink()", async (t) => {
@@ -28,22 +29,25 @@ Deno.test("hasLink()", async (t) => {
   });
 
   const links = [
-    ["こっち", true],
-    ["Scrapbox", true],
+    [{ titleLc: "こっち" }, true],
+    [{ titleLc: "Scrapbox" }, false],
+    [{ titleLc: "scrapbox" }, true],
     [
-      "これはリンクではない",
+      { titleLc: "これはリンクではない" },
       false,
     ],
-    ["HashTag", true],
-    ["大文字aと小文字A", true],
-    ["LINK in_table", true],
-    ["/project/external link", false],
-    [{ project: "project", title: "external link" }, true],
-  ] as [string | { project: string; title: string }, boolean][];
+    [{ titleLc: "HashTag" }, false],
+    [{ titleLc: "hashtag" }, true],
+    [{ titleLc: "大文字aと小文字a" }, true],
+    [{ titleLc: "link_in_table" }, true],
+    [{ titleLc: "/project/external link" }, false],
+    [{ project: "project", titleLc: "external link" }, false],
+    [{ project: "project", titleLc: "external_link" }, true],
+  ] as [LinkTo, boolean][];
   for (const [link, result] of links) {
     await t.step(
       `the text ${result ? "has" : "doesn't have"} ${
-        typeof link === "string" ? link : `/${link.project}/${link.title}`
+        !("project" in link) ? link.titleLc : `/${link.project}/${link.titleLc}`
       }`,
       () => {
         assertEquals(hasLink(link, nodes), result);

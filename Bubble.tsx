@@ -10,7 +10,9 @@ import {
   FunctionComponent,
   h,
   useCallback,
+  useLayoutEffect,
   useMemo,
+  useState,
 } from "./deps/preact.tsx";
 import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
 import { useBubbleData } from "./useBubbleData.ts";
@@ -18,9 +20,13 @@ import { useTheme } from "./useTheme.ts";
 import { LinkTo } from "./types.ts";
 import { fromId, ID, toId } from "./id.ts";
 import { Bubble as BubbleData } from "./storage.ts";
+import { original, produce } from "./deps/immer.ts";
 import type { BubbleSource } from "./useBubbles.ts";
+import { createDebug } from "./debug.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
+
+const logger = createDebug("ScrapBubble:Bubble.tsx");
 
 export interface BubbleProps extends BubbleSource {
   whiteList: Set<string>;
@@ -117,17 +123,31 @@ const useBubbleFilter = (
   whiteList: Set<string>,
   parentTitles: string[],
 ) => {
+  type LinkMap = Map<ID, LinkTo>;
+
+  const [[linked, externalLinked, pages], setBubbleData] = useState<
+    [LinkMap, LinkMap, BubbleData[]]
+  >([new Map(), new Map(), []]);
+
   const pageIds = useMemo(
-    () => [...projects].map((project) => toId(project, source.title)),
+    () => {
+      const pageIds = [...projects].map((project) =>
+        toId(project, source.title)
+      );
+
+      logger.debug("projects", pageIds);
+      return pageIds;
+    },
     [projects, source.title],
   );
+
   const bubbles = useBubbleData(pageIds);
   const parentsLc = useMemo(
     () => parentTitles.map((title) => toTitleLc(title)),
     [parentTitles],
   );
 
-  return useMemo(
+  useLayoutEffect(
     () => {
       /** `source.title`を内部リンク記法で参照しているリンクのリスト */
       const linked = new Map<ID, LinkTo>();
@@ -142,7 +162,6 @@ const useBubbleFilter = (
       // 逆リンクおよびpagesから, parentsとwhitelistにないものを除いておく
       for (const bubble of bubbles) {
         const eLinkTo = { project: bubble.project, titleLc: bubble.titleLc };
-        const linkTo = { titleLc: bubble.titleLc };
         for (const id of bubble.projectLinked ?? []) {
           const { project, titleLc } = fromId(id);
           // External Linksの内、projectがwhiteListに属するlinksも重複除去処理を施す
@@ -154,6 +173,7 @@ const useBubbleFilter = (
         }
         // whiteLitにないprojectのページは、External Links以外表示しない
         if (!whiteList.has(bubble.project)) continue;
+        const linkTo = { titleLc: bubble.titleLc };
         // 親と重複しない逆リンクのみ格納する
         for (const linkLc of bubble.linked ?? []) {
           if (parentsLc.includes(linkLc)) continue;
@@ -166,10 +186,41 @@ const useBubbleFilter = (
         if (!bubble.exists) continue;
         pages.push(bubble);
       }
-      return [linked, externalLinked, pages] as const;
+
+      // 再レンダリングを抑制するために、必要なものだけ更新する
+      setBubbleData(produce((draft) => {
+        logger.debug(
+          `depth: ${parentsLc.length}, bubbled from ${
+            toId(source.project, source.title)
+          }, bubbles,`,
+          bubbles,
+          "before",
+          draft[0],
+          `internal cards,`,
+          linked,
+          "external cards",
+          externalLinked,
+        );
+        for (const key of draft[0].keys()) {
+          if (!linked.has(key)) draft[0].delete(key);
+        }
+        for (const [key, value] of linked) {
+          draft[0].set(key, value);
+        }
+
+        for (const key of draft[1].keys()) {
+          if (!externalLinked.has(key)) draft[1].delete(key);
+        }
+        for (const [key, value] of externalLinked) {
+          draft[1].set(key, value);
+        }
+        draft[2] = pages;
+      }));
     },
     [bubbles, whiteList, parentsLc],
   );
+
+  return [linked, externalLinked, pages] as const;
 };
 
 const StatusBar: FunctionComponent = ({ children }) => (
