@@ -13,6 +13,7 @@ import { useEventListener } from "./useEventListener.ts";
 import { isLiteralStrings, isPageLink, isTitle } from "./is.ts";
 import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
+import { toId } from "./id.ts";
 import { calcBubblePosition } from "./position.ts";
 import { prefetch as prefetch_ } from "./bubble.ts";
 import { editor } from "./deps/scrapbox-std.ts";
@@ -154,6 +155,7 @@ export const App = (
       <UserCSS style={style} />
       {bubbles.map((bubble) => (
         <Bubble
+          key={toId(bubble.source.project, bubble.source.title)}
           {...bubble}
           whiteList={whiteList}
           delay={delay}
