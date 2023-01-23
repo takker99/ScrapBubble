@@ -78,9 +78,8 @@ export const CardList = ({
       {sortedCards.map((
         { project, lines: [{ text: title }], descriptions, image },
       ) => (
-        <li>
+        <li key={toId(project, title)}>
           <Card
-            key={toId(project, title)}
             project={project}
             title={title}
             linkedTo={source.title}
