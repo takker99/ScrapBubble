@@ -5,7 +5,7 @@
 /// <reference lib="dom"/>
 import { Fragment, h, useCallback, useMemo } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
-import { encodeTitleURI } from "./deps/scrapbox-std.ts";
+import { encodeTitleURI, pushPageTransition } from "./deps/scrapbox-std.ts";
 import {
   FormulaNode,
   HashTagNode,
@@ -74,6 +74,14 @@ export const Card = ({
     [project, title, delay, linkTo.project, linkTo.titleLc],
   );
 
+  const handleClick = useCallback(() => {
+    pushPageTransition({
+      type: "page",
+      from: { project: linkTo.project ?? project, title: linkTo.titleLc },
+      to: { project, title },
+    });
+  }, [project, title, linkTo.project, linkTo.titleLc]);
+
   return (
     <a
       className="related-page-card page-link"
@@ -83,6 +91,7 @@ export const Card = ({
       rel={project === scrapbox.Project.name ? "route" : "noopner noreferrer"}
       target={project !== scrapbox.Project.name ? "_blank" : ""}
       onPointerEnter={handleEnter}
+      onClick={handleClick}
     >
       <div class="hover" />
       <div class="content">
