@@ -4,6 +4,7 @@
 
 import { Node } from "./deps/scrapbox-parser.ts";
 import { parseLink } from "./parseLink.ts";
+import { LinkTo } from "./types.ts";
 import { toTitleLc } from "./deps/scrapbox-std.ts";
 
 /** 指定したリンクがScrapboxのページ中に存在するか調べる
@@ -13,15 +14,15 @@ import { toTitleLc } from "./deps/scrapbox-std.ts";
  * @return 見つかったら`true`
  */
 export const hasLink = (
-  link: string | { project: string; title: string },
+  link: LinkTo,
   nodes: Node[],
 ): boolean =>
   nodes.some((node) => {
-    const isRelative = typeof link === "string";
+    const isRelative = !link.project;
     switch (node.type) {
       case "hashTag":
         return isRelative &&
-          toTitleLc(node.href) === toTitleLc(link);
+          toTitleLc(node.href) === link.titleLc;
       case "link": {
         if (node.pathType == "absolute") return false;
         if ((node.pathType === "relative") !== isRelative) return false;
@@ -31,9 +32,9 @@ export const hasLink = (
           href: node.href,
         });
         return isRelative
-          ? !project && toTitleLc(title) === toTitleLc(link)
+          ? !project && toTitleLc(title) === link.titleLc
           : project === link.project &&
-            toTitleLc(title) === toTitleLc(link.title);
+            toTitleLc(title) === link.titleLc;
       }
       case "quote":
       case "strong":

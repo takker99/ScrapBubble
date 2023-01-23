@@ -7,17 +7,19 @@ import { Card } from "./Card.tsx";
 import { h, useMemo } from "./deps/preact.tsx";
 import { useBubbleData } from "./useBubbleData.ts";
 import { Bubble } from "./storage.ts";
+import { LinkTo } from "./types.ts";
 import { ID, toId } from "./id.ts";
-import type { BubbleSource } from "./useBubbles.ts";
+import { BubbleOperators, Source } from "./useBubbles.ts";
 
-export interface CardListProps
-  extends
-    Pick<BubbleSource, "source" | "bubble">,
-    h.JSX.HTMLAttributes<HTMLUListElement> {
+export interface CardListProps extends h.JSX.HTMLAttributes<HTMLUListElement> {
   delay: number;
   prefetch: (project: string, title: string) => void;
-  linked: readonly ID[];
-  externalLinked: readonly ID[];
+  /** key ページカードのID, value: 逆リンク先 */
+  linked: Map<ID, LinkTo>;
+  /** key ページカードのID, value: 逆リンク先 */
+  externalLinked: Map<ID, LinkTo>;
+  bubble: BubbleOperators["bubble"];
+  source: Pick<Source, "project" | "title" | "position">;
   projectsForSort: Set<string>;
 }
 
@@ -28,12 +30,25 @@ export const CardList = ({
   projectsForSort: projectsForSort_,
   ...props
 }: CardListProps) => {
-  const cards = useBubbleData(linked);
-  const externalCards = useBubbleData(externalLinked);
+  const ids = useMemo(() => [...linked.keys(), ...externalLinked.keys()], [
+    linked,
+    externalLinked,
+  ]);
+  const cards = useBubbleData(ids);
+  const cardsForRender = useMemo(
+    () =>
+      cards.map((card) => {
+        const key = toId(card.project, card.titleLc);
+        const linkTo = linked.get(key) ?? externalLinked.get(key);
+        if (!linkTo) throw Error(`Could not found "linkTo" of ${key}`);
+        return { key, linkTo, ...card };
+      }),
+    [cards, linked, externalLinked],
+  );
+
   const projectsForSort = useMemo(() => [...projectsForSort_], [
     projectsForSort_,
   ]);
-
   /** 更新日時降順とproject昇順に並び替えた関連ページデータ
    *
    * externalCardsは分けない
@@ -50,9 +65,9 @@ export const CardList = ({
         return aIndex - bIndex;
       };
 
-      return [...cards, ...externalCards].sort(compare);
+      return [...cardsForRender].sort(compare);
     },
-    [cards, externalCards, projectsForSort],
+    [cardsForRender, projectsForSort],
   );
 
   const cardStyle = useMemo(() => ({
@@ -76,14 +91,13 @@ export const CardList = ({
       onClick={props.onClick}
     >
       {sortedCards.map((
-        { project, lines: [{ text: title }], descriptions, image },
+        { key, project, lines: [{ text: title }], descriptions, image, linkTo },
       ) => (
-        <li key={toId(project, title)}>
+        <li key={key}>
           <Card
             project={project}
             title={title}
-            linkedTo={source.title}
-            linkedType={source.type}
+            linkTo={linkTo}
             descriptions={descriptions}
             thumbnail={image ?? ""}
             {...props}

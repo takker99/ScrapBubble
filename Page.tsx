@@ -36,11 +36,11 @@ import { hasLink } from "./hasLink.ts";
 import { toId } from "./id.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { BubbleOperators } from "./useBubbles.ts";
+import { LinkTo } from "./types.ts";
 import { useBubbleData } from "./useBubbleData.ts";
 import { isEmptyLink } from "./storage.ts";
 import { calcBubblePosition } from "./position.ts";
 import { parse } from "./deps/scrapbox-parser.ts";
-import type { ScrollTo } from "./types.ts";
 import {
   AnchorFMNode,
   AudioNode,
@@ -70,7 +70,9 @@ export interface PageProps extends BubbleOperators {
   delay: number;
   lines: { text: string; id: string }[] | string[];
   noIndent?: boolean;
-  scrollTo?: ScrollTo;
+  hash?: string;
+  linkTo?: LinkTo;
+
   prefetch: (project: string, title: string) => void;
 }
 
@@ -95,7 +97,8 @@ const context = createContext<
 });
 
 export const Page = (
-  { lines, project, title, whiteList, noIndent, scrollTo, ...props }: PageProps,
+  { lines, project, title, whiteList, noIndent, hash, linkTo, ...props }:
+    PageProps,
 ): h.JSX.Element => {
   const lineIds = useMemo(
     () => lines.flatMap((line) => typeof line === "string" ? [] : [line.id]),
@@ -137,18 +140,15 @@ export const Page = (
   }, [lines, lineIds]);
 
   const scrollId = useMemo(() => {
-    if (!scrollTo) return;
+    if (hash && lineIds.includes(hash)) return hash;
+    if (!linkTo) return;
 
-    const id = scrollTo.type === "id"
-      ? scrollTo.value
-      : (blocks.find((block) => {
-        if (block.type !== "line") return false;
+    return (blocks.find((block) => {
+      if (block.type !== "line") return false;
 
-        return hasLink(scrollTo.value, block.nodes);
-      }) as LineType & { id: string } | undefined)?.id ?? "";
-    if (!lineIds.includes(id)) return;
-    return id;
-  }, [scrollTo, blocks, lineIds]);
+      return hasLink(linkTo, block.nodes);
+    }) as LineType & { id: string } | undefined)?.id;
+  }, [blocks, lineIds, hash, linkTo?.project, linkTo?.titleLc]);
 
   // リンク先にスクロールする
   const ref = useRef<HTMLDivElement>(null);
@@ -525,7 +525,7 @@ type HashTagProps = { node: HashTagNode };
 const HashTag = ({ node: { href } }: HashTagProps) => {
   const { project } = useContext(context);
   const emptyLink = useEmptyLink(project, href);
-  const handleHover = useHover(project, href);
+  const handleHover = useHover(project, href, "hashtag");
 
   return (
     <a
@@ -597,7 +597,7 @@ const ScrapboxLink = (
       href,
     },
   );
-  const handleHover = useHover(project, title);
+  const handleHover = useHover(project, title, "link", hash);
   const emptyLink = useEmptyLink(project, title ?? "");
 
   return (
@@ -736,6 +736,8 @@ const useEmptyLink = (project: string, link: string) => {
 const useHover = (
   project: string,
   title: string | undefined,
+  type: "link" | "hashtag",
+  hash?: string,
 ) => {
   const { delay, bubble, prefetch } = useContext(context);
 
@@ -752,10 +754,11 @@ const useHover = (
       bubble({
         project,
         title,
-        type: "link",
+        hash,
+        type,
         position: calcBubblePosition(a),
       });
     },
-    [project, title, delay, prefetch, bubble],
+    [project, title, hash, type, delay, prefetch, bubble],
   );
 };
