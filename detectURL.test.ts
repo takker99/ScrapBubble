@@ -46,6 +46,38 @@ Deno.test("Relative Path", async (t) => {
     });
   }
   {
+    const text = "#editor { display: block; }";
+    await t.step(text, () => {
+      const url = detectURL(text, base);
+      assert(!(url instanceof URL));
+      assertEquals(url, text);
+    });
+  }
+  {
+    const text = "#editor { background: url('../../image.png'); }";
+    await t.step(text, () => {
+      const url = detectURL(text, base);
+      assert(!(url instanceof URL));
+      assertEquals(url, text);
+    });
+  }
+  {
+    const text = "#editor { background: url('./image.png'); }";
+    await t.step(text, () => {
+      const url = detectURL(text, base);
+      assert(!(url instanceof URL));
+      assertEquals(url, text);
+    });
+  }
+  {
+    const text = "#editor { background: url('/image.png'); }";
+    await t.step(text, () => {
+      const url = detectURL(text, base);
+      assert(!(url instanceof URL));
+      assertEquals(url, text);
+    });
+  }
+  {
     const text = "./test.css";
     await t.step(text, () => {
       const url = detectURL(text, base);
