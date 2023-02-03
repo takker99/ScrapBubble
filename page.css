@@ -149,14 +149,14 @@ code.code-block,
 .deco-\- {text-decoration: line-through;}
 .deco-_ {text-decoration: underline;}
 .page-link {color: var(--page-link-color, #5e8af7);}
-.page-link:hover {color: var(--page-link-hover-color, #2d67f5);}
+a.page-link:hover {color: var(--page-link-hover-color, #2d67f5);}
 .empty-page-link {color: var(--empty-page-link-color, #fd7373);}
-.empty-page-link:hover {color: var(--empty-page-link-hover-color, #fd7373);}
+a.empty-page-link:hover {color: var(--empty-page-link-hover-color, #fd7373);}
 .link {
   color: var(--page-link-color, #5e8af7);
   text-decoration: underline;
 }
-.link:hover {color: var(--page-link-color-hover-color, #2d67f5);}
+a.link:hover {color: var(--page-link-color-hover-color, #2d67f5);}
 .link img {
   padding-bottom: 3px;
   border-style: none none solid;
