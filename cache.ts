@@ -36,7 +36,7 @@ export interface CacheFirstFetchOptions extends CacheQueryOptions {
  *
  * networkからとってこなくていいときは、途中でiteratorをbreakすればfetchしない
  *
- * fetchは同時に5回までしかできないよう制限する
+ * fetchは同時に3回までしかできないよう制限する
  *
  * @param req 要求
  * @param options cacheを探すときの設定

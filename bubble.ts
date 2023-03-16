@@ -50,12 +50,14 @@ export interface PrefetchOptions {
  */
 export const prefetch = async (
   title: string,
-  projects: Set<string>,
+  projects: Iterable<string>,
   watchList: Set<ProjectId>,
   options?: PrefetchOptions,
 ): Promise<void> => {
   const promises: Promise<void>[] = [];
-  for (const project of projects) {
+  // 最後に登録したものからfetchされるので、反転させておく
+  // makeThrottleの仕様を参照
+  for (const project of [...projects].reverse()) {
     const id = toId(project, title);
     if (loadingIds.has(id)) continue;
     promises.push(
