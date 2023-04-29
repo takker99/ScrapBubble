@@ -19,10 +19,10 @@ export const makeThrottle = <T>(max: number): (job: Fn<T>) => Promise<T> => {
     pendings.delete(prev);
     const task = queue.pop();
     if (!task) return;
-    const promise = task[0]()
+    const promise: Promise<void> = task[0]()
+      .finally(() => runNext(promise))
       .then((result) => task[1](result))
-      .catch((error) => task[2](error))
-      .finally(() => runNext(promise));
+      .catch((error) => task[2](error));
     pendings.add(promise);
   };
 
