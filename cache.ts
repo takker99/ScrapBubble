@@ -3,7 +3,8 @@
 /// <reference lib="dom"/>
 
 import type { UnixTime } from "./deps/scrapbox.ts";
-import { findLatestCache, sleep } from "./deps/scrapbox-std.ts";
+import { sleep } from "./deps/scrapbox-std.ts";
+import { findLatestCache } from "./deps/scrapbox-std-browser.ts";
 import { makeThrottle } from "./throttle.ts";
 
 const cacheVersion = "0.6.5"; // release前に更新する

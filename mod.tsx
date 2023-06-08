@@ -5,7 +5,7 @@
 import { h, render } from "./deps/preact.tsx";
 import { ensureHTMLDivElement } from "./ensure.ts";
 import { getWatchList } from "./watchList.ts";
-import { editor } from "./deps/scrapbox-std.ts";
+import { editor } from "./deps/scrapbox-std-browser.ts";
 import { App, AppProps, userscriptName } from "./App.tsx";
 import { setDebugMode } from "./debug.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
