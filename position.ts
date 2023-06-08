@@ -2,7 +2,7 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 
-import { editor } from "./deps/scrapbox-std.ts";
+import { editor } from "./deps/scrapbox-std-browser.ts";
 import { ensureHTMLDivElement } from "./ensure.ts";
 
 export type Position =

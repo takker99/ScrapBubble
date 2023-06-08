@@ -5,7 +5,8 @@
 /// <reference lib="dom"/>
 import { Fragment, h, useCallback, useMemo } from "./deps/preact.tsx";
 import { useKaTeX } from "./deps/useKaTeX.ts";
-import { encodeTitleURI, pushPageTransition } from "./deps/scrapbox-std.ts";
+import { encodeTitleURI } from "./deps/scrapbox-std.ts";
+import { pushPageTransition } from "./deps/scrapbox-std-browser.ts";
 import {
   FormulaNode,
   HashTagNode,

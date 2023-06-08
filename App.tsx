@@ -16,7 +16,7 @@ import { parseLink } from "./parseLink.ts";
 import { toId } from "./id.ts";
 import { calcBubblePosition } from "./position.ts";
 import { prefetch as prefetch_ } from "./bubble.ts";
-import { editor } from "./deps/scrapbox-std.ts";
+import { editor } from "./deps/scrapbox-std-browser.ts";
 import type { LinkType } from "./types.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
