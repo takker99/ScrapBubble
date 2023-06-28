@@ -135,6 +135,12 @@ code.code-block,
   height: calc(11px * 1.2);
 }
 
+.tool-button {
+  margin-left: 1em;
+  cursor: pointer;
+  font-size: .9em;
+}
+
 .deco-\/ {font-style: italic;}
 .deco-\*-1 {font-weight: bold;}
 .deco-\*-2 {font-weight: bold; font-size: 1.20em;}

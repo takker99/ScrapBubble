@@ -19,6 +19,7 @@ import {
 import { useKaTeX } from "./deps/useKaTeX.ts";
 import {
   CodeBlock as CodeBlockType,
+  CommandLineNode,
   DecorationNode,
   FormulaNode,
   GoogleMapNode,
@@ -374,12 +375,7 @@ const Node = ({ node }: NodeProps) => {
     case "formula":
       return <Formula node={node} />;
     case "commandLine":
-      return (
-        <code className="cli">
-          <span className="prefix">{node.symbol}</span>{"  "}
-          <span className="command">{node.text}</span>
-        </code>
-      );
+      return <CommandLine node={node} />;
     case "helpfeel":
       return (
         <code className="helpfeel">
@@ -449,6 +445,42 @@ const Decoration = (
     {nodes.map((node) => <Node node={node} />)}
   </span>
 );
+
+type CommandLineProps = { node: CommandLineNode };
+const CommandLine = (
+  { node }: CommandLineProps,
+) => {
+  const [buttonLabel, setButtonLabel] = useState("\uf0c5");
+  const handleClick = useCallback(
+    async (e: h.JSX.TargetedMouseEvent<HTMLSpanElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      try {
+        await navigator.clipboard.writeText(node.text);
+        setButtonLabel("Copied");
+        await sleep(1000);
+        setButtonLabel("\uf0c5");
+      } catch (e) {
+        alert(`Failed to copy the code block\nError:${e.message}`);
+      }
+    },
+    [node.text],
+  );
+
+  return (
+    <>
+      <code className="cli">
+        <span className="prefix">{node.symbol}</span>{"  "}
+        <span className="command">{node.text}</span>
+      </code>
+      <span className="tool-buttons">
+        <span title="Copy" className="copy" onClick={handleClick}>
+          {buttonLabel}
+        </span>
+      </span>
+    </>
+  );
+};
 type GoogleMapProps = { node: GoogleMapNode };
 const GoogleMap = (
   { node: { place, latitude, longitude, zoom } }: GoogleMapProps,
