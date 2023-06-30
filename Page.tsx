@@ -278,18 +278,12 @@ const CodeBlock = (
       <Line index={ids[0]} indent={indent} permalink={ids[0] === scrollId}>
         <span className="code-block">
           <span className="code-block-start">
-            {fileName.includes(".")
-              ? (
-                <a
-                  href={`/api/code/${project}/${
-                    encodeTitleURI(title)
-                  }/${fileName}`}
-                  target="_blank"
-                >
-                  {fileName}
-                </a>
-              )
-              : fileName}
+            <a
+              href={`/api/code/${project}/${encodeTitleURI(title)}/${fileName}`}
+              target="_blank"
+            >
+              {fileName}
+            </a>
           </span>
           <span className="copy" title="Copy" onClick={handleClick}>
             {buttonLabel}
