@@ -24,11 +24,11 @@ export interface MountInit
   watchList?: Iterable<ProjectId>;
 }
 
-export const mount = (init?: MountInit): void => {
+export const mount = async (init?: MountInit): Promise<void> => {
   const {
     delay = 500,
     whiteList = [],
-    watchList = getWatchList().slice(0, 100),
+    watchList = (await getWatchList()).slice(0, 100),
     style = "",
     debug = false,
   } = init ?? {};
