@@ -37,7 +37,7 @@ const { outputFiles: [css] } = await build({
 // create app.min.css.ts
 await Deno.writeTextFile(
   new URL("../app.min.css.ts", import.meta.url),
-  `export const CSS =\`${css.text}\`;`,
+  `export const CSS =String.raw\`${css.text}\`;`,
 );
 
 // format code
