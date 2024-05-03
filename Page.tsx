@@ -157,9 +157,9 @@ export const Page = (
     if (!scrollId) return;
 
     const targetLine = ref.current?.querySelector(`[data-id="${scrollId}"]`);
-    const scrollY = window.scrollY;
+    const scrollY = globalThis.scrollY;
     targetLine?.scrollIntoView?.({ block: "center" });
-    window.scroll(0, scrollY);
+    globalThis.scroll(0, scrollY);
   }, [scrollId]);
 
   return (
@@ -487,7 +487,7 @@ const GoogleMap = (
     >
       <img
         className="google-map"
-        src={`/api/google-map/static-map?center=${latitude}%2C${longitude}&markers=${place}&zoom=${zoom}&_csrf=${window._csrf}`}
+        src={`/api/google-map/static-map?center=${latitude}%2C${longitude}&markers=${place}&zoom=${zoom}&_csrf=${globalThis._csrf}`}
       />
     </a>
   </span>
