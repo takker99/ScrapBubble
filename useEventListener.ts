@@ -21,7 +21,16 @@ export const useEventListener = <
   deps?: unknown[],
 ): void => {
   useEffect(() => {
-    element.addEventListener(type, listener, options);
-    return () => element.removeEventListener(type, listener, options);
+    element.addEventListener(
+      type,
+      listener as EventListenerOrEventListenerObject,
+      options,
+    );
+    return () =>
+      element.removeEventListener(
+        type,
+        listener as EventListenerOrEventListenerObject,
+        options,
+      );
   }, [element, type, options, ...(deps ?? [])]);
 };
