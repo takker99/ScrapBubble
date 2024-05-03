@@ -3,9 +3,7 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 import { h, render } from "./deps/preact.tsx";
-import { ensureHTMLDivElement } from "./ensure.ts";
 import { getWatchList } from "./watchList.ts";
-import { editor } from "./deps/scrapbox-std-browser.ts";
 import { App, AppProps, userscriptName } from "./App.tsx";
 import { setDebugMode } from "./debug.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
@@ -36,9 +34,7 @@ export const mount = async (init?: MountInit): Promise<void> => {
   setDebugMode(debug);
   const app = document.createElement("div");
   app.dataset.userscriptName = userscriptName;
-  const editorDiv = editor();
-  ensureHTMLDivElement(editorDiv, "#editor");
-  editorDiv.append(app);
+  document.body.append(app);
   const shadowRoot = app.attachShadow({ mode: "open" });
   render(
     <App

@@ -2,9 +2,6 @@
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
 
-import { editor } from "./deps/scrapbox-std-browser.ts";
-import { ensureHTMLDivElement } from "./ensure.ts";
-
 export type Position =
   & {
     top: number;
@@ -23,18 +20,15 @@ export type Position =
  * @return 表示位置
  */
 export const calcBubblePosition = (target: Element): Position => {
-  const editorDiv = editor();
-  ensureHTMLDivElement(editorDiv, "#editor");
-
   // 表示位置を計算する
   const { top, right, left, bottom } = target.getBoundingClientRect();
-  const root = editorDiv.getBoundingClientRect();
+  const root = document.body.getBoundingClientRect();
   // linkが画面の右寄りにあったら、bubbleを左側に出す
   const adjustRight = (left - root.left) / root.width > 0.5;
 
   return {
     top: Math.round(bottom - root.top),
-    bottom: Math.round(root.bottom - top),
+    bottom: Math.round(globalThis.innerHeight - globalThis.scrollY - top),
     ...(adjustRight
       ? { right: Math.round(root.right - right) }
       : { left: Math.round(left - root.left) }),

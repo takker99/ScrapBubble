@@ -11,12 +11,10 @@ import { useBubbles } from "./useBubbles.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { useEventListener } from "./useEventListener.ts";
 import { isPageLink, isTitle } from "./is.ts";
-import { ensureHTMLDivElement } from "./ensure.ts";
 import { parseLink } from "./parseLink.ts";
 import { toId } from "./id.ts";
 import { calcBubblePosition } from "./position.ts";
 import { prefetch as prefetch_ } from "./bubble.ts";
-import { editor } from "./deps/scrapbox-std-browser.ts";
 import type { LinkType } from "./types.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
@@ -41,9 +39,6 @@ export interface AppProps {
   style: URL | string;
 }
 
-const editorDiv = editor();
-ensureHTMLDivElement(editorDiv, "#editor");
-
 export const App = (
   { delay, whiteList, watchList, style }: AppProps,
 ) => {
@@ -62,10 +57,9 @@ export const App = (
 
   // hover処理
   useEventListener(
-    editorDiv,
+    document,
     "pointerenter",
     async (event: PointerEvent) => {
-      ensureHTMLDivElement(event.currentTarget, "event.currentTarget");
       const link = event.target as HTMLElement;
 
       // 処理を<a>か.line-titleのときに限定する
