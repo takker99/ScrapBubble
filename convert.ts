@@ -128,7 +128,16 @@ export const convert = (
  */
 const toBubble = (
   project: string,
-  page: Page | Omit<RelatedPage, "linksLc">,
+  page:
+    | Page
+    | Omit<
+      RelatedPage,
+      | "linksLc"
+      | "pageRank"
+      | "created"
+      | "infoboxResult"
+      | "infoboxDisableLinks"
+    >,
 ): Bubble => ({
   project,
   titleLc: "titleLc" in page ? page.titleLc : toTitleLc(page.title),
