@@ -55,6 +55,7 @@ import {
   YoutubeNode,
 } from "./deps/scrapbox-std.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
+import { useTheme } from "./useTheme.ts";
 declare const scrapbox: Scrapbox;
 
 declare global {
@@ -162,8 +163,10 @@ export const Page = (
     globalThis.scroll(0, scrollY);
   }, [scrollId]);
 
+  const theme = useTheme(project);
+
   return (
-    <div className="lines" ref={ref}>
+    <div className="lines" data-theme={theme} ref={ref}>
       <context.Provider
         value={{ project, title, whiteList, ...props }}
       >
@@ -179,7 +182,17 @@ export const Page = (
                     noIndent={noIndent}
                     permalink={block.id === scrollId}
                   >
-                    {block.text}
+                    <a
+                      className="page-link"
+                      type="link"
+                      href={`/${project}/${encodeTitleURI(block.text)}`}
+                      rel={project === scrapbox.Project.name
+                        ? "route"
+                        : "noopener noreferrer"}
+                      target={project === scrapbox.Project.name ? "" : "_blank"}
+                    >
+                      {block.text}
+                    </a>
                   </Line>
                   <hr />
                 </>

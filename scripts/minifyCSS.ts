@@ -2,17 +2,14 @@ import { build, initialize } from "../deps/esbuild.ts";
 
 // prepare esbuild
 await initialize({
-  wasmURL: "https://cdn.jsdelivr.net/npm/esbuild-wasm@0.14.10/esbuild.wasm",
+  wasmURL: "https://cdn.jsdelivr.net/npm/esbuild-wasm@0.21.5/esbuild.wasm",
   worker: false,
 });
 
 // bundle & minify app.css
 const name = "file-loader";
 const { outputFiles: [css] } = await build({
-  stdin: {
-    loader: "css",
-    contents: '@import "../app.css";',
-  },
+  entryPoints: [new URL("../app.css", import.meta.url).href],
   bundle: true,
   minify: true,
   write: false,
@@ -20,14 +17,13 @@ const { outputFiles: [css] } = await build({
     name,
     setup: ({ onLoad, onResolve }) => {
       onResolve({ filter: /.*/ }, ({ path, importer }) => {
-        importer = importer === "<stdin>" ? import.meta.url : importer;
         return {
-          path: new URL(path, importer).href,
+          path: importer ? new URL(path, importer).href : path,
           namespace: name,
         };
       });
       onLoad({ filter: /.*/, namespace: name }, async ({ path }) => ({
-        contents: await Deno.readTextFile(new URL(path)),
+        contents: await (await fetch(new URL(path))).text(),
         loader: "css",
       }));
     },
