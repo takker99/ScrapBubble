@@ -3,27 +3,24 @@
 /// <reference no-default-lib="true"/>
 /// <reference lib="esnext"/>
 /// <reference lib="dom"/>
-import { Page } from "./Page.tsx";
 import { CardList } from "./CardList.tsx";
 import {
   Fragment,
-  FunctionComponent,
   h,
-  useCallback,
   useLayoutEffect,
   useMemo,
   useState,
 } from "./deps/preact.tsx";
-import { encodeTitleURI, toTitleLc } from "./deps/scrapbox-std.ts";
+import { toTitleLc } from "./deps/scrapbox-std.ts";
 import { useBubbleData } from "./useBubbleData.ts";
-import { useTheme } from "./useTheme.ts";
 import { LinkTo } from "./types.ts";
 import { fromId, ID, toId } from "./id.ts";
 import { Bubble as BubbleData } from "./storage.ts";
-import { original, produce } from "./deps/immer.ts";
+import { produce } from "./deps/immer.ts";
 import type { BubbleSource } from "./useBubbles.ts";
 import { createDebug } from "./debug.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
+import { TextBubble } from "./TextBubble.tsx";
 declare const scrapbox: Scrapbox;
 
 const logger = createDebug("ScrapBubble:Bubble.tsx");
@@ -57,54 +54,21 @@ export const Bubble = ({
     parentTitles,
   );
 
-  const handleClick = useCallback(() => props.hide(), [props.hide]);
-  const theme = useTheme(pages[0]?.project ?? source.project);
-  const pageStyle = useMemo(() => ({
-    top: `${source.position.top}px`,
-    maxWidth: `${source.position.maxWidth}px`,
-    ...("left" in source.position
-      ? {
-        left: `${source.position.left}px`,
-      }
-      : {
-        right: `${source.position.right}px`,
-      }),
-  }), [
-    source.position,
-  ]);
-
   return (
     <>
-      {pages.length > 0 && (
-        <div
-          className="text-bubble"
-          style={pageStyle}
-          data-theme={theme}
-          onClick={handleClick}
-        >
-          <StatusBar>
-            {pages[0].project !== scrapbox.Project.name && (
-              <ProjectBadge
-                project={pages[0].project}
-                title={pages[0].lines[0].text}
-              />
-            )}
-          </StatusBar>
-          <Page
-            lines={pages[0].lines}
-            project={pages[0].project}
-            title={pages[0].lines[0].text}
-            hash={source.hash}
-            linkTo={source.linkTo}
-            whiteList={whiteList}
-            {...props}
-          />
-        </div>
+      {hasOneBubble(pages) && (
+        <TextBubble
+          pages={pages}
+          source={source}
+          whiteList={whiteList}
+          onClick={props.hide}
+          {...props}
+        />
       )}
       <CardList
         linked={linked}
         externalLinked={externalLinked}
-        onClick={handleClick}
+        onClick={props.hide}
         source={source}
         projectsForSort={projects}
         {...props}
@@ -112,6 +76,10 @@ export const Bubble = ({
     </>
   );
 };
+
+const hasOneBubble = (
+  pages: BubbleData[],
+): pages is [BubbleData, ...BubbleData[]] => pages.length > 0;
 
 /** 指定したsourceからbubblesするページ本文とページカードを、親bubblesやwhiteListを使って絞り込む
  *
@@ -222,21 +190,3 @@ const useBubbleFilter = (
 
   return [linked, externalLinked, pages] as const;
 };
-
-const StatusBar: FunctionComponent = ({ children }) => (
-  <div className="status-bar top-right">{children}</div>
-);
-
-type ProjectBadgeProps = {
-  project: string;
-  title: string;
-};
-const ProjectBadge = ({ project, title }: ProjectBadgeProps): h.JSX.Element => (
-  <a
-    href={`/${project}/${encodeTitleURI(title)}`}
-    target="_blank"
-    rel="noopener noreferrer"
-  >
-    {project}
-  </a>
-);
