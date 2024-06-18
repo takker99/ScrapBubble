@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from "./deps/preact.tsx";
+import { useEffect, useState } from "./deps/preact.tsx";
 import { load, subscribe, unsubscribe } from "./bubble.ts";
 import { createDebug } from "./debug.ts";
 import { ID } from "./id.ts";
@@ -8,35 +8,19 @@ const logger = createDebug("ScrapBubble:useBubbleData.ts");
 
 /** bubbleデータを取得するhooks
  *
- * @param title 取得したいbubbleのタイトル
- * @param projects 取得先projectのリスト
- * @return bubble
+ * @param pageIds 取得するページのID
+ * @returns bubble data
  */
 export const useBubbleData = (
   pageIds: readonly ID[],
 ): readonly Bubble[] => {
-  const [bubbles, setBubbles] = useState<readonly Bubble[]>([]);
+  const [bubbles, setBubbles] = useState<readonly Bubble[]>(
+    makeBubbles(pageIds),
+  );
 
-  useLayoutEffect(() => {
-    const update = () => {
-      setBubbles(() => {
-        const bubbles = [...load(pageIds)].flatMap((bubble) =>
-          bubble ? [bubble] : []
-        );
-
-        // debug用
-        logger.debug(
-          `Required: ${pageIds.length} pages, ${bubbles.length} found`,
-          bubbles,
-        );
-        return bubbles;
-      });
-    };
-
-    // データの初期化
-    update();
-
-    // データ更新用listenerの登録
+  // データ更新用listenerの登録
+  useEffect(() => {
+    setBubbles(makeBubbles(pageIds));
 
     let timer: number | undefined;
     /** ページデータを更新する */
@@ -45,7 +29,7 @@ export const useBubbleData = (
       clearTimeout(timer);
       timer = setTimeout(() => {
         logger.debug(`Update ${pageIds.length} pages`);
-        update();
+        setBubbles(makeBubbles(pageIds));
       }, 10);
     };
 
@@ -56,5 +40,18 @@ export const useBubbleData = (
 
   // debug用
 
+  return bubbles;
+};
+
+const makeBubbles = (pageIds: readonly ID[]): readonly Bubble[] => {
+  const bubbles = [...load(pageIds)].flatMap((bubble) =>
+    bubble ? [bubble] : []
+  );
+
+  // debug用
+  logger.debug(
+    `Required: ${pageIds.length} pages, ${bubbles.length} found`,
+    bubbles,
+  );
   return bubbles;
 };
