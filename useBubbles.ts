@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "./deps/preact.tsx";
+import { useCallback, useState } from "./deps/preact.tsx";
 import { Position } from "./position.ts";
 import { LinkType } from "./types.ts";
 import { Scrapbox } from "./deps/scrapbox.ts";
@@ -54,19 +54,6 @@ export const useBubbles = (): [
   BubbleOperators,
   ...BubbleSource[],
 ] => {
-  const [sources, setSources] = useState<Source[]>([]);
-
-  const change = useCallback(
-    (
-      depth: number,
-      source?: Source,
-    ) =>
-      setSources((old) =>
-        source ? [...old.slice(0, depth), source] : [...old.slice(0, depth)]
-      ),
-    [],
-  );
-
   const [bubbles, setBubbles] = useState<[
     BubbleOperators,
     ...BubbleSource[],
@@ -75,26 +62,37 @@ export const useBubbles = (): [
     hide: () => change(0),
   }]);
 
-  // 操作函数や他のbubbleデータから計算される値を追加する
-  useEffect(() => {
-    // 更新されたbubble以外は、objectの参照を壊さずにそのまま返す
-    setBubbles((
-      [first, ...prev],
-    ) => [
-      first,
-      ...sources.map((source, i) =>
-        source === prev.at(i)?.source ? prev.at(i)! : ({
-          source,
-          parentTitles: [
-            scrapbox.Page.title ?? "",
-            ...sources.slice(0, i).map((source) => source.title),
-          ],
-          bubble: (source: Source) => change(i + 1, source),
-          hide: () => change(i + 1),
-        })
-      ),
-    ]);
-  }, [sources]);
+  const change = useCallback(
+    (
+      depth: number,
+      source?: Source,
+    ) => {
+      // 操作函数や他のbubbleデータから計算される値を追加する
+      // 更新されたbubble以外は、objectの参照を壊さずにそのまま返す
+      setBubbles((
+        [first, ...prev],
+      ) => [
+        first,
+        ...(
+          source
+            ? [
+              ...prev.slice(0, depth),
+              source === prev.at(depth)?.source ? prev.at(depth)! : ({
+                source,
+                parentTitles: [
+                  scrapbox.Page.title ?? "",
+                  ...prev.slice(0, depth).map((bubble) => bubble.source.title),
+                ],
+                bubble: (source: Source) => change(depth + 1, source),
+                hide: () => change(depth + 1),
+              }),
+            ]
+            : [...prev.slice(0, depth)]
+        ),
+      ]);
+    },
+    [],
+  );
 
   return bubbles;
 };
