@@ -11,7 +11,7 @@ import { LinkTo } from "./types.ts";
 import { ID, toId } from "./id.ts";
 import { BubbleOperators, Source } from "./useBubbles.ts";
 
-export interface CardListProps extends h.JSX.HTMLAttributes<HTMLUListElement> {
+export interface CardListProps {
   delay: number;
   prefetch: (project: string, title: string) => void;
   /** key ページカードのID, value: 逆リンク先 */
@@ -21,6 +21,7 @@ export interface CardListProps extends h.JSX.HTMLAttributes<HTMLUListElement> {
   bubble: BubbleOperators["bubble"];
   source: Pick<Source, "project" | "title" | "position">;
   projectsForSort: Set<string>;
+  onClick?: h.JSX.MouseEventHandler<HTMLUListElement>;
 }
 
 export const CardList = ({
