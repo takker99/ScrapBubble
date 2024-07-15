@@ -10,9 +10,9 @@ export {
   h,
   render,
   toChildArray,
-} from "https://esm.sh/preact@10.6.4";
+} from "https://esm.sh/preact@10.22.1";
 export type {
   ComponentChildren,
   FunctionComponent,
-} from "https://esm.sh/preact@10.6.4";
-export * from "https://esm.sh/preact@10.6.4/hooks";
+} from "https://esm.sh/preact@10.22.1";
+export * from "https://esm.sh/preact@10.22.1/hooks";
