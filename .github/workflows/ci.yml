@@ -6,13 +6,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v1
         with:
-          deno-version: "1.36.1"
-      - name: Check fmt
-        run: deno fmt --check
-      - name: Run lint
-        run: deno lint
-      - name: Run type check
-        run: deno check --remote App.tsx
+          deno-version: "v1"
+      - name: Check all
+        run: deno task check:all
