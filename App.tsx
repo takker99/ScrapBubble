@@ -1,12 +1,7 @@
-/** @jsx h */
-/** @jsxFrag Fragment */
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
 import { Bubble } from "./Bubble.tsx";
 import { UserCSS } from "./UserCSS.tsx";
 import { CSS } from "./app.min.css.ts";
-import { Fragment, h, useCallback, useEffect } from "./deps/preact.tsx";
+import { useCallback, useEffect } from "./deps/preact.tsx";
 import { useBubbles } from "./useBubbles.ts";
 import { stayHovering } from "./stayHovering.ts";
 import { useEventListener } from "./useEventListener.ts";

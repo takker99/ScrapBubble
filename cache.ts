@@ -1,11 +1,7 @@
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
-
 import type { UnixTime } from "./deps/scrapbox.ts";
-import { sleep } from "./deps/scrapbox-std.ts";
 import { findLatestCache } from "./deps/scrapbox-std-browser.ts";
 import { makeThrottle } from "./throttle.ts";
+import { delay } from "./deps/async.ts";
 
 const cacheVersion = "0.6.5"; // release前に更新する
 const cacheName = `ScrapBubble-${cacheVersion}`;
@@ -52,7 +48,7 @@ export async function* cacheFirstFetch(
     ((options?.saveFailedResponse ? cache.match(req) : undefined) ??
       findLatestCache(req, options)).then((res) => ["cache", res] as const);
   {
-    const timer = sleep(1000).then(() => "timeout" as const);
+    const timer = delay(1000).then(() => "timeout" as const);
     const first = await Promise.race([cachePromise, timer]);
     if (first !== "timeout") {
       // 1秒以内にcacheを読み込めたら、cache→networkの順に返す

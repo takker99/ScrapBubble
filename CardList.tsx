@@ -1,8 +1,3 @@
-/** @jsx h */
-/** @jsxFrag Fragment */
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
 import { Card } from "./Card.tsx";
 import { h, useMemo } from "./deps/preact.tsx";
 import { useBubbleData } from "./useBubbleData.ts";

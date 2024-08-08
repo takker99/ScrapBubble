@@ -1,13 +1,6 @@
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
-
-/** @jsx h */
-/** @jsxFrag Fragment */
 import {
   ComponentChildren,
   createContext,
-  Fragment,
   h,
   useCallback,
   useContext,
@@ -16,7 +9,7 @@ import {
   useRef,
   useState,
 } from "./deps/preact.tsx";
-import { useKaTeX } from "./deps/useKaTeX.ts";
+import { useKaTeX } from "./useKaTeX.ts";
 import {
   CodeBlock as CodeBlockType,
   CommandLineNode,
@@ -47,7 +40,6 @@ import {
   AudioNode,
   encodeTitleURI,
   parseAbsoluteLink,
-  sleep,
   SpotifyNode,
   VideoNode,
   VimeoNode,
@@ -56,6 +48,7 @@ import {
 } from "./deps/scrapbox-std.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 import { useTheme } from "./useTheme.ts";
+import { delay } from "./deps/async.ts";
 declare const scrapbox: Scrapbox;
 
 declare global {
@@ -277,7 +270,7 @@ const CodeBlock = (
       try {
         await navigator.clipboard.writeText(content);
         setButtonLabel("Copied");
-        await sleep(1000);
+        await delay(1000);
         setButtonLabel("\uf0c5");
       } catch (e) {
         alert(`Failed to copy the code block\nError:${e.message}`);
@@ -433,8 +426,7 @@ const Node = ({ node }: NodeProps) => {
 
 type FormulaProps = { node: FormulaNode };
 const Formula = ({ node: { formula } }: FormulaProps) => {
-  const { ref, error, setFormula } = useKaTeX("");
-  setFormula(formula);
+  const { ref, error } = useKaTeX(formula);
 
   return (
     <span className={`formula ${error ? " error" : ""}`}>
@@ -465,7 +457,7 @@ const CommandLine = (
       try {
         await navigator.clipboard.writeText(node.text);
         setButtonLabel("Copied");
-        await sleep(1000);
+        await delay(1000);
         setButtonLabel("\uf0c5");
       } catch (e) {
         alert(`Failed to copy the code block\nError:${e.message}`);
@@ -500,7 +492,9 @@ const GoogleMap = (
     >
       <img
         className="google-map"
-        src={`/api/google-map/static-map?center=${latitude}%2C${longitude}&markers=${place}&zoom=${zoom}&_csrf=${globalThis._csrf}`}
+        src={`/api/google-map/static-map?center=${latitude}%2C${longitude}&markers=${place}&zoom=${zoom}&_csrf=${
+          // deno-lint-ignore no-explicit-any
+          (globalThis as any)._csrf}`}
       />
     </a>
   </span>

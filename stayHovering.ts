@@ -1,7 +1,3 @@
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
-
 /** ホバー操作を待機する
  * @return ホバーがキャンセルされたら`false`
  */

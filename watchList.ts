@@ -1,9 +1,6 @@
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
-
 import type { ProjectId, UnixTime } from "./deps/scrapbox.ts";
 import { listProjects } from "./deps/scrapbox-std.ts";
+import { isErr, unwrapOk } from "./deps/option-t.ts";
 
 export const getWatchList = async (): Promise<ProjectId[]> => {
   const value = localStorage.getItem("projectsLastAccessed");
@@ -15,8 +12,8 @@ export const getWatchList = async (): Promise<ProjectId[]> => {
       [projectId],
     ) => projectId);
     const result = await listProjects([]);
-    if (!result.ok) return ids;
-    const joinedIds = result.value.projects.map((project) => project.id);
+    if (isErr(result)) return ids;
+    const joinedIds = unwrapOk(result).projects.map((project) => project.id);
     return ids.filter((id) => !joinedIds.includes(id));
   } catch (e: unknown) {
     if (!(e instanceof SyntaxError)) throw e;

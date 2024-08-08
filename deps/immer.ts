@@ -1,4 +1,4 @@
-import { enableMapSet } from "https://esm.sh/immer@10.1.1/";
+import { enableMapSet } from "npm:immer@10";
 enableMapSet();
 
-export * from "https://esm.sh/immer@10.1.1/";
+export * from "npm:immer@10";

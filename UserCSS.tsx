@@ -1,6 +1,4 @@
-/** @jsx h */
-/** @jsxFrag Fragment */
-import { Fragment, h, useMemo } from "./deps/preact.tsx";
+import { useMemo } from "./deps/preact.tsx";
 import { detectURL } from "./detectURL.ts";
 
 export interface UserCSSProps {

@@ -1,22 +1,14 @@
 import { useEffect, useState } from "./deps/preact.tsx";
-import { getProject, Result } from "./deps/scrapbox-std.ts";
+import { FetchError, getProject, ProjectError } from "./deps/scrapbox-std.ts";
 import { cacheFirstFetch } from "./cache.ts";
 import { makeEmitter } from "./eventEmitter.ts";
-import {
-  MemberProject,
-  NotFoundError,
-  NotLoggedInError,
-  NotMemberError,
-  NotMemberProject,
-} from "./deps/scrapbox.ts";
+import { MemberProject, NotMemberProject } from "./deps/scrapbox.ts";
 import { createDebug } from "./debug.ts";
+import { Result } from "./deps/option-t.ts";
 
-type ProjectResult = Result<
-  | NotMemberProject
-  | MemberProject,
-  | NotFoundError
-  | NotLoggedInError
-  | NotMemberError
+export type ProjectResult = Result<
+  NotMemberProject | MemberProject,
+  ProjectError | FetchError
 >;
 type State<T> = { loading: true } | { loading: false; value: T };
 const emitter = makeEmitter<string, ProjectResult>();

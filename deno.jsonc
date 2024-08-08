@@ -1,0 +1,21 @@
+{
+  "tasks": {
+    "check": "deno check --remote **/*.ts **/*.tsx",
+    "test": "deno test --allow-read --parallel",
+    "fix": "deno fmt && deno lint --fix && deno task check && deno task test"
+  },
+  "imports": {
+    "react": "npm:preact@10",
+    "react/": "npm:preact@10/"
+  },
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "deno.ns"
+    ],
+    "jsx": "react-jsx",
+    "jsxImportSource": "npm:preact@10"
+  }
+}
