@@ -1,6 +1,7 @@
 import { useMemo } from "./deps/preact.tsx";
 import { useProject } from "./useProject.ts";
 import { isTheme, Theme } from "./deps/scrapbox.ts";
+import { isErr, unwrapOk } from "./deps/option-t.ts";
 
 const defaultTheme = "default-light";
 
@@ -9,8 +10,8 @@ export const useTheme = (project: string): Theme => {
   const res = useProject(project);
 
   return useMemo(() => {
-    if (!res || !res.ok) return defaultTheme;
-    const theme = res.value.theme;
+    if (!res || isErr(res)) return defaultTheme;
+    const theme = unwrapOk(res).theme;
     return isTheme(theme) ? theme : defaultTheme;
   }, [res]);
 };

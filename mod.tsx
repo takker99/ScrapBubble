@@ -1,8 +1,4 @@
-/** @jsx h */
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
-import { h, render } from "./deps/preact.tsx";
+import { render } from "./deps/preact.tsx";
 import { getWatchList } from "./watchList.ts";
 import { App, AppProps, userscriptName } from "./App.tsx";
 import { setDebugMode } from "./debug.ts";

@@ -6,6 +6,7 @@ import { convert } from "./convert.ts";
 import { createDebug } from "./debug.ts";
 import { getPage } from "./deps/scrapbox-std.ts";
 import { ProjectId, UnixTime } from "./deps/scrapbox.ts";
+import { isOk, unwrapOk } from "./deps/option-t.ts";
 
 const logger = createDebug("ScrapBubble:bubble.ts");
 
@@ -106,8 +107,8 @@ const updateApiCache = async (
       logger.debug(`[${i}]${type} ${id}`);
       const result = await getPage.fromResponse(res);
       // 更新があればeventを発行する
-      if (result.ok) {
-        const converted = convert(project, result.value);
+      if (isOk(result)) {
+        const converted = convert(project, unwrapOk(result));
         for (const [bubbleId, bubble] of converted) {
           const prev = storage.get(bubbleId);
           const updatedBubble = update(prev, bubble);

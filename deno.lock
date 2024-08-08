@@ -1,0 +1,344 @@
+{
+  "version": "3",
+  "packages": {
+    "specifiers": {
+      "jsr:@core/unknownutil@^4.0.0": "jsr:@core/unknownutil@4.0.1",
+      "jsr:@cosense/std": "jsr:@cosense/std@0.28.2",
+      "jsr:@cosense/std@0.28": "jsr:@cosense/std@0.28.2",
+      "jsr:@cosense/types@0.10": "jsr:@cosense/types@0.10.1",
+      "jsr:@progfay/scrapbox-parser@9": "jsr:@progfay/scrapbox-parser@9.0.0",
+      "jsr:@std/assert": "jsr:@std/assert@1.0.2",
+      "jsr:@std/assert@^1.0.2": "jsr:@std/assert@1.0.2",
+      "jsr:@std/async@1": "jsr:@std/async@1.0.3",
+      "jsr:@std/encoding@1": "jsr:@std/encoding@1.0.1",
+      "jsr:@std/fs@^1.0.1": "jsr:@std/fs@1.0.1",
+      "jsr:@std/internal@^1.0.1": "jsr:@std/internal@1.0.1",
+      "jsr:@std/path@^1.0.2": "jsr:@std/path@1.0.2",
+      "jsr:@std/testing": "jsr:@std/testing@1.0.0",
+      "jsr:@takker/md5@0.1": "jsr:@takker/md5@0.1.0",
+      "npm:esbuild": "npm:esbuild@0.23.0",
+      "npm:esbuild@0.23": "npm:esbuild@0.23.0",
+      "npm:im": "npm:im@0.4.0",
+      "npm:immer": "npm:immer@10.1.1",
+      "npm:immer@10": "npm:immer@10.1.1",
+      "npm:option-t@49": "npm:option-t@49.1.0",
+      "npm:option-t@^49.1.0": "npm:option-t@49.1.0",
+      "npm:preact@10": "npm:preact@10.23.1"
+    },
+    "jsr": {
+      "@core/unknownutil@4.0.1": {
+        "integrity": "5e08141ea8284d064bc4ee8c70aab42825355fb1399eaeb6140936f5f763f42d"
+      },
+      "@cosense/std@0.28.2": {
+        "integrity": "e80550e16daf1266b0132c9f828f9744fe170714eecbe3fa3223df7ff75e4892",
+        "dependencies": [
+          "jsr:@core/unknownutil@^4.0.0",
+          "jsr:@cosense/types@0.10",
+          "jsr:@progfay/scrapbox-parser@9",
+          "jsr:@std/async@1",
+          "jsr:@std/encoding@1",
+          "jsr:@takker/md5@0.1",
+          "npm:option-t@^49.1.0"
+        ]
+      },
+      "@cosense/types@0.10.1": {
+        "integrity": "13d2488a02c7b0b035a265bc3299affbdab1ea5b607516379685965cd37b2058"
+      },
+      "@progfay/scrapbox-parser@9.0.0": {
+        "integrity": "c559602926d6ddd0580ab0c945333d06ed6cbdd67d4c67557edce8b0bb4be978"
+      },
+      "@std/assert@1.0.2": {
+        "integrity": "ccacec332958126deaceb5c63ff8b4eaf9f5ed0eac9feccf124110435e59e49c",
+        "dependencies": [
+          "jsr:@std/internal@^1.0.1"
+        ]
+      },
+      "@std/async@1.0.3": {
+        "integrity": "6ed64678db43451683c6c176a21426a2ccd21ba0269ebb2c36133ede3f165792"
+      },
+      "@std/encoding@1.0.1": {
+        "integrity": "5955c6c542ebb4ce6587c3b548dc71e07a6c27614f1976d1d3887b1196cf4e65"
+      },
+      "@std/fs@1.0.1": {
+        "integrity": "d6914ca2c21abe591f733b31dbe6331e446815e513e2451b3b9e472daddfefcb",
+        "dependencies": [
+          "jsr:@std/path@^1.0.2"
+        ]
+      },
+      "@std/internal@1.0.1": {
+        "integrity": "6f8c7544d06a11dd256c8d6ba54b11ed870aac6c5aeafff499892662c57673e6"
+      },
+      "@std/path@1.0.2": {
+        "integrity": "a452174603f8c620bd278a380c596437a9eef50c891c64b85812f735245d9ec7"
+      },
+      "@std/testing@1.0.0": {
+        "integrity": "27cfc06392c69c2acffe54e6d0bcb5f961cf193f519255372bd4fff1481bfef8",
+        "dependencies": [
+          "jsr:@std/assert@^1.0.2",
+          "jsr:@std/fs@^1.0.1",
+          "jsr:@std/internal@^1.0.1",
+          "jsr:@std/path@^1.0.2"
+        ]
+      },
+      "@takker/md5@0.1.0": {
+        "integrity": "4c423d8247aadf7bcb1eb83c727bf28c05c21906e916517395d00aa157b6eae0"
+      }
+    },
+    "npm": {
+      "@esbuild/aix-ppc64@0.23.0": {
+        "integrity": "sha512-3sG8Zwa5fMcA9bgqB8AfWPQ+HFke6uD3h1s3RIwUNK8EG7a4buxvuFTs3j1IMs2NXAk9F30C/FF4vxRgQCcmoQ==",
+        "dependencies": {}
+      },
+      "@esbuild/android-arm64@0.23.0": {
+        "integrity": "sha512-EuHFUYkAVfU4qBdyivULuu03FhJO4IJN9PGuABGrFy4vUuzk91P2d+npxHcFdpUnfYKy0PuV+n6bKIpHOB3prQ==",
+        "dependencies": {}
+      },
+      "@esbuild/android-arm@0.23.0": {
+        "integrity": "sha512-+KuOHTKKyIKgEEqKbGTK8W7mPp+hKinbMBeEnNzjJGyFcWsfrXjSTNluJHCY1RqhxFurdD8uNXQDei7qDlR6+g==",
+        "dependencies": {}
+      },
+      "@esbuild/android-x64@0.23.0": {
+        "integrity": "sha512-WRrmKidLoKDl56LsbBMhzTTBxrsVwTKdNbKDalbEZr0tcsBgCLbEtoNthOW6PX942YiYq8HzEnb4yWQMLQuipQ==",
+        "dependencies": {}
+      },
+      "@esbuild/darwin-arm64@0.23.0": {
+        "integrity": "sha512-YLntie/IdS31H54Ogdn+v50NuoWF5BDkEUFpiOChVa9UnKpftgwzZRrI4J132ETIi+D8n6xh9IviFV3eXdxfow==",
+        "dependencies": {}
+      },
+      "@esbuild/darwin-x64@0.23.0": {
+        "integrity": "sha512-IMQ6eme4AfznElesHUPDZ+teuGwoRmVuuixu7sv92ZkdQcPbsNHzutd+rAfaBKo8YK3IrBEi9SLLKWJdEvJniQ==",
+        "dependencies": {}
+      },
+      "@esbuild/freebsd-arm64@0.23.0": {
+        "integrity": "sha512-0muYWCng5vqaxobq6LB3YNtevDFSAZGlgtLoAc81PjUfiFz36n4KMpwhtAd4he8ToSI3TGyuhyx5xmiWNYZFyw==",
+        "dependencies": {}
+      },
+      "@esbuild/freebsd-x64@0.23.0": {
+        "integrity": "sha512-XKDVu8IsD0/q3foBzsXGt/KjD/yTKBCIwOHE1XwiXmrRwrX6Hbnd5Eqn/WvDekddK21tfszBSrE/WMaZh+1buQ==",
+        "dependencies": {}
+      },
+      "@esbuild/linux-arm64@0.23.0": {
+        "integrity": "sha512-j1t5iG8jE7BhonbsEg5d9qOYcVZv/Rv6tghaXM/Ug9xahM0nX/H2gfu6X6z11QRTMT6+aywOMA8TDkhPo8aCGw==",
+        "dependencies": {}
+      },
+      "@esbuild/linux-arm@0.23.0": {
+        "integrity": "sha512-SEELSTEtOFu5LPykzA395Mc+54RMg1EUgXP+iw2SJ72+ooMwVsgfuwXo5Fn0wXNgWZsTVHwY2cg4Vi/bOD88qw==",
+        "dependencies": {}
+      },
+      "@esbuild/linux-ia32@0.23.0": {
+        "integrity": "sha512-P7O5Tkh2NbgIm2R6x1zGJJsnacDzTFcRWZyTTMgFdVit6E98LTxO+v8LCCLWRvPrjdzXHx9FEOA8oAZPyApWUA==",
+        "dependencies": {}
+      },
+      "@esbuild/linux-loong64@0.23.0": {
+        "integrity": "sha512-InQwepswq6urikQiIC/kkx412fqUZudBO4SYKu0N+tGhXRWUqAx+Q+341tFV6QdBifpjYgUndV1hhMq3WeJi7A==",
+        "dependencies": {}
+      },
+      "@esbuild/linux-mips64el@0.23.0": {
+        "integrity": "sha512-J9rflLtqdYrxHv2FqXE2i1ELgNjT+JFURt/uDMoPQLcjWQA5wDKgQA4t/dTqGa88ZVECKaD0TctwsUfHbVoi4w==",
+        "dependencies": {}
+      },
+      "@esbuild/linux-ppc64@0.23.0": {
+        "integrity": "sha512-cShCXtEOVc5GxU0fM+dsFD10qZ5UpcQ8AM22bYj0u/yaAykWnqXJDpd77ublcX6vdDsWLuweeuSNZk4yUxZwtw==",
+        "dependencies": {}
+      },
+      "@esbuild/linux-riscv64@0.23.0": {
+        "integrity": "sha512-HEtaN7Y5UB4tZPeQmgz/UhzoEyYftbMXrBCUjINGjh3uil+rB/QzzpMshz3cNUxqXN7Vr93zzVtpIDL99t9aRw==",
+        "dependencies": {}
+      },
+      "@esbuild/linux-s390x@0.23.0": {
+        "integrity": "sha512-WDi3+NVAuyjg/Wxi+o5KPqRbZY0QhI9TjrEEm+8dmpY9Xir8+HE/HNx2JoLckhKbFopW0RdO2D72w8trZOV+Wg==",
+        "dependencies": {}
+      },
+      "@esbuild/linux-x64@0.23.0": {
+        "integrity": "sha512-a3pMQhUEJkITgAw6e0bWA+F+vFtCciMjW/LPtoj99MhVt+Mfb6bbL9hu2wmTZgNd994qTAEw+U/r6k3qHWWaOQ==",
+        "dependencies": {}
+      },
+      "@esbuild/netbsd-x64@0.23.0": {
+        "integrity": "sha512-cRK+YDem7lFTs2Q5nEv/HHc4LnrfBCbH5+JHu6wm2eP+d8OZNoSMYgPZJq78vqQ9g+9+nMuIsAO7skzphRXHyw==",
+        "dependencies": {}
+      },
+      "@esbuild/openbsd-arm64@0.23.0": {
+        "integrity": "sha512-suXjq53gERueVWu0OKxzWqk7NxiUWSUlrxoZK7usiF50C6ipColGR5qie2496iKGYNLhDZkPxBI3erbnYkU0rQ==",
+        "dependencies": {}
+      },
+      "@esbuild/openbsd-x64@0.23.0": {
+        "integrity": "sha512-6p3nHpby0DM/v15IFKMjAaayFhqnXV52aEmv1whZHX56pdkK+MEaLoQWj+H42ssFarP1PcomVhbsR4pkz09qBg==",
+        "dependencies": {}
+      },
+      "@esbuild/sunos-x64@0.23.0": {
+        "integrity": "sha512-BFelBGfrBwk6LVrmFzCq1u1dZbG4zy/Kp93w2+y83Q5UGYF1d8sCzeLI9NXjKyujjBBniQa8R8PzLFAUrSM9OA==",
+        "dependencies": {}
+      },
+      "@esbuild/win32-arm64@0.23.0": {
+        "integrity": "sha512-lY6AC8p4Cnb7xYHuIxQ6iYPe6MfO2CC43XXKo9nBXDb35krYt7KGhQnOkRGar5psxYkircpCqfbNDB4uJbS2jQ==",
+        "dependencies": {}
+      },
+      "@esbuild/win32-ia32@0.23.0": {
+        "integrity": "sha512-7L1bHlOTcO4ByvI7OXVI5pNN6HSu6pUQq9yodga8izeuB1KcT2UkHaH6118QJwopExPn0rMHIseCTx1CRo/uNA==",
+        "dependencies": {}
+      },
+      "@esbuild/win32-x64@0.23.0": {
+        "integrity": "sha512-Arm+WgUFLUATuoxCJcahGuk6Yj9Pzxd6l11Zb/2aAuv5kWWvvfhLFo2fni4uSK5vzlUdCGZ/BdV5tH8klj8p8g==",
+        "dependencies": {}
+      },
+      "esbuild@0.23.0": {
+        "integrity": "sha512-1lvV17H2bMYda/WaFb2jLPeHU3zml2k4/yagNMG8Q/YtfMjCwEUZa2eXXMgZTVSL5q1n4H7sQ0X6CdJDqqeCFA==",
+        "dependencies": {
+          "@esbuild/aix-ppc64": "@esbuild/aix-ppc64@0.23.0",
+          "@esbuild/android-arm": "@esbuild/android-arm@0.23.0",
+          "@esbuild/android-arm64": "@esbuild/android-arm64@0.23.0",
+          "@esbuild/android-x64": "@esbuild/android-x64@0.23.0",
+          "@esbuild/darwin-arm64": "@esbuild/darwin-arm64@0.23.0",
+          "@esbuild/darwin-x64": "@esbuild/darwin-x64@0.23.0",
+          "@esbuild/freebsd-arm64": "@esbuild/freebsd-arm64@0.23.0",
+          "@esbuild/freebsd-x64": "@esbuild/freebsd-x64@0.23.0",
+          "@esbuild/linux-arm": "@esbuild/linux-arm@0.23.0",
+          "@esbuild/linux-arm64": "@esbuild/linux-arm64@0.23.0",
+          "@esbuild/linux-ia32": "@esbuild/linux-ia32@0.23.0",
+          "@esbuild/linux-loong64": "@esbuild/linux-loong64@0.23.0",
+          "@esbuild/linux-mips64el": "@esbuild/linux-mips64el@0.23.0",
+          "@esbuild/linux-ppc64": "@esbuild/linux-ppc64@0.23.0",
+          "@esbuild/linux-riscv64": "@esbuild/linux-riscv64@0.23.0",
+          "@esbuild/linux-s390x": "@esbuild/linux-s390x@0.23.0",
+          "@esbuild/linux-x64": "@esbuild/linux-x64@0.23.0",
+          "@esbuild/netbsd-x64": "@esbuild/netbsd-x64@0.23.0",
+          "@esbuild/openbsd-arm64": "@esbuild/openbsd-arm64@0.23.0",
+          "@esbuild/openbsd-x64": "@esbuild/openbsd-x64@0.23.0",
+          "@esbuild/sunos-x64": "@esbuild/sunos-x64@0.23.0",
+          "@esbuild/win32-arm64": "@esbuild/win32-arm64@0.23.0",
+          "@esbuild/win32-ia32": "@esbuild/win32-ia32@0.23.0",
+          "@esbuild/win32-x64": "@esbuild/win32-x64@0.23.0"
+        }
+      },
+      "im@0.4.0": {
+        "integrity": "sha512-Oh7XMOR+yE8haRA3cx3W7/C97WaanfD7rWhjWodMe+cujYeuLKf57Ckhb1rUqGuflOO6Y+R0tS+hKeI8Hm0oAA==",
+        "dependencies": {}
+      },
+      "immer@10.1.1": {
+        "integrity": "sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw==",
+        "dependencies": {}
+      },
+      "option-t@49.1.0": {
+        "integrity": "sha512-K5o4+D8rSE1VcmfwrieRZWyShPxX27NEGuZPT11S4CbvjE73YUDR/sanKAYnhVRj6Hn1mKcjfhjhbOCD2ef3qg==",
+        "dependencies": {}
+      },
+      "preact@10.23.1": {
+        "integrity": "sha512-O5UdRsNh4vdZaTieWe3XOgSpdMAmkIYBCT3VhQDlKrzyCm8lUYsk0fmVEvoQQifoOjFRTaHZO69ylrzTW2BH+A==",
+        "dependencies": {}
+      }
+    }
+  },
+  "remote": {
+    "https://cdn.jsdelivr.net/npm/esbuild-wasm@0.21.5/esm/browser.js": "2a909b4facbd42943476caf5e743e360b937bf51995ebcf112225fcd5465ba3a",
+    "https://deno.land/std@0.224.0/assert/_constants.ts": "a271e8ef5a573f1df8e822a6eb9d09df064ad66a4390f21b3e31f820a38e0975",
+    "https://deno.land/std@0.224.0/assert/assert.ts": "09d30564c09de846855b7b071e62b5974b001bb72a4b797958fe0660e7849834",
+    "https://deno.land/std@0.224.0/assert/assert_equals.ts": "3bbca947d85b9d374a108687b1a8ba3785a7850436b5a8930d81f34a32cb8c74",
+    "https://deno.land/std@0.224.0/assert/assertion_error.ts": "ba8752bd27ebc51f723702fac2f54d3e94447598f54264a6653d6413738a8917",
+    "https://deno.land/std@0.224.0/assert/equal.ts": "bddf07bb5fc718e10bb72d5dc2c36c1ce5a8bdd3b647069b6319e07af181ac47",
+    "https://deno.land/std@0.224.0/fmt/colors.ts": "508563c0659dd7198ba4bbf87e97f654af3c34eb56ba790260f252ad8012e1c5",
+    "https://deno.land/std@0.224.0/fs/_get_file_info_type.ts": "da7bec18a7661dba360a1db475b826b18977582ce6fc9b25f3d4ee0403fe8cbd",
+    "https://deno.land/std@0.224.0/fs/_to_path_string.ts": "29bfc9c6c112254961d75cbf6ba814d6de5349767818eb93090cecfa9665591e",
+    "https://deno.land/std@0.224.0/fs/ensure_dir.ts": "51a6279016c65d2985f8803c848e2888e206d1b510686a509fa7cc34ce59d29f",
+    "https://deno.land/std@0.224.0/fs/ensure_file.ts": "67608cf550529f3d4aa1f8b6b36bf817bdc40b14487bf8f60e61cbf68f507cf3",
+    "https://deno.land/std@0.224.0/internal/diff.ts": "6234a4b493ebe65dc67a18a0eb97ef683626a1166a1906232ce186ae9f65f4e6",
+    "https://deno.land/std@0.224.0/internal/format.ts": "0a98ee226fd3d43450245b1844b47003419d34d210fa989900861c79820d21c2",
+    "https://deno.land/std@0.224.0/internal/mod.ts": "534125398c8e7426183e12dc255bb635d94e06d0f93c60a297723abe69d3b22e",
+    "https://deno.land/std@0.224.0/path/_common/assert_path.ts": "dbdd757a465b690b2cc72fc5fb7698c51507dec6bfafce4ca500c46b76ff7bd8",
+    "https://deno.land/std@0.224.0/path/_common/constants.ts": "dc5f8057159f4b48cd304eb3027e42f1148cf4df1fb4240774d3492b5d12ac0c",
+    "https://deno.land/std@0.224.0/path/_common/dirname.ts": "684df4aa71a04bbcc346c692c8485594fc8a90b9408dfbc26ff32cf3e0c98cc8",
+    "https://deno.land/std@0.224.0/path/_common/from_file_url.ts": "d672bdeebc11bf80e99bf266f886c70963107bdd31134c4e249eef51133ceccf",
+    "https://deno.land/std@0.224.0/path/_common/normalize_string.ts": "33edef773c2a8e242761f731adeb2bd6d683e9c69e4e3d0092985bede74f4ac3",
+    "https://deno.land/std@0.224.0/path/_common/strip_trailing_separators.ts": "7024a93447efcdcfeaa9339a98fa63ef9d53de363f1fbe9858970f1bba02655a",
+    "https://deno.land/std@0.224.0/path/_common/to_file_url.ts": "7f76adbc83ece1bba173e6e98a27c647712cab773d3f8cbe0398b74afc817883",
+    "https://deno.land/std@0.224.0/path/_interface.ts": "8dfeb930ca4a772c458a8c7bbe1e33216fe91c253411338ad80c5b6fa93ddba0",
+    "https://deno.land/std@0.224.0/path/_os.ts": "8fb9b90fb6b753bd8c77cfd8a33c2ff6c5f5bc185f50de8ca4ac6a05710b2c15",
+    "https://deno.land/std@0.224.0/path/dirname.ts": "85bd955bf31d62c9aafdd7ff561c4b5fb587d11a9a5a45e2b01aedffa4238a7c",
+    "https://deno.land/std@0.224.0/path/from_file_url.ts": "911833ae4fd10a1c84f6271f36151ab785955849117dc48c6e43b929504ee069",
+    "https://deno.land/std@0.224.0/path/parse.ts": "77ad91dcb235a66c6f504df83087ce2a5471e67d79c402014f6e847389108d5a",
+    "https://deno.land/std@0.224.0/path/posix/_util.ts": "1e3937da30f080bfc99fe45d7ed23c47dd8585c5e473b2d771380d3a6937cf9d",
+    "https://deno.land/std@0.224.0/path/posix/dirname.ts": "76cd348ffe92345711409f88d4d8561d8645353ac215c8e9c80140069bf42f00",
+    "https://deno.land/std@0.224.0/path/posix/from_file_url.ts": "951aee3a2c46fd0ed488899d024c6352b59154c70552e90885ed0c2ab699bc40",
+    "https://deno.land/std@0.224.0/path/posix/is_absolute.ts": "cebe561ad0ae294f0ce0365a1879dcfca8abd872821519b4fcc8d8967f888ede",
+    "https://deno.land/std@0.224.0/path/posix/parse.ts": "09dfad0cae530f93627202f28c1befa78ea6e751f92f478ca2cc3b56be2cbb6a",
+    "https://deno.land/std@0.224.0/path/posix/resolve.ts": "08b699cfeee10cb6857ccab38fa4b2ec703b0ea33e8e69964f29d02a2d5257cf",
+    "https://deno.land/std@0.224.0/path/posix/to_file_url.ts": "7aa752ba66a35049e0e4a4be5a0a31ac6b645257d2e031142abb1854de250aaf",
+    "https://deno.land/std@0.224.0/path/resolve.ts": "a6f977bdb4272e79d8d0ed4333e3d71367cc3926acf15ac271f1d059c8494d8d",
+    "https://deno.land/std@0.224.0/path/to_file_url.ts": "88f049b769bce411e2d2db5bd9e6fd9a185a5fbd6b9f5ad8f52bef517c4ece1b",
+    "https://deno.land/std@0.224.0/path/windows/_util.ts": "d5f47363e5293fced22c984550d5e70e98e266cc3f31769e1710511803d04808",
+    "https://deno.land/std@0.224.0/path/windows/dirname.ts": "33e421be5a5558a1346a48e74c330b8e560be7424ed7684ea03c12c21b627bc9",
+    "https://deno.land/std@0.224.0/path/windows/from_file_url.ts": "ced2d587b6dff18f963f269d745c4a599cf82b0c4007356bd957cb4cb52efc01",
+    "https://deno.land/std@0.224.0/path/windows/is_absolute.ts": "4a8f6853f8598cf91a835f41abed42112cebab09478b072e4beb00ec81f8ca8a",
+    "https://deno.land/std@0.224.0/path/windows/parse.ts": "08804327b0484d18ab4d6781742bf374976de662f8642e62a67e93346e759707",
+    "https://deno.land/std@0.224.0/path/windows/resolve.ts": "8dae1dadfed9d46ff46cc337c9525c0c7d959fb400a6308f34595c45bdca1972",
+    "https://deno.land/std@0.224.0/path/windows/to_file_url.ts": "40e560ee4854fe5a3d4d12976cef2f4e8914125c81b11f1108e127934ced502e",
+    "https://deno.land/std@0.224.0/testing/snapshot.ts": "35ca1c8e8bfb98d7b7e794f1b7be8d992483fcff572540e41396f22a5bddb944",
+    "https://esm.sh/@progfay/scrapbox-parser@9.0.0": "24b6a5a7b95e3b8f49a259fce1f39b0d9c333b2c8afc71d844d551c47473b3b1",
+    "https://esm.sh/immer@10.1.1/": "2adc785c2e60dcfad934f4bc9496b75cf4f11d385d77901b546115141cd08a11",
+    "https://esm.sh/preact@10.6.4": "f25e43d18a2bdab3487af9da176728614d900572afe6b410de3380f5ece3e6af",
+    "https://esm.sh/preact@10.6.4/hooks": "5a173af8f814b7297c77ed18f4f4b55c9ea2dde7c975302eb2eb70c20a632cf6",
+    "https://esm.sh/stable/preact@10.6.4/denonext/hooks.js": "4be90e80069621ec98f22d04fa70fc42fa3df2935e206e01b8cbb9779d108551",
+    "https://esm.sh/stable/preact@10.6.4/denonext/preact.mjs": "9db665bd9a2835951fb2670ebe81e19a3e78068e7b636a526772408c1fed4c9d",
+    "https://esm.sh/v135/@progfay/scrapbox-parser@9.0.0/denonext/scrapbox-parser.mjs": "36ea0381aaf840f8e1d177d3f349d191e70a2b33292010b87e84ea1d34fd4937",
+    "https://esm.sh/v135/immer@10.1.1/denonext/immer.mjs": "c9720da0ba7a521aa46a694a69f3a6089b4f99823890263ddce76b20d5c4a7da",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/base.ts": "63bd526c652edbdd43aa86b119828b87828b25dfbb997ce521437cc6fc40fbcb",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/baseStore.ts": "b05ed2f2de45d187afc8f9fbb4767b209929cc6924f67d1d6f252eb3bb64c32f",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/blocks.ts": "d37c6bb33b600ece0bfeb5b63246300c567bdf38e559adf01e1d26c967f8999f",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/change.ts": "9b4d9af65a9d5aa024aa84acb62128da8db3c8892f3a0256ca89fde84ab50485",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/commit.ts": "0c576ba285c69d13ee653d9ffb01bf30df8243f3f718ef34f821be10c3cbe0e2",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/deps/events.ts": "ee8d76b320f2dfa4b128dfd288665a9be938b1b91e92c7fe3cca7cd1a7d0b712",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/deps/react.ts": "615586e4241cfa13f2c17c019c0775be981067558b7611aadb422102fb72c27b",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/error.ts": "d48e7ded2683f47a778a0793e1a142baae75582ccbe9bb1c8e115787a6bcc33e",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/eventName.ts": "c5c9074c379290250ef4f19abe510c43cfbd08a6704b5857c8a7c054b0a2e7cc",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/layout.ts": "11cc0e9e80e56ae5fdc09d5a057ca052e7bf829b15b2fd9bb7e59a549c476a30",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/anchor.ts": "3d040039a8d69d401bc41e7ff995083e9ebadbbf263680ee16a7712a8e21b56e",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/audio.ts": "81ae28b140b50034b0186ed0465e9b41d902a7370786b4641700b0690d1d6f26",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/audioLink.ts": "2038dc326e9037140100d2b3d4346b027d52a47ecbf6ab24e4e02d1e65f3d253",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/blank.ts": "356af0417b138e4a71eea1683759a56a26b8263df28a385458cbe51b02986856",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/code.ts": "f20ab3c7bffb283f41190565aa5a8bc80ea93f752f74d1e471fc5a0c93c23800",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/decoration.ts": "c88db9edabaec8ec13678bb63e81df678fb6e3a79a7c41b5831ac2bdc7ab5534",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/formula.ts": "38f6a2fe4ed2fafc1db491f21f0aeb8a6d554f016f6cca9d27926520d7039f69",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/googleMap.ts": "6f76fc80ed68254264428272e46e3f45b9c17bcd0254b9c755246f9d3546a09a",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/gyazo.ts": "e3f1028ed72fe58dc24ac2a6d2d5ba04357bf349feea5b3f839577f2b37895e0",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/gyazoLink.ts": "291d201a78593785b8fa8dc26a0ca7e0f3de32f66a1d5564fb145748accd52b8",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/hashTag.ts": "8681d33efa0ed2c11dec79b0de54e2ecae1eee1dba0500727210d5795d46bdca",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/icon.ts": "2de232a72a8697d3a53e441e85c412f680c6828ea34859ffeffec61c42ef8bc7",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/image.ts": "8d74736ab40d73f7de0227dc9e084723d3b1a11e419808db45af4c64e75ef166",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/imageLink.ts": "ce0c51de550b95fda1e43eba6779b62e2ec1b088e77c67014cb39d610f6c8d5e",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/indent.ts": "8713c29f254e3d0f9a580eb9e67cb755e4984c9ca5a9d57759e4adbdeb113b94",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/link.ts": "8941e9ba0aad88e6e70331f9a2242938cf5023aa42a4c0ea7cbb0f536471696a",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/node.ts": "21eddbc8ffb7d9e9c4cbeb2ddb3cc00272aef2cf8276a35433b52c5c6c377ec8",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/plainText.ts": "1c6cf1bb4f11c950176ed7f2a0703a4b0f84ca3adc9e99dcbe5fc07185989c5a",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/quote.ts": "6c7a219b7325cf9ed757a5924d9f1d3731b19ed526705499f2c5561ebd7c8410",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/spotify.ts": "db7fda4ad020c411291dda9fb134e0f993063637fc3ada11c393806e7c537789",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/strong.ts": "28e243dfb5928a628b72225eb2e39ae0c0b0d088f4ceac1ce2288582f4b73797",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/unit.ts": "c5b9e5528c1b6da08794e2ebf61e25c0c2bf04f2a45682d16fd802a4c50e895a",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/url.ts": "ee63873dbce3e8edb547f0e44e8400cb875c00edb548ca6abf40d72a9f11b714",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/urlLink.ts": "410b062607137f75603b3d19585a0ac5605e0721f306840c872c0ea6c4e8ed9b",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/video.ts": "d35692e25001533636d7a3f8bc133718794c3f5ecd6f49768f9da9d52f1ed833",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/vimeo.ts": "43f97bb9312817c1503edeec08f056c9ebb407b8746e071a9ce161b2d4bc0525",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/node/youtube.ts": "8c7b9bfe15e0a2d17ae79a272d770effded2a78d75ab9c585c4bbc2a04c26978",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/pageMenu.ts": "97c843bb61c6e535011cbbf73099d68ed3cceb72fdfcc222db69ce32fc6b3b34",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/response.ts": "abed5a47197cd1b13386017b15d98e4f85a73d25a1d678fd131af7ef4c6093f8",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/rest.ts": "4620da5f7c9cddf5a40241b842184df57d1162fa0f549f93c0722f9275f12533",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/scrapbox.ts": "18c9bf3d47a5a9ede8d0de982dc233ef80251cbe294719f964a1041689b2e9bd",
+    "https://raw.githubusercontent.com/scrapbox-jp/types/0.9.0/userscript.ts": "c25143a34f1a1ec5c7430fc95735b4fefa18a16be41b44d3bf3050b64ed89d1d",
+    "https://raw.githubusercontent.com/takker99/scrapbox-katex-previewer/0.3.2/deps/katex.ts": "47e2471ba3e39960fa66177a23871ce47c36c03ce31f14b880d4d85b39294427",
+    "https://raw.githubusercontent.com/takker99/scrapbox-katex-previewer/0.3.2/deps/preact.tsx": "f4cfbb50d992033039b0fa5735e30f845e1aa0e3de0de2fdec929a80c302e8b7",
+    "https://raw.githubusercontent.com/takker99/scrapbox-katex-previewer/0.3.2/useKaTeX.ts": "fad53ce886e10388c8271877ff8169f46c8371a546b88e948473737ca32f989c",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/deps/scrapbox-rest.ts": "9b9111910fbbae8757a1e0527d49fb91f4711673d145083310fbe6297913b3cf",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/deps/scrapbox.ts": "9960c9fceea7ec96515e3a739154295a541a7445e63440346917b634a3d821f5",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/is.ts": "e31370f6f916baa2ed9343d12b721e301f5a32623cd92e1cee7be814bde33912",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/parseAbsoluteLink.ts": "c83e8987202f5be6bc40cac178eade0eee7ce7a18d67c2c1f78f15305017e9df",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/parser/anchor-fm.ts": "f3d5aeef15c8a6a5d90a310e1cf330f26795d2bd84722c4ff7dca91e2873e32a",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/parser/spotify.ts": "24127d97fb6d185bdb808a41bbc759c3c04d27ab6da9caa85d80a0c0e96d5206",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/parser/vimeo.ts": "d2d90bbafa3ade4114cc3a5c4d5120daccc5775d7c8bad1658d9a855f37e190a",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/parser/youtube.ts": "cb8a1b2290c910458cbeeb434dea57f89b30b1ee4619da0c284d124f75dee59a",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/sleep.ts": "53f49e4a153544e29a9b0e8cf904c910bf9f7e6b67743b86f91b38a0373a0934",
+    "https://raw.githubusercontent.com/takker99/scrapbox-userscript-std/0.27.1/title.ts": "d04d19c2c5a5c957a926d0ed8d25dbd8d18b704f9bf8c20680617e314e39b0d0"
+  },
+  "workspace": {
+    "dependencies": [
+      "npm:preact@10"
+    ]
+  }
+}

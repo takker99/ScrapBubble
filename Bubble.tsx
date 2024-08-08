@@ -1,16 +1,5 @@
-/** @jsx h */
-/** @jsxFrag Fragment */
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
 import { CardList } from "./CardList.tsx";
-import {
-  Fragment,
-  h,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from "./deps/preact.tsx";
+import { useLayoutEffect, useMemo, useState } from "./deps/preact.tsx";
 import { toTitleLc } from "./deps/scrapbox-std.ts";
 import { useBubbleData } from "./useBubbleData.ts";
 import { LinkTo } from "./types.ts";

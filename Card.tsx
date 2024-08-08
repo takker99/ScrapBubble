@@ -1,10 +1,5 @@
-/** @jsx h */
-/** @jsxFrag Fragment */
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
-import { Fragment, h, useCallback, useMemo } from "./deps/preact.tsx";
-import { useKaTeX } from "./deps/useKaTeX.ts";
+import { h, useCallback, useMemo } from "./deps/preact.tsx";
+import { useKaTeX } from "./useKaTeX.ts";
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import { pushPageTransition } from "./deps/scrapbox-std-browser.ts";
 import {
@@ -171,8 +166,7 @@ type FormulaProps = {
   node: FormulaNode;
 };
 const Formula = ({ node: { formula } }: FormulaProps) => {
-  const { ref, error, setFormula } = useKaTeX("");
-  setFormula(formula);
+  const { ref, error } = useKaTeX(formula);
 
   return (
     <span className={`formula ${error ? " error" : ""}`}>

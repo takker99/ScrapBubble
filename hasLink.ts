@@ -1,7 +1,3 @@
-/// <reference no-default-lib="true"/>
-/// <reference lib="esnext"/>
-/// <reference lib="dom"/>
-
 import { Node } from "./deps/scrapbox-parser.ts";
 import { parseLink } from "./parseLink.ts";
 import { LinkTo } from "./types.ts";
