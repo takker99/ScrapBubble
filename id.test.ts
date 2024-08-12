@@ -3,6 +3,10 @@ import { assertEquals } from "./deps/testing.ts";
 
 Deno.test("toId()", () => {
   assertEquals(toId("project", "Page A"), "/project/page_a");
+  assertEquals(
+    toId("Upper-Letter-Project", "Page A"),
+    "/upper-letter-project/page_a",
+  );
 });
 Deno.test("fromId()", () => {
   assertEquals(fromId("/project/page_a"), {
@@ -19,6 +23,10 @@ Deno.test("fromId()", () => {
   });
   assertEquals(fromId("/project/Page A"), {
     project: "project",
+    titleLc: "Page A",
+  });
+  assertEquals(fromId("/upper-letter-project/Page A"), {
+    project: "upper-letter-project",
     titleLc: "Page A",
   });
 });

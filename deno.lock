@@ -2,8 +2,8 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "jsr:@core/unknownutil@^4.0.0": "jsr:@core/unknownutil@4.0.3",
-      "jsr:@cosense/std@0.28": "jsr:@cosense/std@0.28.4",
+      "jsr:@core/unknownutil@^4.0.0": "jsr:@core/unknownutil@4.0.1",
+      "jsr:@cosense/std@0.28": "jsr:@cosense/std@0.28.2",
       "jsr:@cosense/types@0.10": "jsr:@cosense/types@0.10.1",
       "jsr:@progfay/scrapbox-parser@9": "jsr:@progfay/scrapbox-parser@9.0.0",
       "jsr:@std/assert": "jsr:@std/assert@1.0.2",
@@ -15,21 +15,18 @@
       "jsr:@std/path@^1.0.2": "jsr:@std/path@1.0.2",
       "jsr:@std/testing": "jsr:@std/testing@1.0.0",
       "jsr:@takker/md5@0.1": "jsr:@takker/md5@0.1.0",
-      "npm:esbuild": "npm:esbuild@0.23.0",
       "npm:esbuild@0.23": "npm:esbuild@0.23.0",
-      "npm:im": "npm:im@0.4.0",
-      "npm:immer": "npm:immer@10.1.1",
       "npm:immer@10": "npm:immer@10.1.1",
       "npm:option-t@49": "npm:option-t@49.1.0",
       "npm:option-t@^49.1.0": "npm:option-t@49.1.0",
       "npm:preact@10": "npm:preact@10.23.1"
     },
     "jsr": {
-      "@core/unknownutil@4.0.3": {
-        "integrity": "96fb490ad67362c8111284c92e98cff7d333674f8e7cdc9e3dc486d97ce566fd"
+      "@core/unknownutil@4.0.1": {
+        "integrity": "5e08141ea8284d064bc4ee8c70aab42825355fb1399eaeb6140936f5f763f42d"
       },
-      "@cosense/std@0.28.4": {
-        "integrity": "1563399d4cd26c12866c471221f402fddd896cae389c141260d06d6bc1ea8cf1",
+      "@cosense/std@0.28.2": {
+        "integrity": "e80550e16daf1266b0132c9f828f9744fe170714eecbe3fa3223df7ff75e4892",
         "dependencies": [
           "jsr:@core/unknownutil@^4.0.0",
           "jsr:@cosense/types@0.10",
@@ -209,10 +206,6 @@
           "@esbuild/win32-x64": "@esbuild/win32-x64@0.23.0"
         }
       },
-      "im@0.4.0": {
-        "integrity": "sha512-Oh7XMOR+yE8haRA3cx3W7/C97WaanfD7rWhjWodMe+cujYeuLKf57Ckhb1rUqGuflOO6Y+R0tS+hKeI8Hm0oAA==",
-        "dependencies": {}
-      },
       "immer@10.1.1": {
         "integrity": "sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw==",
         "dependencies": {}
@@ -230,13 +223,6 @@
   "remote": {},
   "workspace": {
     "dependencies": [
-      "jsr:@cosense/std@0.28",
-      "jsr:@cosense/types@0.10",
-      "jsr:@progfay/scrapbox-parser@9",
-      "jsr:@std/async@1",
-      "npm:esbuild@0.23",
-      "npm:immer@10",
-      "npm:option-t@49",
       "npm:preact@10"
     ]
   }
