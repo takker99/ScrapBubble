@@ -19,7 +19,7 @@
       "npm:immer@10": "npm:immer@10.1.1",
       "npm:option-t@49": "npm:option-t@49.1.0",
       "npm:option-t@^49.1.0": "npm:option-t@49.1.0",
-      "npm:preact@10": "npm:preact@10.23.2"
+      "npm:preact@10": "npm:preact@10.24.0"
     },
     "jsr": {
       "@core/unknownutil@4.2.0": {
@@ -45,6 +45,9 @@
       },
       "@progfay/scrapbox-parser@9.1.1": {
         "integrity": "71a6f828b7ecd89edc142f9831508561c330f924255ce34d2b835ee69cce424c"
+      },
+      "@progfay/scrapbox-parser@9.1.5": {
+        "integrity": "729a086b6675dd4a216875757c918c6bbea329d6e35e410516a16bbd6c468369"
       },
       "@std/assert@1.0.2": {
         "integrity": "ccacec332958126deaceb5c63ff8b4eaf9f5ed0eac9feccf124110435e59e49c",
@@ -102,8 +105,8 @@
         "integrity": "sha512-K5o4+D8rSE1VcmfwrieRZWyShPxX27NEGuZPT11S4CbvjE73YUDR/sanKAYnhVRj6Hn1mKcjfhjhbOCD2ef3qg==",
         "dependencies": {}
       },
-      "preact@10.23.2": {
-        "integrity": "sha512-kKYfePf9rzKnxOAKDpsWhg/ysrHPqT+yQ7UW4JjdnqjFIeNUnNcEJvhuA8fDenxAGWzUqtd51DfVg7xp/8T9NA==",
+      "preact@10.24.0": {
+        "integrity": "sha512-aK8Cf+jkfyuZ0ZZRG9FbYqwmEiGQ4y/PUO4SuTWoyWL244nZZh7bd5h2APd4rSNDYTBNghg1L+5iJN3Skxtbsw==",
         "dependencies": {}
       }
     }
