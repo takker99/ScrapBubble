@@ -58,9 +58,6 @@
           "jsr:@std/internal@^1.0.1"
         ]
       },
-      "@std/async@1.0.3": {
-        "integrity": "6ed64678db43451683c6c176a21426a2ccd21ba0269ebb2c36133ede3f165792"
-      },
       "@std/async@1.0.4": {
         "integrity": "373f5168a01b46ecaabc785d4e0f9ef18a010ab867af069fb905d93a9129ae5b"
       },
