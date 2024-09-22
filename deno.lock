@@ -46,9 +46,6 @@
       "@cosense/types@0.10.1": {
         "integrity": "13d2488a02c7b0b035a265bc3299affbdab1ea5b607516379685965cd37b2058"
       },
-      "@progfay/scrapbox-parser@9.0.0": {
-        "integrity": "c559602926d6ddd0580ab0c945333d06ed6cbdd67d4c67557edce8b0bb4be978"
-      },
       "@progfay/scrapbox-parser@9.1.1": {
         "integrity": "71a6f828b7ecd89edc142f9831508561c330f924255ce34d2b835ee69cce424c"
       },
