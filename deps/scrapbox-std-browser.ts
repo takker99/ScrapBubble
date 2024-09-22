@@ -1,1 +1,1 @@
-export * from "jsr:@cosense/std@0.28/browser/dom";
+export * from "jsr:@cosense/std@0.29/browser/dom";

@@ -2,39 +2,45 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "jsr:@core/unknownutil@^4.0.0": "jsr:@core/unknownutil@4.2.0",
-      "jsr:@cosense/std@0.28": "jsr:@cosense/std@0.28.4",
+      "jsr:@core/unknownutil@^4.0.0": "jsr:@core/unknownutil@4.3.0",
+      "jsr:@cosense/std@0.29": "jsr:@cosense/std@0.29.0",
       "jsr:@cosense/types@0.10": "jsr:@cosense/types@0.10.1",
-      "jsr:@progfay/scrapbox-parser@9": "jsr:@progfay/scrapbox-parser@9.0.0",
+      "jsr:@progfay/scrapbox-parser@9": "jsr:@progfay/scrapbox-parser@9.1.5",
       "jsr:@std/assert": "jsr:@std/assert@1.0.2",
       "jsr:@std/assert@^1.0.2": "jsr:@std/assert@1.0.2",
-      "jsr:@std/async@1": "jsr:@std/async@1.0.3",
-      "jsr:@std/encoding@1": "jsr:@std/encoding@1.0.1",
+      "jsr:@std/async@1": "jsr:@std/async@1.0.5",
+      "jsr:@std/bytes@^1.0.2": "jsr:@std/bytes@1.0.2",
+      "jsr:@std/encoding@1": "jsr:@std/encoding@1.0.5",
       "jsr:@std/fs@^1.0.1": "jsr:@std/fs@1.0.1",
       "jsr:@std/internal@^1.0.1": "jsr:@std/internal@1.0.1",
+      "jsr:@std/json@^1.0.0": "jsr:@std/json@1.0.0",
       "jsr:@std/path@^1.0.2": "jsr:@std/path@1.0.2",
+      "jsr:@std/streams@^1.0.0": "jsr:@std/streams@1.0.5",
       "jsr:@std/testing": "jsr:@std/testing@1.0.0",
       "jsr:@takker/md5@0.1": "jsr:@takker/md5@0.1.0",
       "npm:esbuild@0.23": "npm:esbuild@0.23.1",
       "npm:immer@10": "npm:immer@10.1.1",
       "npm:option-t@49": "npm:option-t@49.1.0",
-      "npm:option-t@^49.1.0": "npm:option-t@49.1.0",
-      "npm:preact@10": "npm:preact@10.24.0"
+      "npm:option-t@^49.1.0": "npm:option-t@49.2.0",
+      "npm:preact@10": "npm:preact@10.24.0",
+      "npm:socket.io-client@^4.7.5": "npm:socket.io-client@4.8.0"
     },
     "jsr": {
-      "@core/unknownutil@4.2.0": {
-        "integrity": "cc0609f2e9fcfd68783c8c34d588261464114770d83047e93eaa1e13732aaedb"
+      "@core/unknownutil@4.3.0": {
+        "integrity": "538a3687ffa81028e91d148818047df219663d0da671d906cecd165581ae55cc"
       },
-      "@cosense/std@0.28.4": {
-        "integrity": "1563399d4cd26c12866c471221f402fddd896cae389c141260d06d6bc1ea8cf1",
+      "@cosense/std@0.29.0": {
+        "integrity": "8d861520011d331bc45e9334f50b733a8ad6f79453382576c8ca4f7e4a6c1be1",
         "dependencies": [
           "jsr:@core/unknownutil@^4.0.0",
           "jsr:@cosense/types@0.10",
           "jsr:@progfay/scrapbox-parser@9",
           "jsr:@std/async@1",
           "jsr:@std/encoding@1",
+          "jsr:@std/json@^1.0.0",
           "jsr:@takker/md5@0.1",
-          "npm:option-t@^49.1.0"
+          "npm:option-t@^49.1.0",
+          "npm:socket.io-client@^4.7.5"
         ]
       },
       "@cosense/types@0.10.1": {
@@ -64,8 +70,11 @@
       "@std/async@1.0.5": {
         "integrity": "31d68214bfbb31bd4c6022401d484e3964147c76c9220098baa703a39b6c2da6"
       },
-      "@std/encoding@1.0.1": {
-        "integrity": "5955c6c542ebb4ce6587c3b548dc71e07a6c27614f1976d1d3887b1196cf4e65"
+      "@std/bytes@1.0.2": {
+        "integrity": "fbdee322bbd8c599a6af186a1603b3355e59a5fb1baa139f8f4c3c9a1b3e3d57"
+      },
+      "@std/encoding@1.0.5": {
+        "integrity": "ecf363d4fc25bd85bd915ff6733a7e79b67e0e7806334af15f4645c569fefc04"
       },
       "@std/fs@1.0.1": {
         "integrity": "d6914ca2c21abe591f733b31dbe6331e446815e513e2451b3b9e472daddfefcb",
@@ -76,8 +85,20 @@
       "@std/internal@1.0.1": {
         "integrity": "6f8c7544d06a11dd256c8d6ba54b11ed870aac6c5aeafff499892662c57673e6"
       },
+      "@std/json@1.0.0": {
+        "integrity": "985c1e544918d42e4e84072fc739ac4a19c3a5093292c99742ffcdd03fb6a268",
+        "dependencies": [
+          "jsr:@std/streams@^1.0.0"
+        ]
+      },
       "@std/path@1.0.2": {
         "integrity": "a452174603f8c620bd278a380c596437a9eef50c891c64b85812f735245d9ec7"
+      },
+      "@std/streams@1.0.5": {
+        "integrity": "74e5c73d7d68eeab0d7fba3b05cbee3ba4ac5ae37c5f4e675f67e62f8f53edc4",
+        "dependencies": [
+          "jsr:@std/bytes@^1.0.2"
+        ]
       },
       "@std/testing@1.0.0": {
         "integrity": "27cfc06392c69c2acffe54e6d0bcb5f961cf193f519255372bd4fff1481bfef8",
@@ -93,6 +114,30 @@
       }
     },
     "npm": {
+      "@socket.io/component-emitter@3.1.2": {
+        "integrity": "sha512-9BCxFwvbGg/RsZK9tjXd8s4UcwR0MWeFQ1XEKIQVVvAGJyINdrqKMcTRyLoK8Rse1GjzLV9cwjWV1olXRWEXVA==",
+        "dependencies": {}
+      },
+      "debug@4.3.7": {
+        "integrity": "sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==",
+        "dependencies": {
+          "ms": "ms@2.1.3"
+        }
+      },
+      "engine.io-client@6.6.1": {
+        "integrity": "sha512-aYuoak7I+R83M/BBPIOs2to51BmFIpC1wZe6zZzMrT2llVsHy5cvcmdsJgP2Qz6smHu+sD9oexiSUAVd8OfBPw==",
+        "dependencies": {
+          "@socket.io/component-emitter": "@socket.io/component-emitter@3.1.2",
+          "debug": "debug@4.3.7",
+          "engine.io-parser": "engine.io-parser@5.2.3",
+          "ws": "ws@8.17.1",
+          "xmlhttprequest-ssl": "xmlhttprequest-ssl@2.1.1"
+        }
+      },
+      "engine.io-parser@5.2.3": {
+        "integrity": "sha512-HqD3yTBfnBxIrbnM1DoD6Pcq8NECnh8d4As1Qgh0z5Gg3jRRIqijury0CL3ghu/edArpUYiYqQiDUQBIs4np3Q==",
+        "dependencies": {}
+      },
       "esbuild@0.23.1": {
         "integrity": "sha512-VVNz/9Sa0bs5SELtn3f7qhJCDPCF5oMEl5cO9/SSinpE9hbPVvxbd572HH5AKiP7WD8INO53GgfDDhRjkylHEg==",
         "dependencies": {}
@@ -101,12 +146,44 @@
         "integrity": "sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw==",
         "dependencies": {}
       },
+      "ms@2.1.3": {
+        "integrity": "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==",
+        "dependencies": {}
+      },
       "option-t@49.1.0": {
         "integrity": "sha512-K5o4+D8rSE1VcmfwrieRZWyShPxX27NEGuZPT11S4CbvjE73YUDR/sanKAYnhVRj6Hn1mKcjfhjhbOCD2ef3qg==",
         "dependencies": {}
       },
+      "option-t@49.2.0": {
+        "integrity": "sha512-Div3PZRWovCM7O10oWJDE4aXshu5X5Jc1MIY2cwasaoyhpso7j2yntdZZg39peZ8ZOcGvga7JzmlyaNwKFv/dA==",
+        "dependencies": {}
+      },
       "preact@10.24.0": {
         "integrity": "sha512-aK8Cf+jkfyuZ0ZZRG9FbYqwmEiGQ4y/PUO4SuTWoyWL244nZZh7bd5h2APd4rSNDYTBNghg1L+5iJN3Skxtbsw==",
+        "dependencies": {}
+      },
+      "socket.io-client@4.8.0": {
+        "integrity": "sha512-C0jdhD5yQahMws9alf/yvtsMGTaIDBnZ8Rb5HU56svyq0l5LIrGzIDZZD5pHQlmzxLuU91Gz+VpQMKgCTNYtkw==",
+        "dependencies": {
+          "@socket.io/component-emitter": "@socket.io/component-emitter@3.1.2",
+          "debug": "debug@4.3.7",
+          "engine.io-client": "engine.io-client@6.6.1",
+          "socket.io-parser": "socket.io-parser@4.2.4"
+        }
+      },
+      "socket.io-parser@4.2.4": {
+        "integrity": "sha512-/GbIKmo8ioc+NIWIhwdecY0ge+qVBSMdgxGygevmdHj24bsfgtCmcUUcQ5ZzcylGFHsN3k4HB4Cgkl96KVnuew==",
+        "dependencies": {
+          "@socket.io/component-emitter": "@socket.io/component-emitter@3.1.2",
+          "debug": "debug@4.3.7"
+        }
+      },
+      "ws@8.17.1": {
+        "integrity": "sha512-6XQFvXTkbfUOZOKKILFG1PDK2NDQs4azKQl26T0YS5CxqWLgXajbPZ+h4gZekJyRqFU8pvnbAbbs/3TgRPy+GQ==",
+        "dependencies": {}
+      },
+      "xmlhttprequest-ssl@2.1.1": {
+        "integrity": "sha512-ptjR8YSJIXoA3Mbv5po7RtSYHO6mZr8s7i5VGmEk7QY2pQWyT1o0N+W1gKbOyJPUCGXGnuw0wqe8f0L6Y0ny7g==",
         "dependencies": {}
       }
     }
@@ -114,7 +191,7 @@
   "remote": {},
   "workspace": {
     "dependencies": [
-      "jsr:@cosense/std@0.28",
+      "jsr:@cosense/std@0.29",
       "jsr:@cosense/types@0.10",
       "jsr:@progfay/scrapbox-parser@9",
       "jsr:@std/async@1",
