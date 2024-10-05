@@ -22,7 +22,7 @@
       "npm:immer@10": "npm:immer@10.1.1",
       "npm:option-t@49": "npm:option-t@49.2.0",
       "npm:option-t@^49.1.0": "npm:option-t@49.2.0",
-      "npm:preact@10": "npm:preact@10.24.1",
+      "npm:preact@10": "npm:preact@10.24.2",
       "npm:socket.io-client@^4.7.5": "npm:socket.io-client@4.8.0"
     },
     "jsr": {
@@ -148,8 +148,8 @@
         "integrity": "sha512-Div3PZRWovCM7O10oWJDE4aXshu5X5Jc1MIY2cwasaoyhpso7j2yntdZZg39peZ8ZOcGvga7JzmlyaNwKFv/dA==",
         "dependencies": {}
       },
-      "preact@10.24.1": {
-        "integrity": "sha512-PnBAwFI3Yjxxcxw75n6VId/5TFxNW/81zexzWD9jn1+eSrOP84NdsS38H5IkF/UH3frqRPT+MvuCoVHjTDTnDw==",
+      "preact@10.24.2": {
+        "integrity": "sha512-1cSoF0aCC8uaARATfrlz4VCBqE8LwZwRfLgkxJOQwAlQt6ayTmi0D9OF7nXid1POI5SZidFuG9CnlXbDfLqY/Q==",
         "dependencies": {}
       },
       "socket.io-client@4.8.0": {
