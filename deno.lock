@@ -148,6 +148,10 @@
         "integrity": "sha512-Div3PZRWovCM7O10oWJDE4aXshu5X5Jc1MIY2cwasaoyhpso7j2yntdZZg39peZ8ZOcGvga7JzmlyaNwKFv/dA==",
         "dependencies": {}
       },
+      "option-t@49.2.1": {
+        "integrity": "sha512-ueUhVyOyiNJ7Bd0Qkv5HWaqfCX331ZoslSTYq7xhlu8pP+8YKcKzGHVGcDZOpjXlehyS0rPd9w8OXFRfL1d52Q==",
+        "dependencies": {}
+      },
       "preact@10.24.2": {
         "integrity": "sha512-1cSoF0aCC8uaARATfrlz4VCBqE8LwZwRfLgkxJOQwAlQt6ayTmi0D9OF7nXid1POI5SZidFuG9CnlXbDfLqY/Q==",
         "dependencies": {}
