@@ -21,6 +21,7 @@
       "npm:esbuild@0.24": "npm:esbuild@0.24.0",
       "npm:immer@10": "npm:immer@10.1.1",
       "npm:option-t@49": "npm:option-t@49.2.0",
+      "npm:option-t@50": "npm:option-t@50.0.0",
       "npm:option-t@^49.1.0": "npm:option-t@49.2.0",
       "npm:preact@10": "npm:preact@10.24.3",
       "npm:socket.io-client@^4.7.5": "npm:socket.io-client@4.8.0"
@@ -155,6 +156,10 @@
         "integrity": "sha512-ueUhVyOyiNJ7Bd0Qkv5HWaqfCX331ZoslSTYq7xhlu8pP+8YKcKzGHVGcDZOpjXlehyS0rPd9w8OXFRfL1d52Q==",
         "dependencies": {}
       },
+      "option-t@50.0.0": {
+        "integrity": "sha512-zHw9Et+SfAx3Xtl9LagyAjyyzC3pNONEinTAOmZN2IKL0dYa6dthjzwuSRueJ2gLkaTiinQjRDGo/1mKSl70hg==",
+        "dependencies": {}
+      },
       "preact@10.24.3": {
         "integrity": "sha512-Z2dPnBnMUfyQfSQ+GBdsGa16hz35YmLmtTLhM169uW944hYL6xzTYkJjC07j+Wosz733pMWx0fgON3JNw1jJQA==",
         "dependencies": {}
@@ -194,7 +199,7 @@
       "jsr:@std/async@1",
       "npm:esbuild@0.24",
       "npm:immer@10",
-      "npm:option-t@49",
+      "npm:option-t@50",
       "npm:preact@10"
     ]
   }
