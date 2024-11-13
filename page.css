@@ -9,16 +9,23 @@ img {
   max-height: 100px;
 }
 code {
-  font-family: var(--code-text-font, Menlo, Monaco, Consolas, "Courier New", monospace);
+  font-family: var(
+    --code-text-font,
+    Menlo,
+    Monaco,
+    Consolas,
+    "Courier New",
+    monospace
+  );
   font-size: 90%;
   color: var(--code-color, #342d9c);
-  background-color: var(--code-bg, rgba(0,0,0,0.04));
+  background-color: var(--code-bg, rgba(0, 0, 0, 0.04));
   padding: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
 blockquote {
-  background-color: var(--quote-bg-color, rgba(0,0,0,0.05));
+  background-color: var(--quote-bg-color, rgba(0, 0, 0, 0.05));
   display: block;
   border-left: solid 4px #a0a0a0;
   padding-left: 4px;
@@ -46,7 +53,9 @@ audio {
 .formula {
   margin: auto 6px;
 }
-.formula.error code {color:#fd7373; }
+.formula.error code {
+  color: #fd7373;
+}
 .katex-display {
   display: inline-block !important;
   margin: 0 !important;
@@ -76,13 +85,13 @@ audio {
 .code-block {
   display: block;
   line-height: 1.7em;
-  background-color: var(--code-bg, rgba(0,0,0,0.04));
+  background-color: var(--code-bg, rgba(0, 0, 0, 0.04));
 }
 .code-block-start {
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
   color: #342d9c;
   background-color: #ffcfc6;
-  font-size: .9em;
+  font-size: 0.9em;
   padding: 1px 2px;
 }
 .code-block-start a {
@@ -103,7 +112,7 @@ code.code-block,
 }
 .table-block-start {
   padding: 1px 2px;
-  font-size: .9em;
+  font-size: 0.9em;
   background-color: #ffcfc6;
 }
 .table-block-start a {
@@ -118,10 +127,10 @@ code.code-block,
   white-space: pre;
 }
 .cell:nth-child(2n+1) {
-  background-color: rgba(0,0,0,0.04);
+  background-color: rgba(0, 0, 0, 0.04);
 }
 .cell:nth-child(2n) {
-  background-color: rgba(0,0,0,0.06);
+  background-color: rgba(0, 0, 0, 0.06);
 }
 
 .strong-image {
@@ -138,31 +147,76 @@ code.code-block,
 .tool-button {
   margin-left: 1em;
   cursor: pointer;
-  font-size: .9em;
+  font-size: 0.9em;
 }
 
-.deco-\/ {font-style: italic;}
-.deco-\*-1 {font-weight: bold;}
-.deco-\*-2 {font-weight: bold; font-size: 1.20em;}
-.deco-\*-3 {font-weight: bold; font-size: 1.44em;}
-.deco-\*-4 {font-weight: bold; font-size: 1.73em;}
-.deco-\*-5 {font-weight: bold; font-size: 2.07em;}
-.deco-\*-6 {font-weight: bold; font-size: 2.49em;}
-.deco-\*-7 {font-weight: bold; font-size: 3.00em;}
-.deco-\*-8 {font-weight: bold; font-size: 3.58em;}
-.deco-\*-9 {font-weight: bold; font-size: 4.30em;}
-.deco-\*-10 {font-weight: bold; font-size: 5.16em;}
-.deco-\- {text-decoration: line-through;}
-.deco-_ {text-decoration: underline;}
-.page-link {color: var(--page-link-color, #5e8af7);}
-a.page-link:hover {color: var(--page-link-hover-color, #2d67f5);}
-.empty-page-link {color: var(--empty-page-link-color, #fd7373);}
-a.empty-page-link:hover {color: var(--empty-page-link-hover-color, #fd7373);}
+.deco-\/ {
+  font-style: italic;
+}
+.deco-\*-1 {
+  font-weight: bold;
+}
+.deco-\*-2 {
+  font-weight: bold;
+  font-size: 1.20em;
+}
+.deco-\*-3 {
+  font-weight: bold;
+  font-size: 1.44em;
+}
+.deco-\*-4 {
+  font-weight: bold;
+  font-size: 1.73em;
+}
+.deco-\*-5 {
+  font-weight: bold;
+  font-size: 2.07em;
+}
+.deco-\*-6 {
+  font-weight: bold;
+  font-size: 2.49em;
+}
+.deco-\*-7 {
+  font-weight: bold;
+  font-size: 3.00em;
+}
+.deco-\*-8 {
+  font-weight: bold;
+  font-size: 3.58em;
+}
+.deco-\*-9 {
+  font-weight: bold;
+  font-size: 4.30em;
+}
+.deco-\*-10 {
+  font-weight: bold;
+  font-size: 5.16em;
+}
+.deco-\- {
+  text-decoration: line-through;
+}
+.deco-_ {
+  text-decoration: underline;
+}
+.page-link {
+  color: var(--page-link-color, #5e8af7);
+}
+a.page-link:hover {
+  color: var(--page-link-hover-color, #2d67f5);
+}
+.empty-page-link {
+  color: var(--empty-page-link-color, #fd7373);
+}
+a.empty-page-link:hover {
+  color: var(--empty-page-link-hover-color, #fd7373);
+}
 .link {
   color: var(--page-link-color, #5e8af7);
   text-decoration: underline;
 }
-a.link:hover {color: var(--page-link-color-hover-color, #2d67f5);}
+a.link:hover {
+  color: var(--page-link-color-hover-color, #2d67f5);
+}
 .link img {
   padding-bottom: 3px;
   border-style: none none solid;
@@ -171,5 +225,5 @@ a.link:hover {color: var(--page-link-color-hover-color, #2d67f5);}
 }
 
 .permalink {
-  background-color: var(--line-permalink-color, rgba(234,218,74,0.75));
+  background-color: var(--line-permalink-color, rgba(234, 218, 74, 0.75));
 }

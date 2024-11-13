@@ -42,20 +42,20 @@
   width: inherit;
   overflow: hidden;
   text-overflow: ellipsis;
-  font-family: "Roboto",Helvetica,Arial,"Hiragino Sans",sans-serif;
+  font-family: "Roboto", Helvetica, Arial, "Hiragino Sans", sans-serif;
   background-color: var(--card-bg, #fff);
   color: var(--card-title-color, #555);
   word-break: break-word;
   text-decoration: none;
 }
 .related-page-card:hover {
-  box-shadow: var(--card-box-hover-shadow, 0 2px 0 rgba(0,0,0,0.23));
+  box-shadow: var(--card-box-hover-shadow, 0 2px 0 rgba(0, 0, 0, 0.23));
 }
 .related-page-card:focus {
   outline: 0;
-  box-shadow: 0 0px 0px 3px rgba(102,175,233,0.6);
+  box-shadow: 0 0px 0px 3px rgba(102, 175, 233, 0.6);
   border-color: #66afe9;
-  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 }
 .related-page-card.hover {
   opacity: 0;
@@ -64,17 +64,17 @@
   height: 100%;
   top: 0;
   left: 0;
-  background-color: var(--card-hover-bg, rgba(0,0,0,0.05));
+  background-color: var(--card-hover-bg, rgba(0, 0, 0, 0.05));
   mix-blend-mode: multiply;
   z-index: 1;
-  transition: background-color .1s
+  transition: background-color 0.1s;
 }
-.related-page-card:hover .hover{
+.related-page-card:hover .hover {
   opacity: 1;
 }
-.related-page-card:active .hover{
+.related-page-card:active .hover {
   opacity: 1;
-  background-color: var(--card-active-bg, rgba(0,0,0,0.1))
+  background-color: var(--card-active-bg, rgba(0, 0, 0, 0.1));
 }
 .related-page-card .content {
   height: calc(100% - 5px);
@@ -130,7 +130,7 @@
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
   font-size: 90%;
   color: var(--code-color, #342d9c);
-  background-color: var(--code-bg, rgba(0,0,0,0.04));
+  background-color: var(--code-bg, rgba(0, 0, 0, 0.04));
   padding: 0;
   white-space: pre-wrap;
   word-wrap: break-word;
