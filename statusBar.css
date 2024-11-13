@@ -4,7 +4,7 @@
   background-color: var(--page-bg, #fefefe);
   cursor: default;
 }
-.status-bar > *{
+.status-bar > * {
   border: 1px solid var(--status-bar-border-color, #a9aaaf);
 }
 

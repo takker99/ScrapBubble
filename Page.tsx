@@ -272,8 +272,8 @@ const CodeBlock = (
         setButtonLabel("Copied");
         await delay(1000);
         setButtonLabel("\uf0c5");
-      } catch (e) {
-        alert(`Failed to copy the code block\nError:${e.message}`);
+      } catch (e: unknown) {
+        alert(`Failed to copy the code block\nError: ${e}`);
       }
     },
     [content],
@@ -459,8 +459,8 @@ const CommandLine = (
         setButtonLabel("Copied");
         await delay(1000);
         setButtonLabel("\uf0c5");
-      } catch (e) {
-        alert(`Failed to copy the code block\nError:${e.message}`);
+      } catch (e: unknown) {
+        alert(`Failed to copy the code block\nError: ${e}`);
       }
     },
     [node.text],
