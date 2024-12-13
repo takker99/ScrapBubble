@@ -56,8 +56,7 @@ export const convert = (
       const linkLc of card.linksLc.filter((linkLc) => linksLc.includes(linkLc))
     ) {
       const cardId = toId(project, linkLc);
-      const bubble = storage.get(cardId);
-      if (!bubble) throw Error(`storage already must have "${cardId}"`);
+      const bubble = storage.get(cardId) ?? makeDummy(project, linkLc);
       if (!bubble.linked) {
         bubble.linked = [card.titleLc];
         continue;
@@ -99,8 +98,7 @@ export const convert = (
       // 逆リンクを作る
       // 重複はありえないので配列でいい
       const cardId = toId(project, linkLc);
-      const bubble = storage.get(cardId);
-      if (!bubble) throw Error(`storage already must have "${cardId}"`);
+      const bubble = storage.get(cardId) ?? makeDummy(project, linkLc);
       if (!bubble.linked) {
         bubble.linked = [card.titleLc];
         continue;
