@@ -15,23 +15,20 @@ export const parseLink = (
   title: string;
   hash?: string;
 } => {
-  if (link.pathType === "root") {
+  root: if (link.pathType === "root") {
     const [, project = "", title = ""] = link.href.match(
       /\/([\w\-]+)(?:\/?|\/(.*))$/,
     ) ?? ["", "", ""];
-    if (project === "") {
-      throw SyntaxError(`Failed to get a project name from "${link.href}"`);
-    }
+    if (project === "") break root;
     const [, hash] = title?.match?.(/#([a-f\d]{24,32})$/) ?? ["", ""];
     return title === ""
       ? { project }
       : hash === ""
       ? { project, title }
       : { project, title: title.slice(0, -1 - hash.length), hash };
-  } else {
-    const [, hash] = link.href.match(/#([a-f\d]{24,32})$/) ?? ["", ""];
-    return hash === ""
-      ? { title: link.href }
-      : { title: link.href.slice(0, -1 - hash.length), hash };
   }
+  const [, hash] = link.href.match(/#([a-f\d]{24,32})$/) ?? ["", ""];
+  return hash === ""
+    ? { title: link.href }
+    : { title: link.href.slice(0, -1 - hash.length), hash };
 };

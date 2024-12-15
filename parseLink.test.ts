@@ -62,3 +62,9 @@ Deno.test("internal link", () => {
     title: "title/with#/",
   });
 });
+
+Deno.test("project-like title", () => {
+  assertEquals(parseLink({ pathType: "root", href: "/*@__PURE__*/" }), {
+    title: "/*@__PURE__*/",
+  });
+});
