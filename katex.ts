@@ -173,7 +173,7 @@ export namespace katex {
 const defaultVersion = "0.13.3";
 let initialized: Promise<Katex> | undefined;
 let error: string | Event | undefined;
-export const importKaTeX = async (
+export const importKaTeX = (
   version = defaultVersion,
 ): Promise<Katex> => {
   const url =
@@ -183,8 +183,9 @@ export const importKaTeX = async (
   if (!document.querySelector(`script[src="${url}"]`)) {
     const script = document.createElement("script");
     script.src = url;
-    await new Promise<void>((resolve, reject) => {
-      script.onload = () => resolve();
+    initialized = new Promise<Katex>((resolve, reject) => {
+      // deno-lint-ignore no-window
+      script.onload = () => resolve(window.katex);
       script.onerror = (e) => {
         error = e;
         reject(e);
@@ -192,12 +193,15 @@ export const importKaTeX = async (
       document.head.append(script);
     });
   }
+  if (initialized) return initialized;
 
   return new Promise((resolve) => {
     const id = setInterval(() => {
-      if (!initialized) return;
+      // deno-lint-ignore no-window
+      if (!window.katex) return;
       clearInterval(id);
-      resolve(initialized);
+      // deno-lint-ignore no-window
+      resolve(window.katex);
     }, 500);
   });
 };
