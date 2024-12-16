@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource npm:preact@10 */
 import { Card } from "./Card.tsx";
 import { h, useMemo } from "./deps/preact.tsx";
 import { useBubbleData } from "./useBubbleData.ts";

@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource npm:preact@10 */
 import { Bubble } from "./Bubble.tsx";
 import { UserCSS } from "./UserCSS.tsx";
 import { CSS } from "./app.min.css.ts";

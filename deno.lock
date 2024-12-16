@@ -19,7 +19,7 @@
     "npm:immer@10": "10.1.1",
     "npm:option-t@50": "50.0.0",
     "npm:option-t@^49.1.0": "49.3.0",
-    "npm:preact@10": "10.24.3"
+    "npm:preact@10": "10.25.2"
   },
   "jsr": {
     "@core/unknownutil@4.3.0": {
@@ -191,13 +191,8 @@
     "option-t@50.0.0": {
       "integrity": "sha512-zHw9Et+SfAx3Xtl9LagyAjyyzC3pNONEinTAOmZN2IKL0dYa6dthjzwuSRueJ2gLkaTiinQjRDGo/1mKSl70hg=="
     },
-    "preact@10.24.3": {
-      "integrity": "sha512-Z2dPnBnMUfyQfSQ+GBdsGa16hz35YmLmtTLhM169uW944hYL6xzTYkJjC07j+Wosz733pMWx0fgON3JNw1jJQA=="
+    "preact@10.25.2": {
+      "integrity": "sha512-GEts1EH3oMnqdOIeXhlbBSddZ9nrINd070WBOiPO2ous1orrKGUM4SMDbwyjSWD1iMS2dBvaDjAa5qUhz3TXqw=="
     }
-  },
-  "workspace": {
-    "dependencies": [
-      "npm:preact@10"
-    ]
   }
 }

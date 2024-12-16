@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource npm:preact@10 */
 import { h, useCallback, useMemo } from "./deps/preact.tsx";
 import { useKaTeX } from "./useKaTeX.ts";
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
