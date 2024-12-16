@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource npm:preact@10 */
 import {
   ComponentChildren,
   createContext,
@@ -664,7 +666,6 @@ const Youtube = (props: YoutubeNode | YoutubeListNode) => {
       <iframe
         src={src}
         allowFullScreen
-        type="text/html"
       />
     </div>
   );
@@ -675,7 +676,6 @@ const Vimeo = ({ videoId }: VimeoNode) => (
     <iframe
       src={`https://player.vimeo.com/video/${videoId}`}
       allowFullScreen
-      type="text/html"
     />
   </div>
 );
@@ -686,8 +686,6 @@ const Spotify = (props: SpotifyNode) => (
       className={`spotify type-${props.pathType}`}
       src={`https://open.spotify.com/embed/${props.pathType}/${props.videoId}`}
       allowFullScreen
-      type="text/html"
-      scrolling="no"
     />
   </div>
 );
@@ -698,8 +696,6 @@ const AnchorFM = (props: AnchorFMNode) => (
       className="anchor-fm"
       src={props.href.replace("/episodes/", "/embed/episodes/")}
       allowFullScreen
-      type="text/html"
-      scrolling="no"
     />
   </div>
 );

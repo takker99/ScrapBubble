@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource npm:preact@10 */
 import { render } from "./deps/preact.tsx";
 import { getWatchList } from "./watchList.ts";
 import { App, AppProps, userscriptName } from "./App.tsx";

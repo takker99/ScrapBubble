@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource npm:preact@10 */
 import { CardList } from "./CardList.tsx";
 import { useLayoutEffect, useMemo, useState } from "./deps/preact.tsx";
 import { toTitleLc } from "./deps/scrapbox-std.ts";

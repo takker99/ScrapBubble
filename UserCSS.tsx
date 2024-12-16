@@ -1,3 +1,5 @@
+/** @jsxRuntime automatic */
+/** @jsxImportSource npm:preact@10 */
 import { useMemo } from "./deps/preact.tsx";
 import { detectURL } from "./detectURL.ts";
 
