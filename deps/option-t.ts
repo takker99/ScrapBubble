@@ -1,1 +1,1 @@
-export * from "npm:option-t@51/plain_result";
+export * from "npm:option-t@52/plain_result";
