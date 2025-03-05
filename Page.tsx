@@ -224,7 +224,9 @@ export const Page = (
                   permalink={block.id === scrollId}
                 >
                   {block.nodes.length > 0
-                    ? block.nodes.map((node) => <Node node={node} />)
+                    ? block.nodes.map((node) => (
+                      <Node key={node.raw} node={node} />
+                    ))
                     : <br />}
                 </Line>
               );
@@ -356,7 +358,7 @@ const Table = (
             <span className="table-block table-block-row">
               {cell.map((row, index) => (
                 <span className={`cell col-${index}`}>
-                  {row.map((node) => <Node node={node} />)}
+                  {row.map((node) => <Node key={node.raw} node={node} />)}
                 </span>
               ))}
             </span>
@@ -388,13 +390,13 @@ const Node = ({ node }: NodeProps) => {
     case "quote":
       return (
         <blockquote className="quote">
-          {node.nodes.map((node) => <Node node={node} />)}
+          {node.nodes.map((node) => <Node key={node.raw} node={node} />)}
         </blockquote>
       );
     case "strong":
       return (
         <strong>
-          {node.nodes.map((node) => <Node node={node} />)}
+          {node.nodes.map((node) => <Node key={node.raw} node={node} />)}
         </strong>
       );
     case "decoration":
@@ -420,7 +422,7 @@ const Node = ({ node }: NodeProps) => {
       return (
         <>
           {`${node.number}. `}
-          {node.nodes.map((node) => <Node node={node} />)}
+          {node.nodes.map((node) => <Node key={node.raw} node={node} />)}
         </>
       );
   }
@@ -443,7 +445,7 @@ const Decoration = (
   { node: { decos, nodes } }: DecorationProps,
 ) => (
   <span className={decos.map((deco) => `deco-${deco}`).join(" ")}>
-    {nodes.map((node) => <Node node={node} />)}
+    {nodes.map((node) => <Node key={node.raw} node={node} />)}
   </span>
 );
 
@@ -530,9 +532,7 @@ const Icon = (
         className={strong ? "icon strong-icon" : "icon"}
         alt={title}
         src={`/api/pages/${project}/${titleLc}/icon`}
-      >
-        {title}
-      </img>
+      />
     </a>
   );
 };

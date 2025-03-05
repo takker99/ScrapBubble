@@ -160,7 +160,7 @@ const SummaryNode = ({ node, project }: NodeProps) => {
     case "blank":
       return <>{node.text}</>;
     default:
-      return <></>;
+      return;
   }
 };
 

@@ -93,6 +93,7 @@ const Tab: FunctionComponent<
   const theme = useTheme(project);
   return (
     <button
+      type="button"
       role="tab"
       aria-selected={selected}
       data-theme={theme}
