@@ -1,1 +1,1 @@
-export * from "jsr:@progfay/scrapbox-parser@9";
+export * from "jsr:@progfay/scrapbox-parser@10";
