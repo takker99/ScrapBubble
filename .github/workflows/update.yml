@@ -17,9 +17,7 @@ jobs:
       - id: molt
         uses: hasundue/molt-action@v1
         with:
-          commit: false
           pull-request: false
-          commit-prefix: "chore:"
           lock: false
           source: |-
             deps/*.ts
