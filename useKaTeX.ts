@@ -20,10 +20,7 @@ export const useKaTeX = <T extends HTMLElement>(
 
   const ref: RefCallback<T> = useCallback(
     (element) => {
-      if (!element) {
-        setError("");
-        return;
-      }
+      if (!element) return;
 
       importKaTeX(defaultVersion).then((katex) => {
         try {
