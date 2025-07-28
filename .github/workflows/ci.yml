@@ -11,4 +11,4 @@ jobs:
         with:
           deno-version: "v2"
       - name: Check all
-        run: deno task check:all
+        run: deno task check
