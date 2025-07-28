@@ -1,6 +1,20 @@
 {
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "deno.ns"
+    ]
+  },
   "tasks": {
-    "type-check": "deno check --remote **/*.ts **/*.tsx",
+    "check": {
+      "command": "deno fmt --check && deno lint",
+      "dependencies": [
+        "type-check",
+        "test"
+      ]
+    },
     "fix": {
       "command": "deno fmt && deno lint --fix",
       "dependencies": [
@@ -9,20 +23,6 @@
       ]
     },
     "test": "deno test --allow-env=NODE_ENV --allow-read --parallel",
-    "check": {
-      "command": "deno fmt --check && deno lint",
-      "dependencies": [
-        "type-check",
-        "test"
-      ]
-    }
-  },
-  "compilerOptions": {
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "deno.ns"
-    ]
+    "type-check": "deno check --remote **/*.ts **/*.tsx"
   }
 }
