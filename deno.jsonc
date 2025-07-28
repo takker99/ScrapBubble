@@ -1,9 +1,21 @@
 {
   "tasks": {
-    "check": "deno check --remote **/*.ts **/*.tsx",
+    "type-check": "deno check --remote **/*.ts **/*.tsx",
+    "fix": {
+      "command": "deno fmt && deno lint --fix",
+      "dependencies": [
+        "type-check",
+        "test"
+      ]
+    },
     "test": "deno test --allow-env=NODE_ENV --allow-read --parallel",
-    "check:all": "deno fmt --check && deno lint && deno task check && deno task test",
-    "fix": "deno fmt && deno lint --fix && deno task check && deno task test"
+    "check": {
+      "command": "deno fmt --check && deno lint",
+      "dependencies": [
+        "type-check",
+        "test"
+      ]
+    }
   },
   "compilerOptions": {
     "lib": [
