@@ -169,8 +169,7 @@ export namespace katex {
   }
 }
 
-// This is an original code below
-const defaultVersion = "0.13.3";
+const defaultVersion = "0.16.9";
 let initialized: Promise<Katex> | undefined;
 let error: string | Event | undefined;
 export const importKaTeX = (
