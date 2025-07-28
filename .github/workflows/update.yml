@@ -25,6 +25,7 @@ jobs:
             deps/*.ts
             deps/*.tsx
       - uses: denoland/setup-deno@v2
+        if: steps.molt.outputs.files != ''
         with:
           deno-version: "v2"
       - name: Update deno.lock
