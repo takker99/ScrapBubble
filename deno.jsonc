@@ -23,6 +23,7 @@
       ]
     },
     "test": "deno test --allow-env=NODE_ENV --allow-read --parallel",
-    "type-check": "deno check --remote **/*.ts **/*.tsx"
+    "type-check": "deno check --remote **/*.ts **/*.tsx",
+    "refresh-lock": "rm deno.lock && deno task check"
   }
 }
