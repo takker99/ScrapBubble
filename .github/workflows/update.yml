@@ -14,10 +14,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: hasundue/molt-action@v1
+      - id: molt
+        uses: hasundue/molt-action@v1
         with:
-          commit-prefix: ":package:"
+          commit: false
+          pull-request: false
+          commit-prefix: "chore:"
           lock: false
           source: |-
             deps/*.ts
             deps/*.tsx
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: "v2"
+      - name: Update deno.lock
+        if: steps.molt.outputs.files != ''
+        run: deno task refresh-lock
+      - name: Create Pull Request
+        if: steps.molt.outputs.files != ''
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: molt-action
+          base: main
+          title: ${{ steps.molt.outputs.summary }}
+          body: ${{ steps.molt.outputs.report }}
+          labels: dependencies
+          sign-commits: true
+          delete-branch: true
