@@ -3,17 +3,18 @@
 import { Bubble } from "./Bubble.tsx";
 import { UserCSS } from "./UserCSS.tsx";
 import { CSS } from "./app.min.css.ts";
-import { useCallback, useEffect } from "./deps/preact.tsx";
-import { useBubbles } from "./useBubbles.ts";
-import { stayHovering } from "./stayHovering.ts";
-import { useEventListener } from "./useEventListener.ts";
-import { isPageLink, isTitle } from "./is.ts";
-import { parseLink } from "./parseLink.ts";
-import { toId } from "./id.ts";
-import { calcBubblePosition } from "./position.ts";
 import { prefetch as prefetch_ } from "./bubble.ts";
-import type { LinkType } from "./types.ts";
+import { useCallback, useEffect } from "./deps/preact.tsx";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
+import { toId } from "./id.ts";
+import { isPageLink, isTitle } from "./is.ts";
+import { defaultVersion } from "./katex.ts";
+import { parseLink } from "./parseLink.ts";
+import { calcBubblePosition } from "./position.ts";
+import { stayHovering } from "./stayHovering.ts";
+import type { LinkType } from "./types.ts";
+import { useBubbles } from "./useBubbles.ts";
+import { useEventListener } from "./useEventListener.ts";
 declare const scrapbox: Scrapbox;
 
 export const userscriptName = "scrap-bubble";
@@ -120,7 +121,7 @@ export const App = (
     <>
       <link
         rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.12.0/katex.min.css"
+        href={`https://cdnjs.cloudflare.com/ajax/libs/KaTeX/${defaultVersion}/katex.min.css`}
       />
       <style>{CSS}</style>
       <UserCSS style={style} />

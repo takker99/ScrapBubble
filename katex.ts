@@ -169,12 +169,10 @@ export namespace katex {
   }
 }
 
-const defaultVersion = "0.16.9";
+export const defaultVersion = "0.16.9";
 let initialized: Promise<Katex> | undefined;
 let error: string | Event | undefined;
-export const importKaTeX = (
-  version = defaultVersion,
-): Promise<Katex> => {
+export const importKaTeX = (version: string): Promise<Katex> => {
   const url =
     `https://cdnjs.cloudflare.com/ajax/libs/KaTeX/${version}/katex.min.js`;
 

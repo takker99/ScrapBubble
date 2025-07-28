@@ -1,5 +1,5 @@
 import { type RefCallback, useCallback, useState } from "./deps/preact.tsx";
-import { importKaTeX, KatexOptions } from "./katex.ts";
+import { defaultVersion, importKaTeX, KatexOptions } from "./katex.ts";
 
 export interface ParseError {
   name: string;
@@ -25,7 +25,7 @@ export const useKaTeX = <T extends HTMLElement>(
         return;
       }
 
-      importKaTeX().then((katex) => {
+      importKaTeX(defaultVersion).then((katex) => {
         try {
           katex.render(formula, element, options);
           setError("");
