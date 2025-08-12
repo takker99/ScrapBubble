@@ -11,8 +11,8 @@ export type {
   RelatedPage,
   StringLc,
   UnixTime,
-} from "jsr:@cosense/types@0.10/rest";
-export type { Scrapbox } from "jsr:@cosense/types@0.10/userscript";
+} from "jsr:@cosense/types@0.11/rest";
+export type { Scrapbox } from "jsr:@cosense/types@0.11/userscript";
 
 import type { ErrorLike } from "jsr:@cosense/types@0.10/rest";
 
