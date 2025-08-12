@@ -3,14 +3,15 @@
   "specifiers": {
     "jsr:@core/iterutil@0.9": "0.9.0",
     "jsr:@core/unknownutil@4": "4.3.0",
-    "jsr:@cosense/std@0.29": "0.29.14",
-    "jsr:@cosense/types@0.10": "0.10.8",
-    "jsr:@progfay/scrapbox-parser@10": "10.0.0",
-    "jsr:@progfay/scrapbox-parser@9": "9.2.0",
+    "jsr:@cosense/std@0.30": "0.30.0",
+    "jsr:@cosense/types@0.10": "0.10.10",
+    "jsr:@cosense/types@0.11": "0.11.0",
+    "jsr:@progfay/scrapbox-parser@10": "10.0.1",
+    "jsr:@progfay/scrapbox-parser@^10.0.1": "10.0.1",
     "jsr:@std/assert@*": "1.0.13",
     "jsr:@std/assert@^1.0.13": "1.0.13",
-    "jsr:@std/async@1": "1.0.13",
-    "jsr:@std/async@^1.0.11": "1.0.13",
+    "jsr:@std/async@1": "1.0.14",
+    "jsr:@std/async@^1.0.14": "1.0.14",
     "jsr:@std/encoding@1": "1.0.10",
     "jsr:@std/fs@^1.0.19": "1.0.19",
     "jsr:@std/internal@^1.0.10": "1.0.10",
@@ -21,9 +22,8 @@
     "jsr:@takker/md5@0.1": "0.1.0",
     "npm:esbuild@0.25": "0.25.8",
     "npm:immer@10": "10.1.1",
-    "npm:option-t@51": "51.1.1",
     "npm:option-t@53": "53.0.0",
-    "npm:preact@10": "10.26.9"
+    "npm:preact@10": "10.27.0"
   },
   "jsr": {
     "@core/iterutil@0.9.0": {
@@ -32,27 +32,27 @@
     "@core/unknownutil@4.3.0": {
       "integrity": "538a3687ffa81028e91d148818047df219663d0da671d906cecd165581ae55cc"
     },
-    "@cosense/std@0.29.14": {
-      "integrity": "2a603abf14e557376c94232e4a4ffce7d8322da398d5c8a8abe0975687021354",
+    "@cosense/std@0.30.0": {
+      "integrity": "4c9e6fbb1dc2d7a238ac65dba89213992d7509dbe12c4dd0bdfd4a2b2eb6b84f",
       "dependencies": [
         "jsr:@core/iterutil",
         "jsr:@core/unknownutil",
-        "jsr:@cosense/types",
-        "jsr:@progfay/scrapbox-parser@9",
-        "jsr:@std/async@^1.0.11",
+        "jsr:@cosense/types@0.11",
+        "jsr:@progfay/scrapbox-parser@^10.0.1",
+        "jsr:@std/async@^1.0.14",
         "jsr:@std/encoding",
         "jsr:@takker/md5",
-        "npm:option-t@51"
+        "npm:option-t"
       ]
     },
-    "@cosense/types@0.10.8": {
-      "integrity": "f946efbd89459ae7bd888d589151b0020e557aabc152710db645337769d54981"
+    "@cosense/types@0.10.10": {
+      "integrity": "16575916902f22a7d401edbd2305324cfcb378aa2bc39a4fef7ba81a1c84a0a1"
     },
-    "@progfay/scrapbox-parser@9.2.0": {
-      "integrity": "82ebb95e72dd0ea44547fd48e2bcb479fd2275fc26c4515598f742e5aaf6e0e5"
+    "@cosense/types@0.11.0": {
+      "integrity": "6e1d8768b1be162e635ec0c611092b49c528a623ef3e73c7cd95acab04ba2c10"
     },
-    "@progfay/scrapbox-parser@10.0.0": {
-      "integrity": "d394fa9dde106efd5884b137aa2dfafed3605f9083b7e0de13473d41619c89fa"
+    "@progfay/scrapbox-parser@10.0.1": {
+      "integrity": "5b3983ef2cebe5c6b3f0bfb9f5a8a0d1e992f3d2de44e560bfe0628a8344eef1"
     },
     "@std/assert@1.0.13": {
       "integrity": "ae0d31e41919b12c656c742b22522c32fb26ed0cba32975cb0de2a273cb68b29",
@@ -60,8 +60,8 @@
         "jsr:@std/internal@^1.0.6"
       ]
     },
-    "@std/async@1.0.13": {
-      "integrity": "1d76ca5d324aef249908f7f7fe0d39aaf53198e5420604a59ab5c035adc97c96"
+    "@std/async@1.0.14": {
+      "integrity": "62e954a418652c704d37563a3e54a37d4cf0268a9dcaeac1660cc652880b5326"
     },
     "@std/encoding@1.0.10": {
       "integrity": "8783c6384a2d13abd5e9e87a7ae0520a30e9f56aeeaa3bdf910a3eaaf5c811a1"
@@ -261,14 +261,11 @@
     "immer@10.1.1": {
       "integrity": "sha512-s2MPrmjovJcoMaHtx6K11Ra7oD05NT97w1IC5zpMkT6Atjr7H8LjaDd81iIxUYpMKSRRNMJE703M1Fhr/TctHw=="
     },
-    "option-t@51.1.1": {
-      "integrity": "sha512-Ww13j9NVqnGpxsaSr1y0o35Xq1WcopAeJkAbk9DWlKRBgFKYLuJwEU1GzWUtkhBhRQY0st5kfdtT02JO6YqEEw=="
-    },
     "option-t@53.0.0": {
       "integrity": "sha512-qsyo1cFXfUN1MVnxTrpcy+V4tJYEBvEQmeiDkC6m5W/V2JiNfs4V/qXmDGZg4k9XRR1EWkv3jT8TXSZnhGPBLA=="
     },
-    "preact@10.26.9": {
-      "integrity": "sha512-SSjF9vcnF27mJK1XyFMNJzFd5u3pQiATFqoaDy03XuN00u4ziveVVEGt5RKJrDR8MHE/wJo9Nnad56RLzS2RMA=="
+    "preact@10.27.0": {
+      "integrity": "sha512-/DTYoB6mwwgPytiqQTh/7SFRL98ZdiD8Sk8zIUVOxtwq4oWcwrcd1uno9fE/zZmUaUrFNYzbH14CPebOz9tZQw=="
     }
   }
 }
