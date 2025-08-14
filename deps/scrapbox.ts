@@ -14,7 +14,7 @@ export type {
 } from "jsr:@cosense/types@0.11/rest";
 export type { Scrapbox } from "jsr:@cosense/types@0.11/userscript";
 
-import type { ErrorLike } from "jsr:@cosense/types@0.10/rest";
+import type { ErrorLike } from "jsr:@cosense/types@0.11/rest";
 
 // cf. https://blog.uhy.ooo/entry/2021-04-09/typescript-is-any-as/#%E3%83%A6%E3%83%BC%E3%82%B6%E3%83%BC%E5%AE%9A%E7%BE%A9%E5%9E%8B%E3%82%AC%E3%83%BC%E3%83%89%E3%81%AE%E5%BC%95%E6%95%B0%E3%81%AE%E5%9E%8B%E3%82%92%E3%81%A9%E3%81%86%E3%81%99%E3%82%8B%E3%81%8B
 function isNotNullish(data: unknown): data is Record<string, unknown> {
