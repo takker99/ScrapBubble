@@ -1,6 +1,6 @@
 import { useMemo } from "./deps/preact.tsx";
 import { useProject } from "./useProject.ts";
-import { isTheme, Theme } from "./deps/scrapbox.ts";
+import { isTheme, type Theme } from "./deps/scrapbox.ts";
 import { isErr, unwrapOk } from "./deps/option-t.ts";
 
 const defaultTheme = "default-light";

@@ -2,7 +2,7 @@
 /** @jsxImportSource npm:preact@10 */
 import { render } from "./deps/preact.tsx";
 import { getWatchList } from "./watchList.ts";
-import { App, AppProps, userscriptName } from "./App.tsx";
+import { App, type AppProps, userscriptName } from "./App.tsx";
 import { setDebugMode } from "./debug.ts";
 import type { ProjectId, Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;

@@ -1,16 +1,16 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource npm:preact@10 */
 import {
-  FunctionComponent,
-  h,
+  type FunctionComponent,
+  type h,
   useCallback,
   useMemo,
   useState,
 } from "./deps/preact.tsx";
-import { ID, toId } from "./id.ts";
-import { Page, PageProps } from "./Page.tsx";
-import { Bubble } from "./storage.ts";
-import { BubbleOperators, Source } from "./useBubbles.ts";
+import { type ID, toId } from "./id.ts";
+import { Page, type PageProps } from "./Page.tsx";
+import type { Bubble } from "./storage.ts";
+import type { BubbleOperators, Source } from "./useBubbles.ts";
 import { useTheme } from "./useTheme.ts";
 
 export interface TextBubble extends BubbleOperators {

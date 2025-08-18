@@ -1,6 +1,6 @@
 import { parse } from "./deps/scrapbox-parser.ts";
 import { hasLink } from "./hasLink.ts";
-import { LinkTo } from "./types.ts";
+import type { LinkTo } from "./types.ts";
 import { assertEquals } from "./deps/testing.ts";
 
 Deno.test("hasLink()", async (t) => {

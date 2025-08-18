@@ -1,8 +1,8 @@
 import { useEffect, useState } from "./deps/preact.tsx";
 import { load, subscribe, unsubscribe } from "./bubble.ts";
 import { createDebug } from "./debug.ts";
-import { ID } from "./id.ts";
-import { Bubble } from "./storage.ts";
+import type { ID } from "./id.ts";
+import type { Bubble } from "./storage.ts";
 
 const logger = createDebug("ScrapBubble:useBubbleData.ts");
 

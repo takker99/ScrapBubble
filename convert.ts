@@ -1,7 +1,7 @@
 import { toTitleLc } from "./deps/scrapbox-std.ts";
-import { Bubble, BubbleStorage } from "./storage.ts";
-import { fromId, ID, toId } from "./id.ts";
-import { Page, RelatedPage } from "./deps/scrapbox.ts";
+import type { Bubble, BubbleStorage } from "./storage.ts";
+import { fromId, type ID, toId } from "./id.ts";
+import type { Page, RelatedPage } from "./deps/scrapbox.ts";
 
 /** APIから取得したページデータを、Bubble用に変換する
  *

@@ -1,10 +1,14 @@
 import { useEffect, useState } from "./deps/preact.tsx";
-import { FetchError, getProject, ProjectError } from "./deps/scrapbox-std.ts";
+import {
+  type FetchError,
+  getProject,
+  type ProjectError,
+} from "./deps/scrapbox-std.ts";
 import { cacheFirstFetch } from "./cache.ts";
 import { makeEmitter } from "./eventEmitter.ts";
-import { MemberProject, NotMemberProject } from "./deps/scrapbox.ts";
+import type { MemberProject, NotMemberProject } from "./deps/scrapbox.ts";
 import { createDebug } from "./debug.ts";
-import { Result } from "./deps/option-t.ts";
+import type { Result } from "./deps/option-t.ts";
 
 export type ProjectResult = Result<
   NotMemberProject | MemberProject,

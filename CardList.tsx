@@ -1,12 +1,12 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource npm:preact@10 */
 import { Card } from "./Card.tsx";
-import { h, useMemo } from "./deps/preact.tsx";
+import { type h, useMemo } from "./deps/preact.tsx";
 import { useBubbleData } from "./useBubbleData.ts";
-import { Bubble } from "./storage.ts";
-import { LinkTo } from "./types.ts";
-import { ID, toId } from "./id.ts";
-import { BubbleOperators, Source } from "./useBubbles.ts";
+import type { Bubble } from "./storage.ts";
+import type { LinkTo } from "./types.ts";
+import { type ID, toId } from "./id.ts";
+import type { BubbleOperators, Source } from "./useBubbles.ts";
 
 export interface CardListProps {
   delay: number;

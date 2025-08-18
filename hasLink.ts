@@ -1,6 +1,6 @@
-import { Node } from "./deps/scrapbox-parser.ts";
+import type { Node } from "./deps/scrapbox-parser.ts";
 import { parseLink } from "./parseLink.ts";
-import { LinkTo } from "./types.ts";
+import type { LinkTo } from "./types.ts";
 import { toTitleLc } from "./deps/scrapbox-std.ts";
 
 /** 指定したリンクがScrapboxのページ中に存在するか調べる

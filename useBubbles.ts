@@ -1,7 +1,7 @@
 import { useCallback, useState } from "./deps/preact.tsx";
-import { Position } from "./position.ts";
-import { LinkType } from "./types.ts";
-import { Scrapbox } from "./deps/scrapbox.ts";
+import type { Position } from "./position.ts";
+import type { LinkType } from "./types.ts";
+import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
 
 /** bubble data */

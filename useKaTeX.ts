@@ -1,5 +1,5 @@
 import { type RefCallback, useCallback, useState } from "./deps/preact.tsx";
-import { defaultVersion, importKaTeX, KatexOptions } from "./katex.ts";
+import { defaultVersion, importKaTeX, type KatexOptions } from "./katex.ts";
 
 export interface ParseError {
   name: string;
