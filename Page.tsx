@@ -1,9 +1,9 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource npm:preact@10 */
 import {
-  ComponentChildren,
+  type ComponentChildren,
   createContext,
-  h,
+  type h,
   useCallback,
   useContext,
   useEffect,
@@ -12,7 +12,7 @@ import {
   useState,
 } from "./deps/preact.tsx";
 import { useKaTeX } from "./useKaTeX.ts";
-import {
+import type {
   CodeBlock as CodeBlockType,
   CommandLineNode,
   DecorationNode,
@@ -31,22 +31,22 @@ import { parseLink } from "./parseLink.ts";
 import { hasLink } from "./hasLink.ts";
 import { toId } from "./id.ts";
 import { stayHovering } from "./stayHovering.ts";
-import { BubbleOperators } from "./useBubbles.ts";
-import { LinkTo } from "./types.ts";
+import type { BubbleOperators } from "./useBubbles.ts";
+import type { LinkTo } from "./types.ts";
 import { useBubbleData } from "./useBubbleData.ts";
 import { isEmptyLink } from "./storage.ts";
 import { calcBubblePosition } from "./position.ts";
 import { parse } from "./deps/scrapbox-parser.ts";
 import {
-  AnchorFMNode,
-  AudioNode,
+  type AnchorFMNode,
+  type AudioNode,
   encodeTitleURI,
   parseAbsoluteLink,
-  SpotifyNode,
-  VideoNode,
-  VimeoNode,
-  YoutubeListNode,
-  YoutubeNode,
+  type SpotifyNode,
+  type VideoNode,
+  type VimeoNode,
+  type YoutubeListNode,
+  type YoutubeNode,
 } from "./deps/scrapbox-std.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 import { useTheme } from "./useTheme.ts";

@@ -1,5 +1,5 @@
-import { Line, StringLc } from "./deps/scrapbox.ts";
-import { ID } from "./id.ts";
+import type { Line, StringLc } from "./deps/scrapbox.ts";
+import type { ID } from "./id.ts";
 import { produce } from "./deps/immer.ts";
 
 export interface Bubble {

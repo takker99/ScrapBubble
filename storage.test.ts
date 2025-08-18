@@ -1,4 +1,4 @@
-import { Bubble, update } from "./storage.ts";
+import { type Bubble, update } from "./storage.ts";
 import {
   assertEquals,
   assertNotEquals,

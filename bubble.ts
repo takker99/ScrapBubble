@@ -1,11 +1,11 @@
 import { cacheFirstFetch, isExpired } from "./cache.ts";
-import { ID, toId } from "./id.ts";
-import { Listener, makeEmitter } from "./eventEmitter.ts";
-import { Bubble, BubbleStorage, update } from "./storage.ts";
+import { type ID, toId } from "./id.ts";
+import { type Listener, makeEmitter } from "./eventEmitter.ts";
+import { type Bubble, type BubbleStorage, update } from "./storage.ts";
 import { convert } from "./convert.ts";
 import { createDebug } from "./debug.ts";
 import { getPage } from "./deps/scrapbox-std.ts";
-import { ProjectId, UnixTime } from "./deps/scrapbox.ts";
+import type { ProjectId, UnixTime } from "./deps/scrapbox.ts";
 import { isOk, unwrapOk } from "./deps/option-t.ts";
 
 const logger = createDebug("ScrapBubble:bubble.ts");

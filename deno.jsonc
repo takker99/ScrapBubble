@@ -7,6 +7,16 @@
       "deno.ns"
     ]
   },
+  "lint": {
+    "rules": {
+      "tags": [
+        "recommended",
+        "jsr",
+        "jsx",
+        "react"
+      ]
+    }
+  },
   "tasks": {
     "check": {
       "command": "deno fmt --check && deno lint",
@@ -22,8 +32,8 @@
         "test"
       ]
     },
+    "refresh-lock": "rm deno.lock && deno task check",
     "test": "deno test --allow-env=NODE_ENV --allow-read --parallel",
-    "type-check": "deno check --remote **/*.ts **/*.tsx",
-    "refresh-lock": "rm deno.lock && deno task check"
+    "type-check": "deno check --remote **/*.ts **/*.tsx"
   }
 }

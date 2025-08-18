@@ -31,7 +31,7 @@ export function isScrapboxError(e: unknown): e is ErrorLike {
   }
 }
 
-import { MakeTuple } from "../type-traits.ts";
+import type { MakeTuple } from "../type-traits.ts";
 const defaults = [
   "default-light",
   "default-dark",

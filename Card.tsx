@@ -1,10 +1,10 @@
 /** @jsxRuntime automatic */
 /** @jsxImportSource npm:preact@10 */
-import { h, useCallback, useMemo } from "./deps/preact.tsx";
+import { type h, useCallback, useMemo } from "./deps/preact.tsx";
 import { useKaTeX } from "./useKaTeX.ts";
 import { encodeTitleURI } from "./deps/scrapbox-std.ts";
 import { pushPageTransition } from "./deps/scrapbox-std-browser.ts";
-import {
+import type {
   FormulaNode,
   HashTagNode,
   IconNode,
@@ -15,7 +15,7 @@ import {
 import { parse } from "./deps/scrapbox-parser.ts";
 import { useTheme } from "./useTheme.ts";
 import { stayHovering } from "./stayHovering.ts";
-import { BubbleOperators } from "./useBubbles.ts";
+import type { BubbleOperators } from "./useBubbles.ts";
 import { calcBubblePosition } from "./position.ts";
 import type { Scrapbox } from "./deps/scrapbox.ts";
 declare const scrapbox: Scrapbox;
