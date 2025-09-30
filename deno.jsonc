@@ -34,6 +34,7 @@
     },
     "refresh-lock": "rm deno.lock && deno task check",
     "test": "deno test --allow-env=NODE_ENV --allow-read --parallel",
-    "type-check": "deno check --remote **/*.ts **/*.tsx"
+    "type-check": "deno check --remote **/*.ts **/*.tsx",
+    "update": "MYDIR=$(mktemp -d) && TMPDIR=$MYDIR deno run --allow-env=TMPDIR,XDG_DATA_HOME,HOME,GITHUB_TOKEN --allow-read --allow-write=\"$MYDIR\",\"~/.local\" --allow-run=git,\"~/.deno/bin/deno\" --allow-net=jsr.io,registry.npmjs.org jsr:@molt/cli --dry-run --no-lock deps/*.ts deps/*.tsx"
   }
 }

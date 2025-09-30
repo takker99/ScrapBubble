@@ -1,7 +1,11 @@
 import { toTitleLc } from "./deps/scrapbox-std.ts";
 import type { Bubble, BubbleStorage } from "./storage.ts";
 import { fromId, type ID, toId } from "./id.ts";
-import type { Page, RelatedPage } from "./deps/scrapbox.ts";
+import type {
+  PageWithInfoboxDefinition,
+  PageWithoutInfoboxDefinition,
+  RelatedPage,
+} from "./deps/scrapbox.ts";
 
 /** APIから取得したページデータを、Bubble用に変換する
  *
@@ -12,7 +16,7 @@ import type { Page, RelatedPage } from "./deps/scrapbox.ts";
  */
 export const convert = (
   project: string,
-  page: Page,
+  page: PageWithInfoboxDefinition | PageWithoutInfoboxDefinition,
 ): BubbleStorage => {
   const storage: BubbleStorage = new Map();
 
@@ -127,26 +131,33 @@ export const convert = (
 const toBubble = (
   project: string,
   page:
-    | Page
+    | PageWithInfoboxDefinition
+    | PageWithoutInfoboxDefinition
     | Omit<
       RelatedPage,
       | "linksLc"
       | "pageRank"
       | "created"
+      | "descriptions"
       | "infoboxResult"
       | "infoboxDisableLinks"
-    >,
+      | "charsCount"
+      | "lastAccessed"
+    >
+      & { descriptions?: string[] },
 ): Bubble => ({
   project,
   titleLc: "titleLc" in page ? page.titleLc : toTitleLc(page.title),
   // 関連ページの場合は、関連ページが存在する時点で中身があるので、常に`true`とする
   exists: "persistent" in page ? page.persistent : true,
-  descriptions: page.descriptions,
+  descriptions: "descriptions" in page ? page.descriptions ?? [] : [],
   image: page.image,
   lines: "lines" in page
     ? page.lines
     // descriptionsからでっち上げる
-    : [page.title, ...page.descriptions].map((text) => ({
+    : [page.title, ...page.descriptions ?? []].map((
+      text,
+    ) => ({
       text,
       id: "dummy",
       userId: "dummy",
