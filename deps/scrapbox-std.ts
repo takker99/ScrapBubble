@@ -1,3 +1,3 @@
-export * from "jsr:@cosense/std@0.30/rest";
-export * from "jsr:@cosense/std@0.30/title";
-export * from "jsr:@cosense/std@0.30/parseAbsoluteLink";
+export * from "jsr:@cosense/std@0.31/rest";
+export * from "jsr:@cosense/std@0.31/title";
+export * from "jsr:@cosense/std@0.31/parseAbsoluteLink";
