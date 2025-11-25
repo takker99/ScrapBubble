@@ -20,7 +20,6 @@
     "jsr:@std/testing@*": "1.0.16",
     "jsr:@takker/md5@0.1": "0.1.0",
     "npm:esbuild@0.27": "0.27.0",
-    "npm:immer@10": "10.2.0",
     "npm:immer@11": "11.0.0",
     "npm:option-t@53": "53.0.0",
     "npm:option-t@55": "55.1.0",
@@ -255,9 +254,6 @@
       ],
       "scripts": true,
       "bin": true
-    },
-    "immer@10.2.0": {
-      "integrity": "sha512-d/+XTN3zfODyjr89gM3mPq1WNX2B8pYsu7eORitdwyA2sBubnTl3laYlBk4sXY5FUa5qTZGBDPJICVbvqzjlbw=="
     },
     "immer@11.0.0": {
       "integrity": "sha512-XtRG4SINt4dpqlnJvs70O2j6hH7H0X8fUzFsjMn1rwnETaxwp83HLNimXBjZ78MrKl3/d3/pkzDH0o0Lkxm37Q=="
